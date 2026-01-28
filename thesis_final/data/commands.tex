@@ -1,0 +1,448 @@
+% =========================================================
+% commands.tex - 博士论文全局符号与命令定义
+% 基于复杂系统数据驱动建模的大气污染研究
+%
+% 版本: 3.0 (newcommand版)
+% 修复内容: 所有命令使用 \newcommand 定义，\ensuremath 确保兼容性
+% =========================================================
+
+% =========================================================
+% 0. 依赖包检测与加载 (Package Loading)
+% =========================================================
+\makeatletter
+% xspace 用于智能空格
+\@ifpackageloaded{xspace}{}{\usepackage{xspace}}
+
+% amsmath 通常由模版加载
+\@ifpackageloaded{amsmath}{}{\usepackage{amsmath}}
+
+% [重要] amssymb 与 unicode-math 冲突，模版使用 unicode-math 时必须注释
+% \@ifpackageloaded{amssymb}{}{\usepackage{amssymb}}
+
+% pifont 用于支持 \ding{51} (打钩/打叉)
+\@ifpackageloaded{pifont}{}{\usepackage{pifont}}
+\makeatother
+
+% =========================================================
+% 1. 空气污染物 (Pollutants)
+%    所有化学式均使用 \ensuremath 包裹
+% =========================================================
+% 1.1 颗粒物 (使用 \providecommand 避免与已有定义冲突)
+\providecommand{\PM}{}
+\renewcommand{\PM}{\ensuremath{\mathrm{PM}_{2.5}}\xspace}
+\providecommand{\PMten}{\ensuremath{\mathrm{PM}_{10}}\xspace}
+\providecommand{\PMcoarse}{\ensuremath{\mathrm{PM}_{10}}\xspace}
+
+% 1.2 气态污染物
+\providecommand{\ozone}{\ensuremath{\mathrm{O}_{3}}\xspace}
+\providecommand{\NitrogenDioxide}{\ensuremath{\mathrm{NO}_{2}}\xspace}
+\providecommand{\NitrogenOxides}{\ensuremath{\mathrm{NO}_{x}}\xspace}
+\providecommand{\NO}{\ensuremath{\mathrm{NO}}\xspace}
+\providecommand{\NOtwo}{\ensuremath{\mathrm{NO}_{2}}\xspace}
+\providecommand{\NOx}{\ensuremath{\mathrm{NO}_{x}}\xspace}
+\providecommand{\SulfurDioxide}{\ensuremath{\mathrm{SO}_{2}}\xspace}
+\providecommand{\SOtwo}{\ensuremath{\mathrm{SO}_{2}}\xspace}
+\providecommand{\CarbonMonoxide}{\ensuremath{\mathrm{CO}}\xspace}
+\providecommand{\CO}{\ensuremath{\mathrm{CO}}\xspace}
+\providecommand{\CarbonDioxide}{\ensuremath{\mathrm{CO}_{2}}\xspace}
+\providecommand{\COtwo}{\ensuremath{\mathrm{CO}_{2}}\xspace}
+
+% 1.3 前体物与其他化学物种
+\providecommand{\VOC}{\ensuremath{\mathrm{VOC}}\xspace}
+\providecommand{\VOCs}{\ensuremath{\mathrm{VOCs}}\xspace}
+\providecommand{\BVOC}{\ensuremath{\mathrm{BVOC}}\xspace}
+\providecommand{\BVOCs}{\ensuremath{\mathrm{BVOCs}}\xspace}
+\providecommand{\Ammonia}{\ensuremath{\mathrm{NH}_{3}}\xspace}
+\providecommand{\NH}{\ensuremath{\mathrm{NH}_{3}}\xspace}
+\providecommand{\NHthree}{\ensuremath{\mathrm{NH}_{3}}\xspace}
+\providecommand{\HNO}{\ensuremath{\mathrm{HNO}_{3}}\xspace}
+\providecommand{\Hsotwo}{\ensuremath{\mathrm{H}_{2}\mathrm{SO}_{4}}\xspace}
+
+% 1.4 二次污染物组分
+\providecommand{\SOA}{\ensuremath{\mathrm{SOA}}\xspace}
+\providecommand{\SNA}{\ensuremath{\mathrm{SNA}}\xspace}
+
+% 1.5 气溶胶光学厚度
+\providecommand{\AOD}{\ensuremath{\mathrm{AOD}}\xspace}
+
+% =========================================================
+% 2. 物理单位 (Units)
+%    所有单位均使用 \ensuremath 包裹
+% =========================================================
+% 2.1 浓度单位
+\providecommand{\ug}{\ensuremath{\mu\mathrm{g}/\mathrm{m}^3}\xspace}
+\providecommand{\ugm}{\ensuremath{\mu\mathrm{g}\,\mathrm{m}^{-3}}\xspace}
+\providecommand{\ppb}{\ensuremath{\mathrm{ppb}}\xspace}
+\providecommand{\ppm}{\ensuremath{\mathrm{ppm}}\xspace}
+
+% 2.2 长度与面积
+\providecommand{\km}{\ensuremath{\mathrm{km}}\xspace}
+\providecommand{\m}{\ensuremath{\mathrm{m}}\xspace}
+\providecommand{\cm}{\ensuremath{\mathrm{cm}}\xspace}
+\providecommand{\mm}{\ensuremath{\mathrm{mm}}\xspace}
+\providecommand{\kmsq}{\ensuremath{\mathrm{km}^{2}}\xspace}
+
+% 2.3 时间
+\providecommand{\s}{\ensuremath{\mathrm{s}}\xspace}
+\providecommand{\h}{\ensuremath{\mathrm{h}}\xspace}
+\providecommand{\hr}{\ensuremath{\mathrm{h}}\xspace}
+
+% 2.4 速度与通量
+\providecommand{\mps}{\ensuremath{\mathrm{m/s}}\xspace}
+\providecommand{\kmph}{\ensuremath{\mathrm{km/h}}\xspace}
+
+% 2.5 质量与排放
+\providecommand{\ton}{\ensuremath{\mathrm{ton}}\xspace}
+\providecommand{\Tg}{\ensuremath{\mathrm{Tg}}\xspace}
+\providecommand{\Gg}{\ensuremath{\mathrm{Gg}}\xspace}
+\providecommand{\kg}{\ensuremath{\mathrm{kg}}\xspace}
+
+% 2.6 气象单位
+\providecommand{\Pa}{\ensuremath{\mathrm{Pa}}\xspace}
+\providecommand{\hPa}{\ensuremath{\mathrm{hPa}}\xspace}
+\providecommand{\K}{\ensuremath{\mathrm{K}}\xspace}
+\providecommand{\degC}{\ensuremath{^{\circ}\mathrm{C}}\xspace}
+\providecommand{\Wm}{\ensuremath{\mathrm{W/m}^{2}}\xspace}
+\providecommand{\Wmsq}{\ensuremath{\mathrm{W}\,\mathrm{m}^{-2}}\xspace}
+\providecommand{\degree}{\ensuremath{^{\circ}}\xspace}
+\providecommand{\percent}{\ensuremath{\%}\xspace}
+
+% =========================================================
+% 3. 核心变量 (Core Variables)
+%    对应符号表中的主要数学符号
+% =========================================================
+% 3.1 空气质量变量
+\providecommand{\AirPoll}{\ensuremath{\mathbf{X}}\xspace}
+\providecommand{\AirPollHat}{\ensuremath{\hat{\mathbf{X}}}\xspace}
+\providecommand{\Concentration}{\ensuremath{C}\xspace}
+\providecommand{\ConcentrationVec}{\ensuremath{\mathbf{C}}\xspace}
+
+% 3.2 驱动变量
+\providecommand{\Meteo}{\ensuremath{\mathbf{M}}\xspace}
+\providecommand{\MeteoP}{\ensuremath{\mathbf{P}}\xspace}
+\providecommand{\Emiss}{\ensuremath{\mathbf{E}}\xspace}
+\providecommand{\EmissQ}{\ensuremath{\mathbf{Q}}\xspace}
+
+% 3.3 遥感与辅助变量
+\providecommand{\RemoteSensing}{\ensuremath{\mathbf{X}^{\mathrm{AOD}}}\xspace}
+\providecommand{\AODMask}{\ensuremath{\mathbf{M}^{\mathrm{AOD}}}\xspace}
+\providecommand{\AODObs}{\ensuremath{\mathbf{Y}^{\mathrm{AOD}}}\xspace}
+
+% 3.4 隐状态与中间变量
+\providecommand{\Hidden}{\ensuremath{\mathbf{H}}\xspace}
+\providecommand{\HiddenZ}{\ensuremath{\mathbf{Z}}\xspace}
+\providecommand{\Message}{\ensuremath{\mathbf{m}}\xspace}
+\providecommand{\MessageAgg}{\ensuremath{\mathbf{Z}}\xspace}  % 聚合消息，避免与气象符号M冲突
+\providecommand{\Feature}{\ensuremath{\mathbf{h}}\xspace}
+\providecommand{\Embedding}{\ensuremath{\mathbf{e}}\xspace}
+
+% 3.5 风场变量
+\providecommand{\WindVec}{\ensuremath{\mathbf{u}}\xspace}
+\providecommand{\WindU}{\ensuremath{u}\xspace}
+\providecommand{\WindV}{\ensuremath{v}\xspace}
+\providecommand{\WindW}{\ensuremath{w}\xspace}
+\providecommand{\WindSpeed}{\ensuremath{|\mathbf{u}|}\xspace}
+
+% 3.6 扩散与传输系数
+\providecommand{\DiffCoef}{\ensuremath{K}\xspace}
+\providecommand{\DiffCoefX}{\ensuremath{K_x}\xspace}
+\providecommand{\DiffCoefY}{\ensuremath{K_y}\xspace}
+\providecommand{\DiffCoefZ}{\ensuremath{K_z}\xspace}
+
+% =========================================================
+% 4. 图结构与时空参数 (Graph & Spatiotemporal)
+% =========================================================
+% 4.1 图结构基础
+\providecommand{\Graph}{\ensuremath{\mathcal{G}}\xspace}
+\providecommand{\Nodes}{\ensuremath{\mathcal{V}}\xspace}
+\providecommand{\Edges}{\ensuremath{\mathcal{E}}\xspace}
+\providecommand{\NodeSet}{\ensuremath{V}\xspace}
+\providecommand{\EdgeSet}{\ensuremath{E}\xspace}
+\providecommand{\NumNodes}{\ensuremath{|V|}\xspace}
+\providecommand{\NumEdges}{\ensuremath{|E|}\xspace}
+
+% 4.2 图矩阵
+\providecommand{\Adj}{\ensuremath{\mathbf{A}}\xspace}
+\providecommand{\AdjNorm}{\ensuremath{\tilde{\mathbf{A}}}\xspace}
+\providecommand{\Laplacian}{\ensuremath{\mathbf{L}}\xspace}
+\providecommand{\LaplacianNorm}{\ensuremath{\tilde{\mathbf{L}}}\xspace}
+\providecommand{\Degree}{\ensuremath{\mathbf{D}}\xspace}
+\providecommand{\Identity}{\ensuremath{\mathbf{I}}\xspace}
+\providecommand{\Neighbor}[1]{\ensuremath{\mathcal{N}(#1)}\xspace}
+
+% 4.3 双图结构 (SPIN模型)
+\providecommand{\AdjDiff}{\ensuremath{\tilde{\mathbf{A}}^{\mathcal{D}}}\xspace}
+\providecommand{\AdjAdv}{\ensuremath{\tilde{\mathbf{A}}^{\mathcal{A}}}\xspace}
+\providecommand{\GraphSpatial}{\ensuremath{\mathcal{G}^{\mathcal{S}}}\xspace}
+\providecommand{\GraphAdvection}{\ensuremath{\mathcal{G}^{\mathcal{A}}}\xspace}
+\providecommand{\GraphDiffusion}{\ensuremath{\mathcal{G}^{\mathcal{D}}}\xspace}
+
+% 4.4 边特征
+\providecommand{\EdgeWeight}{\ensuremath{w_{ij}}\xspace}
+\providecommand{\EdgeFeature}{\ensuremath{\mathbf{e}_{ij}}\xspace}
+\providecommand{\Distance}{\ensuremath{d_{ij}}\xspace}
+
+% 4.5 时间参数
+\providecommand{\HistLen}{\ensuremath{T'}\xspace}
+\providecommand{\PredLen}{\ensuremath{T}\xspace}
+\providecommand{\LeadTime}{\ensuremath{\tau}\xspace}
+\providecommand{\TimeStep}{\ensuremath{\Delta t}\xspace}
+\providecommand{\TimeIndex}{\ensuremath{t}\xspace}
+
+% =========================================================
+% 5. 损失函数与优化 (Loss Functions & Optimization)
+% =========================================================
+% 5.1 损失函数符号
+\providecommand{\Loss}{\ensuremath{\mathcal{L}}\xspace}
+\providecommand{\LossTotal}{\ensuremath{\mathcal{L}_{\mathrm{total}}}\xspace}
+\providecommand{\LossSup}{\ensuremath{\mathcal{L}_{\mathrm{sup}}}\xspace}
+\providecommand{\LossDIC}{\ensuremath{\mathcal{L}_{\mathrm{DIC}}}\xspace}
+\providecommand{\LossAOD}{\ensuremath{\mathcal{L}_{\mathrm{AOD}}}\xspace}
+\providecommand{\LossInfer}{\ensuremath{\mathcal{L}_{\mathrm{infer}}}\xspace}
+\providecommand{\LossInit}{\ensuremath{\mathcal{L}_{\mathrm{init}}}\xspace}
+\providecommand{\LossPred}{\ensuremath{\mathcal{L}_{L1}}\xspace}
+\providecommand{\LossLone}{\ensuremath{\mathcal{L}_{L1}}\xspace}
+\providecommand{\LossLtwo}{\ensuremath{\mathcal{L}_{L2}}\xspace}
+\providecommand{\LossMSE}{\ensuremath{\mathcal{L}_{\mathrm{MSE}}}\xspace}
+\providecommand{\LossMAE}{\ensuremath{\mathcal{L}_{\mathrm{MAE}}}\xspace}
+\providecommand{\LossSmooth}{\ensuremath{\mathcal{L}_{\mathrm{smooth}}}\xspace}
+\providecommand{\LossPhys}{\ensuremath{\mathcal{L}_{\mathrm{phys}}}\xspace}
+
+% 5.2 优化参数
+\providecommand{\Params}{\ensuremath{\Theta}\xspace}
+\providecommand{\LearnRate}{\ensuremath{\alpha}\xspace}
+\providecommand{\RegWeight}{\ensuremath{\lambda}\xspace}
+\providecommand{\BatchSize}{\ensuremath{B}\xspace}
+\providecommand{\Epoch}{\ensuremath{E}\xspace}
+
+% 5.3 神经网络层
+\providecommand{\Linear}{\ensuremath{\mathrm{Linear}}\xspace}
+\providecommand{\MLP}{\ensuremath{\mathrm{MLP}}\xspace}
+\providecommand{\GRUcell}{\ensuremath{\mathrm{GRU}}\xspace}
+\providecommand{\LSTMcell}{\ensuremath{\mathrm{LSTM}}\xspace}
+\providecommand{\Softmax}{\ensuremath{\mathrm{softmax}}\xspace}
+\providecommand{\Sigmoid}{\ensuremath{\sigma}\xspace}
+\providecommand{\ReLU}{\ensuremath{\mathrm{ReLU}}\xspace}
+\providecommand{\Tanh}{\ensuremath{\tanh}\xspace}
+
+% =========================================================
+% 6. 模型名称 (Model Names)
+% =========================================================
+% 6.1 本文提出的模型
+\providecommand{\ModelPred}{\ensuremath{\mathrm{PM}_{2.5}}\text{-GNN}\xspace}
+\providecommand{\ModelSurr}{PCDCNet\xspace}
+\providecommand{\ModelInfer}{SPIN\xspace}
+\providecommand{\ModelSim}{IGNN\xspace}
+\providecommand{\ModelControl}{PCDCNet-IR\xspace}
+\providecommand{\SystemName}{KnowAir\xspace}
+
+% 6.2 基线模型
+\providecommand{\GCLSTM}{GC-LSTM\xspace}
+\providecommand{\STGCN}{STGCN\xspace}
+\providecommand{\AirFormer}{AirFormer\xspace}
+\providecommand{\IGNNK}{IGNNK\xspace}
+\providecommand{\XGBoost}{XGBoost\xspace}
+\providecommand{\LightGBM}{LightGBM\xspace}
+\providecommand{\LSTM}{LSTM\xspace}
+\providecommand{\GRU}{GRU\xspace}
+\providecommand{\Transformer}{Transformer\xspace}
+\providecommand{\TCN}{TCN\xspace}
+
+% 6.3 气象AI模型
+\providecommand{\Pangu}{Pangu-Weather\xspace}
+\providecommand{\GraphCast}{GraphCast\xspace}
+\providecommand{\FourCastNet}{FourCastNet\xspace}
+\providecommand{\Aurora}{Aurora\xspace}
+
+% =========================================================
+% 7. 数据源与区域 (Data Sources & Regions)
+% =========================================================
+% 7.1 排放清单
+\providecommand{\MEIC}{MEIC\xspace}
+\providecommand{\DPEC}{DPEC\xspace}
+\providecommand{\EDGAR}{EDGAR\xspace}
+\providecommand{\ABaCAS}{ABaCAS\xspace}
+
+% 7.2 气象数据
+\providecommand{\ERAFive}{ERA5\xspace}
+\providecommand{\GFS}{GFS\xspace}
+\providecommand{\CMIP}{CMIP6\xspace}
+\providecommand{\CAMS}{CAMS\xspace}
+\providecommand{\ECMWF}{ECMWF\xspace}
+\providecommand{\IFS}{IFS\xspace}
+
+% 7.3 遥感数据
+\providecommand{\Himawari}{Himawari-8\xspace}
+\providecommand{\MODIS}{MODIS\xspace}
+\providecommand{\VIIRS}{VIIRS\xspace}
+
+% 7.4 数值模式
+\providecommand{\CMAQ}{CMAQ\xspace}
+\providecommand{\WRFChem}{WRF-Chem\xspace}
+\providecommand{\WRF}{WRF\xspace}
+\providecommand{\GEOSChem}{GEOS-Chem\xspace}
+\providecommand{\CAMx}{CAMx\xspace}
+\providecommand{\NAQPMS}{NAQPMS\xspace}
+
+% 7.5 监测网络
+\providecommand{\CNEMC}{CNEMC\xspace}
+
+% 7.6 研究区域
+\providecommand{\BTHSA}{BTHSA\xspace}
+\providecommand{\YRD}{YRD\xspace}
+\providecommand{\PRD}{PRD\xspace}
+\providecommand{\NCUA}{NCUA\xspace}
+\providecommand{\FWP}{FWP\xspace}
+
+% 7.7 数据集名称
+\providecommand{\KnowAirOne}{KnowAir-DS-V1\xspace}
+\providecommand{\KnowAirTwo}{KnowAir-DS-V2\xspace}
+\providecommand{\KnowAirDS}{KnowAir-DS\xspace}
+
+% =========================================================
+% 8. 评价指标 (Evaluation Metrics)
+%    所有指标使用 \ensuremath 包裹
+% =========================================================
+% 8.1 回归指标
+\providecommand{\RMSE}{\ensuremath{\mathrm{RMSE}}\xspace}
+\providecommand{\MAE}{\ensuremath{\mathrm{MAE}}\xspace}
+\providecommand{\MSE}{\ensuremath{\mathrm{MSE}}\xspace}
+\providecommand{\MAPE}{\ensuremath{\mathrm{MAPE}}\xspace}
+\providecommand{\Rsquare}{\ensuremath{R^{2}}\xspace}
+\providecommand{\Corr}{\ensuremath{r}\xspace}
+\providecommand{\CorrCoef}{\ensuremath{\rho}\xspace}
+
+% 8.2 分类/检测指标
+\providecommand{\CSI}{\ensuremath{\mathrm{CSI}}\xspace}
+\providecommand{\POD}{\ensuremath{\mathrm{POD}}\xspace}
+\providecommand{\FAR}{\ensuremath{\mathrm{FAR}}\xspace}
+\providecommand{\ACC}{\ensuremath{\mathrm{ACC}}\xspace}
+\providecommand{\Precision}{\ensuremath{\mathrm{Precision}}\xspace}
+\providecommand{\Recall}{\ensuremath{\mathrm{Recall}}\xspace}
+\providecommand{\Fone}{\ensuremath{F_{1}}\xspace}
+
+% 8.3 环境评估指标
+\providecommand{\NMB}{\ensuremath{\mathrm{NMB}}\xspace}
+\providecommand{\NME}{\ensuremath{\mathrm{NME}}\xspace}
+\providecommand{\MFB}{\ensuremath{\mathrm{MFB}}\xspace}
+\providecommand{\MFE}{\ensuremath{\mathrm{MFE}}\xspace}
+\providecommand{\IA}{\ensuremath{\mathrm{IA}}\xspace}
+\providecommand{\IOA}{\ensuremath{\mathrm{IOA}}\xspace}
+\providecommand{\MDAeight}{\ensuremath{\mathrm{MDA8}}\xspace}
+
+% =========================================================
+% 9. 数学算子与常用符号 (Math Operators)
+% =========================================================
+% 9.1 微分算子
+\providecommand{\Grad}{\ensuremath{\nabla}\xspace}
+\providecommand{\Div}{\ensuremath{\nabla \cdot}\xspace}
+\providecommand{\Curl}{\ensuremath{\nabla \times}\xspace}
+\providecommand{\Lapl}{\ensuremath{\nabla^2}\xspace}
+\providecommand{\PartialT}{\ensuremath{\frac{\partial}{\partial t}}\xspace}
+\providecommand{\PartialX}{\ensuremath{\frac{\partial}{\partial x}}\xspace}
+\providecommand{\PartialY}{\ensuremath{\frac{\partial}{\partial y}}\xspace}
+\providecommand{\PartialZ}{\ensuremath{\frac{\partial}{\partial z}}\xspace}
+
+% 9.2 差分与增量
+\providecommand{\Diff}{\ensuremath{\Delta}\xspace}
+\providecommand{\DiffX}{\ensuremath{\Delta X}\xspace}
+\providecommand{\DiffE}{\ensuremath{\Delta E}\xspace}
+\providecommand{\DiffC}{\ensuremath{\Delta C}\xspace}
+
+% 9.3 模型映射函数
+\providecommand{\ModelFunc}{\ensuremath{\mathcal{F}}\xspace}
+\providecommand{\EncFunc}{\ensuremath{\mathcal{E}}\xspace}
+\providecommand{\DecFunc}{\ensuremath{\mathcal{D}}\xspace}
+
+% 9.4 集合与空间符号
+\providecommand{\Real}{\ensuremath{\mathbb{R}}\xspace}
+\providecommand{\Integer}{\ensuremath{\mathbb{Z}}\xspace}
+\providecommand{\Natural}{\ensuremath{\mathbb{N}}\xspace}
+\providecommand{\Expect}{\ensuremath{\mathbb{E}}\xspace}
+\providecommand{\Prob}{\ensuremath{\mathbb{P}}\xspace}
+
+% 9.5 范数与距离
+\providecommand{\Lnorm}[1]{\ensuremath{\|\cdot\|_{#1}}\xspace}
+\providecommand{\LoneNorm}{\ensuremath{\|\cdot\|_{1}}\xspace}
+\providecommand{\LtwoNorm}{\ensuremath{\|\cdot\|_{2}}\xspace}
+\providecommand{\FrobNorm}{\ensuremath{\|\cdot\|_{F}}\xspace}
+
+% 9.6 特殊标记 (需要 pifont 宏包)
+\providecommand{\cmark}{\ding{51}}
+\providecommand{\xmark}{\ding{55}}
+
+% 9.7 常用缩写
+\providecommand{\ie}{\textit{i.e.}\xspace}
+\providecommand{\eg}{\textit{e.g.}\xspace}
+\providecommand{\etc}{\textit{etc.}\xspace}
+\providecommand{\etal}{\textit{et al.}\xspace}
+\providecommand{\vs}{\textit{vs.}\xspace}
+\providecommand{\wrt}{w.r.t.\xspace}
+\providecommand{\iid}{\textit{i.i.d.}\xspace}
+
+% =========================================================
+% 10. 模块名称与方法缩写 (Module Abbreviations)
+% =========================================================
+% 10.1 PCDCNet架构模块
+\providecommand{\LID}{LID\xspace}
+\providecommand{\STD}{STD\xspace}
+\providecommand{\TAD}{TAD\xspace}
+\providecommand{\DIC}{DIC\xspace}
+
+% 10.2 通用神经网络模块
+\providecommand{\GNN}{GNN\xspace}
+\providecommand{\GCN}{GCN\xspace}
+\providecommand{\GAT}{GAT\xspace}
+\providecommand{\RNN}{RNN\xspace}
+\providecommand{\CNN}{CNN\xspace}
+\providecommand{\MHA}{MHA\xspace}
+\providecommand{\FFN}{FFN\xspace}
+
+% 10.3 化学机制
+\providecommand{\CBsix}{CB6\xspace}
+\providecommand{\SAPRC}{SAPRC\xspace}
+\providecommand{\ISORROPIA}{ISORROPIA\xspace}
+
+% 10.4 数据同化方法
+\providecommand{\ISAM}{ISAM\xspace}
+\providecommand{\DDM}{DDM\xspace}
+\providecommand{\PSAT}{PSAT\xspace}
+\providecommand{\OSAT}{OSAT\xspace}
+
+% =========================================================
+% 11. 物理过程术语 (Physical Process Terms)
+% =========================================================
+% 11.1 大气过程
+\providecommand{\Advection}{\ensuremath{\mathrm{Adv}}\xspace}
+\providecommand{\Diffusion}{\ensuremath{\mathrm{Diff}}\xspace}
+\providecommand{\Emission}{\ensuremath{\mathrm{Emis}}\xspace}
+\providecommand{\Deposition}{\ensuremath{\mathrm{Dep}}\xspace}
+\providecommand{\DryDep}{\ensuremath{\mathrm{Dry}}\xspace}
+\providecommand{\WetDep}{\ensuremath{\mathrm{Wet}}\xspace}
+\providecommand{\ChemReaction}{\ensuremath{\mathrm{Chem}}\xspace}
+
+% 11.2 边界层参数
+\providecommand{\PBL}{\ensuremath{\mathrm{PBL}}\xspace}
+\providecommand{\PBLH}{\ensuremath{h_{\mathrm{PBL}}}\xspace}
+
+% =========================================================
+% 12. 情景与政策术语 (Scenarios & Policies)
+% =========================================================
+% 12.1 排放情景
+\providecommand{\RCP}{\ensuremath{\mathrm{RCP}}\xspace}
+\providecommand{\SSP}{\ensuremath{\mathrm{SSP}}\xspace}
+\providecommand{\BAU}{\ensuremath{\mathrm{BAU}}\xspace}
+
+% 12.2 政策目标
+\providecommand{\CarbonPeak}{碳达峰\xspace}
+\providecommand{\CarbonNeutral}{碳中和\xspace}
+
+% =========================================================
+% 13. 文献引用格式辅助
+%     用于表格中的简化引用
+% =========================================================
+\providecommand{\citemark}[1]{\textsuperscript{#1}}
+
+% =========================================================
+% 文件结束
+% =========================================================

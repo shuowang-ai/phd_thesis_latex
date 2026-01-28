@@ -1,0 +1,516 @@
+% ============================================================
+% 第五章 未来污染情景模拟
+% 基于复杂系统数据驱动建模的大气污染研究
+% ============================================================
+
+\chapter{未来污染情景模拟}
+\label{chap:simulation}
+
+前两章分别解决了时间预测和空间推断问题，本章则聚焦于更具前瞻性的情景模拟问题——在碳中和战略背景下，未来数十年的空气质量将如何演变？本章提出IGNN（Integrated Graph Neural Network，集成图神经网络）模型，将排放清单作为可控变量显式纳入深度学习框架，实现多情景下\PM 与\ozone 的长期演变模拟。
+
+% ------------------------------------------------------------
+% 5.1 引言
+% ------------------------------------------------------------
+\section{引言}
+\label{sec:sim_intro}
+
+正如第\ref{chap:introduction}章所述，大气污染治理与碳达峰碳中和目标深度交织。在全球气候变化与可持续发展的双重压力下，大气污染治理已不再是孤立的环境问题，而是与国家能源战略、经济结构转型和全球气候承诺紧密交织的复杂系统性挑战。对于中国而言，\cqt{双碳}目标的提出不仅是一场深刻的能源与经济革命，也为空气质量的根本性改善带来了历史性机遇。
+
+从科学问题角度，准确预估未来空气质量演变对于制定长期环境规划具有重要的决策支撑价值。一方面，政策制定者需要了解不同减排路径下的空气质量响应，以权衡经济成本与环境效益；另一方面，公众健康部门需要预判未来污染暴露水平的变化趋势，以前瞻性地配置医疗卫生资源。这类\cqt{如果-那么}式的情景分析需求，对传统预测模型提出了新的挑战——不仅要具备准确的预测能力，更要能够响应假设性的排放变化。
+
+本章研究的核心问题是：面向碳达峰碳中和目标，如何利用历史数据训练的模型迁移至未来排放情景，预测不同减排路径下的空气质量演变？本章的技术路线是：首先利用\textbf{历史数据}（2014-2020年）训练IGNN模型，学习排放-气象-浓度之间的响应关系——其中历史排放数据来自MEIC清单，历史气象数据来自ERA5再分析资料，历史浓度观测来自国家环境监测网络；随后将训练好的模型应用于\textbf{未来情景数据}（2025-2050年），其中未来排放来自DPEC（Dynamic Projection of Emissions in China，中国排放动态预测）模型的六种减排策略，未来气象来自CMIP6（Coupled Model Intercomparison Project Phase 6，第六次耦合模式比较计划）气候模式输出，从而实现跨时段的迁移模拟。温室气体与大气污染物在很大程度上同根同源，特别是在\PM 和\ozone 这两种关键污染物的协同控制上，其复杂的非线性关系构成了决策过程中的核心科学难题。
+
+\textbf{核心挑战}。本章需解决的关键技术难题包括以下三个方面：
+
+（1）\textbf{排放-浓度响应关系的物理建模}。情景模拟的核心是建立排放源强与污染物浓度之间的响应映射，这要求模型能够刻画公式（\ref{eq:advection_diffusion}）中排放项$E$与浓度场$\mathbf{X}$之间的非线性响应关系。现有自回归模型依赖历史浓度序列进行外推，缺乏对排放驱动的显式表征，无法响应\cqt{如果减排50\%结果如何}这类假设情景。如何设计\cqt{一对一映射}架构，使模型仅依赖气象和排放输入直接预测浓度，是物理约束嵌入的核心问题。
+
+（2）\textbf{历史与未来数据源的融合}。历史训练数据基于MEIC排放清单，而未来情景数据来源于DPEC动态评估模型，两者在空间分辨率、行业分类和时间覆盖上存在差异\citep{zheng2018trends,cheng2021pathways}。此外，未来气象条件来自CMIP6耦合模式输出，与历史ERA5再分析数据在统计特性上也存在偏差。如何建立跨数据源的有效融合机制，确保模型在域迁移（Domain Shift）条件下仍能保持稳定性能，是多源数据融合的核心问题。
+
+（3）\textbf{未来情景外推能力}。模拟任务要求模型外推至训练数据覆盖范围之外的未来情景——包括2020-2060年的气候变化路径（SSP（Shared Socioeconomic Pathways，共享社会经济路径）情景）和多种减排策略组合。模型需在气象条件和排放强度均超出历史分布的条件下保持预测稳定性，这对泛化能力提出了极高要求。如何避免在长期模拟中的误差累积，同时保持对极端情景的物理合理响应，是突破模型泛化瓶颈的核心问题。
+
+\textbf{现有方法的局限性}。针对上述挑战，现有方法存在以下不足：（1）在计算效率方面，传统化学传输模式（如CMAQ（Community Multiscale Air Quality，社区多尺度空气质量模型）、WRF-Chem（Weather Research and Forecasting model coupled with Chemistry，气象-化学耦合模型））虽具有完备的物理化学方程组，但单次区域年尺度模拟需要消耗数百至数千核时的超算资源，难以支撑多情景、多路径的探索性模拟需求。（2）在排放响应建模方面，现有数据驱动方法多采用自回归模式，将历史浓度作为输入进行时序外推，无法响应\cqt{如果排放减少50\%结果如何}这类假设情景，缺乏对排放-浓度响应关系的显式表征。（3）在误差控制方面，自回归模式在长期模拟（如25年尺度）中面临严重的误差累积问题，预测偏差随时间步逐层放大。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，本章的核心挑战不在于如何建模污染物的时空传输过程，而在于如何建立排放源强与浓度场之间的直接响应映射，从而支撑长期情景模拟。
+
+针对上述挑战，本章提出IGNN（Integrated Graph Neural Network，集成图神经网络）模型，将排放清单作为可控变量显式纳入深度学习框架，通过\cqt{一对一映射}策略消除自回归误差累积，构建计算高效且精度可靠的代理模型。
+
+
+% ------------------------------------------------------------
+% 5.2 问题定义
+% ------------------------------------------------------------
+\section{问题定义}
+\label{sec:sim_problem}
+
+本章聚焦的核心科学问题是：\textbf{未来数十年的空气质量将如何演变？}与第\ref{chap:prediction}章的时间预测问题和第\ref{chap:inference}章的空间推断问题不同，本章研究的是一类\textbf{情景响应问题（Scenario Response Problem）}——给定不同的减排政策路径，预测2025-2050年间\PM 与\ozone 的长期演变趋势，从而支撑\cqt{假设-验证}式的政策评估。图\ref{fig:simulation_problem}展示了该问题的整体框架。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_chap01_Q3_simulation.pdf}
+    \caption{未来情景模拟问题示意图}
+    \caption*{\textbf{输入}：未来气象场$\mathbf{M}_{\text{future}}^{t-T'+1:t}$（CMIP6）和排放场$\mathbf{E}_{\text{future}}^{t-T'+1:t}$（DPEC）；\textbf{输出}：2025-2050年的\PM 和\ozone 浓度模拟$\hat{\mathbf{X}}_{\text{future}}^t$；\textbf{模型}：IGNN（$\mathcal{F}_\Theta$）通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）训练得到（图中上半部分，详见第\ref{subsec:train_infer_paradigm}节），学习排放-气象-浓度之间的响应关系后迁移至未来情景（图中下半部分）。}
+    \label{fig:simulation_problem}
+\end{figure}
+
+\textbf{时间尺度说明。}本章的时间维度与前两章存在本质区别：第\ref{chap:prediction}章关注\textbf{小时-日尺度}的短期预报（起报后72小时内），第\ref{chap:inference}章关注\textbf{当前时刻}的空间推断，而本章关注\textbf{年-十年尺度}的长期趋势模拟（2025-2050年）。
+
+形式化地，给定研究区域的图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$（式中$\mathcal{V}$为$N$个城市节点，$\mathcal{E}$为空间邻接边），未来时刻$t$之前$T'$个时间步的气象场$\mathbf{M}_{\text{future}}^{t-T'+1:t}$和排放数据$\mathbf{E}_{\text{future}}^{t-T'+1:t}$，目标是利用预训练的映射函数$\mathcal{F}_{\Theta^*}$模拟该时刻的污染物浓度场：
+\begin{equation}
+\hat{\mathbf{X}}_{\text{future}}^{t} = \mathcal{F}_{\Theta^*}\left(\mathbf{M}_{\text{future}}^{t-T'+1:t}, \mathbf{E}_{\text{future}}^{t-T'+1:t}, \mathcal{G}\right)
+\label{eq:forward_simulation}
+\end{equation}
+\noindent 式中，$\mathbf{M}_{\text{future}}^t \in \mathbb{R}^{N \times D_M}$表示第$t$时刻的未来气象变量（CMIP6，包括温度、风速、辐射等），$\mathbf{E}_{\text{future}}^t \in \mathbb{R}^{N \times D_E}$表示第$t$时刻的未来排放数据（DPEC，包括\NOx、VOC、SO$_2$、\PM 一次排放等），$\hat{\mathbf{X}}_{\text{future}}^t \in \mathbb{R}^{N \times 2}$表示模拟的\PM 和\ozone 浓度，$\Theta^*$为通过历史数据预训练得到的固定模型参数。
+
+与第\ref{chap:prediction}章的自回归预测范式不同，本章的模型输入\textbf{不包含污染物浓度观测}，仅依赖气象和排放驱动。具体而言，模型将一个长度为$T'$的时间窗口（从$t-T'+1$到$t$时刻）内的气象场$\mathbf{M}_{\text{future}}$和排放数据$\mathbf{E}_{\text{future}}$，映射为该窗口末端$t$时刻的污染物浓度$\hat{\mathbf{X}}_{\text{future}}^t$。由于每个时刻的模拟仅依赖当前窗口内的气象和排放输入，而不依赖前一时刻的模拟结果，因此避免了长期积分中的误差累积问题，同时使模型能够直接响应任意假设的排放情景，支撑\cqt{如果减排50\%结果如何}这类假设情景分析。
+
+如图\ref{fig:simulation_problem}所示，模型$\mathcal{F}_{\Theta^*}$通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）预训练得到，学习排放-气象-浓度之间的响应关系（详见第\ref{subsec:train_infer_paradigm}节）；在推理阶段，以未来气象$\mathbf{M}_{\text{future}}^{t-T'+1:t}$（CMIP6）和排放$\mathbf{E}_{\text{future}}^{t-T'+1:t}$（DPEC）为输入，模拟2025-2050年的空气质量$\hat{\mathbf{X}}_{\text{future}}^t$。
+
+
+% ------------------------------------------------------------
+% 5.3 研究区域与数据
+% ------------------------------------------------------------
+\section{研究区域与数据}
+\label{sec:sim_data}
+
+\subsection{研究区域}
+\label{subsec:study_region}
+
+本章选取京津冀及周边地区（简称\cqt{2+26}城市）作为研究区域，涵盖北京、天津及周边26个城市，共计28个主要城市。该区域自1980年代以来经历了快速城市化进程\citep{bai2014society}，工业生产和能源消费量巨大，自2010年以来频繁遭受严重的大气污染事件，尤其是冬季\citep{an2019severe}。选择该区域的理由包括：（1）该区域是中国大气污染防治的重点区域，具有典型性和代表性；（2）监测网络密集，数据质量较高；（3）区域内城市间存在显著的污染物传输关系，适合图神经网络建模。
+
+图\ref{fig:bthsa_network}展示了研究区域内28个城市的空间分布及其网络连接结构。网络的构建基于城市间的空间邻近性，距离阈值设为200 km。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/ncua_network.png}
+  \caption{京津冀及周边28城市的空间分布与网络结构}
+  \caption*{红色圆点表示城市位置，灰色连线表示基于空间邻近性构建的网络边。红色文字标注的六个城市（北京、天津、邢台、太原、淄博、郑州）为后续重点分析的特大城市。}
+  \label{fig:bthsa_network}
+\end{figure}
+
+
+\subsection{历史数据}
+\label{subsec:historical_data}
+
+为训练和验证IGNN模型，本研究使用了2014-2020年的多源历史数据。
+
+\textbf{空气质量观测数据（$\mathbf{X}$）}：目标变量$\mathbf{X} \in \mathbb{R}^{N \times 2}$来源于中国国家环境监测总站（CNEMC）\footnote{\url{http://www.cnemc.cn/}}，包括28个城市103个监测站点的\PM（$X_{\text{PM}_{2.5}}$）和\ozone（$X_{\text{O}_3}$）逐小时浓度数据。数据经过质量控制后，聚合为3小时时间分辨率，与气象数据对齐。
+
+\textbf{气象再分析数据（$\mathbf{M}$）}：气象驱动$\mathbf{M} \in \mathbb{R}^{N \times D_M}$（$D_M=7$）采用欧洲中期天气预报中心（ECMWF）发布的ERA5再分析数据集\citep{hersbach2020era5}。已有研究证实，ERA5在华北地区具有较高的模拟精度\citep{jiang2021evaluation}。选取的气象变量包括：2米气温（$M_{\text{t2m}}$）、100米风速与风向（$M_{\text{spd}}$, $M_{\text{dir}}$）、降水（$M_{\text{tp}}$）、地表向下短波辐射（$M_{\text{rsds}}$）、2米相对湿度（$M_{\text{rh}}$）和地表气压（$M_{\text{sp}}$）。空间分辨率为0.25°×0.25°，时间分辨率为3小时。
+
+\textbf{排放清单数据（$\mathbf{E}$）}：排放驱动$\mathbf{E} \in \mathbb{R}^{N \times D_E}$（$D_E=5$）采用清华大学多尺度排放清单模型（MEIC）\citep{zheng2018trends}提供的历史排放数据。排放物种包括：PM$_{2.5}$（$E_{\text{PM}_{2.5}}$）、PM$_{10}$（$E_{\text{PM}_{10}}$）、SO$_2$（$E_{\text{SO}_2}$）、\NOx（$E_{\text{NO}_x}$）和VOC（$E_{\text{VOC}}$）。原始月度排放数据通过ISAT时间降尺度模型\citep{wang2021measure}转换为3小时分辨率。
+
+表\ref{tab:sim_data_summary}汇总了本研究使用的所有数据变量；各变量的物理意义及其与污染物的关系详见第\ref{chap:prediction}章表~\ref{tab:pm25gnn_node_attributes}和表~\ref{tab:emission_variables}。
+
+\begin{table}[htbp]
+    \centering
+    \caption{模型输入输出变量汇总}
+    \caption*{涵盖污染物观测、排放清单和气象驱动三类数据，历史数据用于模型训练验证，未来数据用于情景模拟。}
+    \label{tab:sim_data_summary}
+    \begin{tabular}{@{}lllccc@{}}
+        \toprule
+        \textbf{数据类型} & \textbf{变量} & \textbf{符号} & \textbf{单位} & \textbf{时间分辨率} & \textbf{数据来源} \\
+        \midrule
+        \multirow{2}{*}{污染物（$\mathbf{X}$）} & PM$_{2.5}$ & $X_{\text{PM}_{2.5}}$ & $\mu$g m$^{-3}$ & 3小时 & CNEMC \\
+        & O$_3$ & $X_{\text{O}_3}$ & $\mu$g m$^{-3}$ & 3小时 & CNEMC \\
+        \midrule
+        \multirow{5}{*}{排放（$\mathbf{E}$）} & PM$_{2.5}$ & $E_{\text{PM}_{2.5}}$ & ton & 3小时 & MEIC/DPEC \\
+        & PM$_{10}$ & $E_{\text{PM}_{10}}$ & ton & 3小时 & MEIC/DPEC \\
+        & SO$_2$ & $E_{\text{SO}_2}$ & ton & 3小时 & MEIC/DPEC \\
+        & \NOx & $E_{\text{NO}_x}$ & ton & 3小时 & MEIC/DPEC \\
+        & VOC & $E_{\text{VOC}}$ & ton & 3小时 & MEIC/DPEC \\
+        \midrule
+        \multirow{7}{*}{气象（$\mathbf{M}$）} & 2米气温 & $M_{\text{t2m}}$ & K & 3小时 & ERA5/CMIP6 \\
+        & 100米风向 & $M_{\text{dir}}$ & ° & 3小时 & ERA5/CMIP6 \\
+        & 100米风速 & $M_{\text{spd}}$ & m s$^{-1}$ & 3小时 & ERA5/CMIP6 \\
+        & 降水 & $M_{\text{tp}}$ & mm & 3小时 & ERA5/CMIP6 \\
+        & 短波辐射 & $M_{\text{rsds}}$ & W m$^{-2}$ & 3小时 & ERA5/CMIP6 \\
+        & 2米相对湿度 & $M_{\text{rh}}$ & \% & 3小时 & ERA5/CMIP6 \\
+        & 地表气压 & $M_{\text{sp}}$ & Pa & 3小时 & ERA5/CMIP6 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\subsection{未来情景数据}
+\label{subsec:future_data}
+
+为驱动IGNN模型进行2025-2050年的未来情景模拟，本研究构建了两类未来驱动数据。
+
+\textbf{未来气象数据}：选取高碳排放情景（RCP8.5，Representative Concentration Pathway 8.5，即典型浓度路径8.5）作为未来气候变化的背景。具体采用CMIP6\citep{eyring2016overview}高分辨率模式比较项目中的CAS FGOALS-f3-L模型输出\citep{bao2020cas}。该模型是唯一提供3小时高时间分辨率输出的气候模式，空间分辨率为25 km，能够为IGNN模型提供与历史数据一致的气象驱动场。数据通过地球系统网格联盟（ESGF）节点获取\footnote{\url{https://esgf-node.llnl.gov/search/cmip6/}}。
+
+\textbf{未来排放数据}：采用MEIC团队开发的未来排放动态预测模型（DPEC）数据\citep{tong2020dynamic,cheng2021pathways}\footnote{\url{http://meicmodel.org.cn/?page_id=1901&lang=en}}。DPEC的核心优势在于其创新的构建方法：将\cqt{自下而上}的精细化技术分析与\cqt{自上而下}的宏观情景驱动相结合，内部集成了源自MEIC清单的700多种中国本土排放源及其详细的技术演变过程，并与全球综合评估模型GCAM-China无缝对接。
+
+DPEC设计了\textbf{六种不同力度的污染控制策略}，依据减排力度从弱到强排列如下：
+
+\begin{enumerate}
+    \item \textbf{基准情景（Baseline）}：延续当前政策，环境控制保持在2015年水平，不施加额外控制措施；
+    \item \textbf{当前目标情景（Current Goals）}：假设中国实现国家自主贡献承诺和国家\PM 空气质量标准（35 $\mu$g m$^{-3}$）至2030年；
+    \item \textbf{NDC目标情景（NDC Goals）}：在当前目标情景的能源和社会经济发展路径基础上，到2050年在所有部门全面部署最佳可用末端控制技术；
+    \item \textbf{2°C温控目标情景（2D Goals）}：与NDC目标情景采用相同的末端控制技术，但实施更严格的2°C一致性气候政策；
+    \item \textbf{碳中和目标情景（Neutral Goals）}：以实现中国碳中和承诺和WHO \PM 指南（10 $\mu$g m$^{-3}$）为目标，追求2060年长期空气质量改善；
+    \item \textbf{1.5°C温控目标情景（1.5D Goals）}：最严格的减排情景，实施1.5°C一致性气候政策。
+\end{enumerate}
+
+月度排放数据采用与第\ref{chap:prediction}章相同的时间分配方法降尺度至3小时分辨率（详见第\ref{subsec:emis_data}节），与气象数据共同作为IGNN模型的输入。
+
+
+% ------------------------------------------------------------
+% 5.3 IGNN模型架构与验证
+% ------------------------------------------------------------
+\section{IGNN模型架构与验证}
+\label{sec:ignn_model}
+
+\subsection{模型架构}
+\label{subsec:ignn_arch}
+
+IGNN模型的核心思想是将研究区域内的城市监测站点抽象为一个\textbf{图结构}$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{A})$，式中$\mathcal{V}$为节点集合（28个城市），$\mathcal{E}$为边集合（基于空间邻近性定义），$\mathbf{A} \in \mathbb{R}^{n \times n}$为邻接矩阵。模型通过图卷积网络（GCN）捕捉污染物在城市间的空间输送与扩散过程，同时采用时间卷积网络（TCN）提取气象条件和排放源强度随时间变化的动态特征。
+
+如图\ref{fig:ignn_arch}所示，IGNN模型采用一对一映射的输入输出范式：
+
+\begin{equation}
+\hat{\mathbf{X}}^{t} = \mathcal{F}_{\text{IGNN}}\left(\mathbf{M}^{t-T'+1:t}, \mathbf{E}^{t-T'+1:t}\right)
+\label{eq:ignn_formulation}
+\end{equation}
+
+\noindent 式中$\mathbf{M}^{t-T'+1:t}$表示过去$T'$个时间步的气象信息（包含温度、风速、风向、降水、辐射、湿度、气压7个变量），$\mathbf{E}^{t-T'+1:t}$表示对应时段的排放数据（包含\PM、PM$_{10}$、SO$_2$、\NOx、VOC共5个物种）；输出$\hat{\mathbf{X}}^t \in \mathbb{R}^{N \times 2}$为时刻$t$的\PM 和\ozone 浓度。该设计避免了将历史污染物浓度作为输入所带来的误差累积问题\citep{qi2019hybrid}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/ignn_arch.png}
+  \caption{IGNN模型架构框架图}
+  \caption*{模型以邻域气象和排放信息为输入，同时输出\PM 和\ozone 浓度。$\oplus$表示向量拼接操作。图卷积层（GCN）对相关站点和信息执行空间卷积操作，时间卷积层在残差和图卷积之后执行时间卷积操作。}
+  \label{fig:ignn_arch}
+\end{figure}
+
+\textbf{谱图卷积}：模型通过拉普拉斯矩阵将输入$(M, E)$变换到傅里叶空间\citep{kipf2017semi}：
+
+\begin{equation}
+\mathcal{G}_{\theta} * \mathcal{G}(M, E) = U\mathcal{G}_{\theta}(\Lambda)U^{T}(M, E)
+\label{eq:ignn_spectral_conv}
+\end{equation}
+
+\noindent 式中$L = I_{N} - D^{-1/2}AD^{-1/2} = U\Lambda U^{T}$为归一化图拉普拉斯矩阵。为降低计算复杂度，采用切比雪夫多项式近似\citep{kipf2017semi}：
+
+\begin{equation}
+\mathcal{G}_{\theta}(L) = \sum_{k=0}^{K-1}\theta_{k}T_{k}(\tilde{L})
+\label{eq:chebyshev}
+\end{equation}
+
+\noindent 式中$\tilde{L} = \frac{2}{\lambda_{\max}}L - I_{N}$，$K$为节点嵌入维度。通过这种方式，第$k$阶邻域的气象和排放信息被有效聚合。
+
+\textbf{时间卷积}：对于一维序列$(M, E) \in \mathbb{R}^{m+n}$，采用膨胀卷积提取时间特征，对应于真实场景中污染物的产生与传输过程。完整的前向传播过程可表述为：
+
+\begin{equation}
+\mathcal{F} = \text{ReLU}\left(\varphi * \left(\text{ReLU}\left(\mathcal{G}_{\theta}(L)(M, E)\right)\right)\right)
+\label{eq:temporal_conv}
+\end{equation}
+
+\noindent 式中$\varphi$为卷积参数，$*$为卷积操作。
+
+
+\subsection{训练与推理范式}
+\label{subsec:train_infer_paradigm}
+
+IGNN模型采用\textbf{两阶段范式}实现从历史学习到未来模拟的知识迁移。如图\ref{fig:simulation_problem}所示，该范式的核心是建立从驱动数据（气象$\mathbf{M}$、排放$\mathbf{E}$）到响应变量（污染物浓度$\mathbf{X}$）的映射关系$\mathcal{F}_\Theta$。训练阶段利用历史观测数据学习这一映射，推理阶段将学习到的映射应用于未来情景数据，生成不同减排策略下的空气质量模拟结果。
+
+\textbf{训练阶段}（$t \in \mathcal{T}_{\text{hist}}$）。训练阶段的目标是从历史数据中学习排放-气象-浓度之间的非线性响应关系。如图\ref{fig:simulation_problem}上半部分所示，模型的输入为长度$T'$的时间窗口内的历史驱动数据：
+\begin{itemize}
+    \item \textbf{气象驱动}$\mathbf{M}_{\text{hist}}^{t-T'+1:t}$：来自ERA5再分析资料（2014-2020年），涵盖温度、风速、风向、降水、辐射、湿度、气压等7个变量；
+    \item \textbf{排放驱动}$\mathbf{E}_{\text{hist}}^{t-T'+1:t}$：来自MEIC清单（2014-2020年），涵盖\PM、PM$_{10}$、SO$_2$、\NOx、VOC等5个物种的排放强度。
+\end{itemize}
+
+模型的监督信号$\mathbf{X}_{\text{hist}}^{t-T'+1:t}$来自CNEMC国家监测站点的实测浓度数据。训练过程中，时间索引$t$\textbf{遍历整个历史时段$\mathcal{T}_{\text{hist}}$}（2014-2020年的每一个3小时时间步）。对于每个$t$，模型接收其前$T'$个时间步的气象和排放数据$(\mathbf{M}_{\text{hist}}^{t-T'+1:t}, \mathbf{E}_{\text{hist}}^{t-T'+1:t})$作为输入，经由图神经网络$\mathcal{F}_\Theta$处理后，输出该时刻的\PM 和\ozone 浓度预测$\hat{\mathbf{X}}_{\text{hist}}^t$，并与真实观测$\mathbf{X}_{\text{hist}}^t$计算损失进行梯度更新。
+
+训练阶段的核心约束是：
+\begin{equation}
+\min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\hat{\mathbf{X}}_{\text{hist}}^t, \mathbf{X}_{\text{hist}}^t\right) = \min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\mathcal{F}_\Theta\left(\mathbf{M}_{\text{hist}}^{t-T'+1:t}, \mathbf{E}_{\text{hist}}^{t-T'+1:t}, \mathcal{G}\right), \mathbf{X}_{\text{hist}}^t\right)
+\label{eq:training_objective}
+\end{equation}
+\noindent 式中$\mathcal{T}_{\text{hist}}$为历史训练时段（2014-2020年），$\mathcal{L}$为均方误差损失函数，$\mathcal{G}$为图\ref{fig:simulation_problem}所示的城市网络结构。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，IGNN采用纯监督损失而未引入显式物理约束项，原因在于：（1）长期模拟的关键挑战是\textbf{误差累积}而非单步物理一致性，而非自回归架构已从根本上解决了这一问题；（2）模型通过大量历史数据隐式学习了公式\eqref{eq:advection_diffusion}所描述的物理响应关系；（3）城市级别的空间聚合平滑了局部物理约束的必要性。通过这种\textbf{窗口到点}的映射方式，模型学习到了在给定气象条件和排放强度下，大气系统如何响应并产生特定的污染物浓度。
+
+\textbf{推理阶段}（$t \in \mathcal{T}_{\text{future}}$）。推理阶段的目标是将训练好的模型迁移至未来情景，生成2025-2050年的空气质量模拟结果。如图\ref{fig:simulation_problem}下半部分所示，模型结构$\mathcal{F}$和参数$\Theta^*$保持固定（图中雪花图标表示参数冻结），仅将输入数据替换为未来情景驱动：
+\begin{itemize}
+    \item \textbf{气象驱动}$\mathbf{M}_{\text{future}}^{t-T'+1:t}$：来自CMIP6气候模式的RCP8.5高排放情景输出（CAS FGOALS-f3-L模型，2025-2050年）；
+    \item \textbf{排放驱动}$\mathbf{E}_{\text{future}}^{t-T'+1:t}$：来自DPEC模型的六种减排策略（从Baseline到1.5°C目标，2025-2050年）。
+\end{itemize}
+
+推理过程中，时间索引$t$\textbf{遍历整个未来时段$\mathcal{T}_{\text{future}}$}（2025-2050年的每一个3小时时间步）。对于每个$t$，模型独立计算该时刻的浓度输出$\hat{\mathbf{X}}_{\text{future}}^t$：
+\begin{equation}
+\hat{\mathbf{X}}_{\text{future}}^t = \mathcal{F}_{\Theta^*}\left(\mathbf{M}_{\text{future}}^{t-T'+1:t}, \mathbf{E}_{\text{future}}^{t-T'+1:t}, \mathcal{G}\right), \quad t \in \mathcal{T}_{\text{future}}
+\label{eq:inference}
+\end{equation}
+\noindent 式中$\Theta^*$为训练后的固定参数，$\mathcal{T}_{\text{future}}$为推理时段（2025-2050年）。
+
+\textbf{范式优势}。这种训练-推理范式具有以下关键优势：
+
+\textbf{（1）消除误差累积}。如图\ref{fig:simulation_problem}所示，IGNN的每个时刻$t$的预测\textbf{仅依赖当前窗口内的输入}（$\mathbf{M}_{\text{hist/future}}^{t-T'+1:t}$和$\mathbf{E}_{\text{hist/future}}^{t-T'+1:t}$），而不依赖前一时刻的预测结果$\hat{\mathbf{X}}^{t-1}$。这意味着即使某一时刻的预测存在偏差，该偏差不会传递到后续时刻。在25年尺度的长期模拟中，这一特性至关重要——自回归模型的预测误差会随时间步指数级放大，而IGNN的误差始终保持在单步水平。
+
+\textbf{（2）支撑假设情景分析}。由于模型输入不包含历史浓度，仅依赖气象和排放驱动，因此可以直接响应\cqt{如果排放减少50\%结果如何}这类假设性问题。只需将$\mathbf{E}_{\text{future}}$替换为假设的排放情景，即可获得对应的浓度响应，这为政策评估提供了\cqt{数字沙盘}工具。
+
+\textbf{（3）实现跨域迁移}。训练阶段学习的排放-气象-浓度响应关系具有物理普适性（公式\ref{eq:advection_diffusion}所描述的平流-扩散-化学反应机制），因此可以迁移至未来情景。尽管未来的气象条件$\mathbf{M}_{\text{future}}$（CMIP6）和排放强度$\mathbf{E}_{\text{future}}$（DPEC）与历史数据$\mathbf{M}_{\text{hist}}$（ERA5）/$\mathbf{E}_{\text{hist}}$（MEIC）存在域偏移，但模型捕捉到的基本物理关系仍然适用。图\ref{fig:simulation_problem}中从训练到推理的迁移（Transfer箭头）正是基于这一物理普适性假设。
+
+
+\subsection{模型训练与验证}
+\label{subsec:ignn_validation}
+
+IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时间划分为三个独立子集：训练集、验证集和测试集。模型在NVIDIA Tesla K80 GPU上训练90轮，总耗时约3小时，模型文件大小仅119 KB。
+
+表\ref{tab:ignn_vs_ml}展示了IGNN与其他机器学习方法的性能对比。采用的评价指标包括：平均绝对误差（MAE）、一致性指数（IA）、相关系数（$r$）、归一化平均偏差（NMB）和归一化平均误差（NME）。
+
+\begin{table}[htbp]
+    \centering
+    \caption{IGNN与机器学习方法在2014-2020年模拟性能对比}
+    \caption*{MAE单位为$\mu$g m$^{-3}$，IA和$r$为无量纲，NMB和NME单位为\%。最优结果已加粗，'*'表示$r$在$p < 0.05$水平显著。}
+    \label{tab:ignn_vs_ml}
+    \begin{tabular}{@{}lccccc|ccccc@{}}
+        \toprule
+        & \multicolumn{5}{c}{\textbf{PM$_{2.5}$}} & \multicolumn{5}{c}{\textbf{O$_3$}} \\
+        \cmidrule(lr){2-6} \cmidrule(lr){7-11}
+        \textbf{模型} & \textbf{MAE} & \textbf{IA} & \textbf{$r$} & \textbf{NMB} & \textbf{NME} & \textbf{MAE} & \textbf{IA} & \textbf{$r$} & \textbf{NMB} & \textbf{NME} \\
+        \midrule
+        XGBoost   & 48.79 & 0.69 & 0.42* & 56.71 & 65.20 & 27.59 & 0.89 & 0.86* & -20.65 & 32.21 \\
+        LightGBM  & 48.75 & 0.67 & 0.36* & 45.09 & 71.34 & 29.13 & 0.86 & 0.88* & -20.21 & 32.77 \\
+        STGCN     & 35.59 & 0.74 & 0.65* & 25.12 & 55.39 & 21.63 & 0.91 & 0.86* & -17.54 & 28.77 \\
+        \textbf{IGNN} & \textbf{29.64} & \textbf{0.79} & \textbf{0.71*} & \textbf{13.42} & \textbf{45.26} & \textbf{19.54} & \textbf{0.93} & \textbf{0.88*} & \textbf{-10.70} & \textbf{28.17} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+从表中可以看出，IGNN在所有指标上均取得最优性能。对于\PM，IGNN的IA达到0.79，MAE为29.64 $\mu$g m$^{-3}$，显著优于XGBoost（IA=0.69, MAE=48.79）和STGCN（IA=0.74, MAE=35.59）。对于\ozone，IGNN同样表现最优（IA=0.93, MAE=19.54）。值得注意的是，所有方法对\ozone 的模拟性能均优于\PM，这可能与\ozone 浓度的日变化规律更为规则有关。
+
+图\ref{fig:ignn_scatter}展示了2019年北京站点IGNN模拟值与观测值的散点对比。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/ignn_scatter.png}
+  \caption{2019年北京站点IGNN模拟值与观测值散点图}
+  \caption*{（a）\PM 和（b）\ozone 的3小时浓度对比，共2920个数据点（365天$\times$8个时次）。\PM 线性回归斜率为0.74（$p < 0.05$），\ozone 相关系数达0.90（$p < 0.05$）。}
+  \label{fig:ignn_scatter}
+\end{figure}
+
+
+\subsection{与物理化学模型的对比}
+\label{subsec:ctm_comparison}
+
+为进一步验证IGNN模型的可靠性，将其与传统物理化学模型（CMAQ和WRF-Chem）进行了对比，表\ref{tab:ctm_config}展示了CMAQ和WRF-Chem模型参数化方案的配置细节。选取2019年1月的\PM 重污染事件和2019年7月的\ozone 重污染事件作为典型案例。
+
+图\ref{fig:ignn_vs_ctm}展示了三种模型对典型污染过程的模拟对比结果。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/ignn_vs_ctm.pdf}
+  \caption{IGNN与物理化学模型对典型污染过程的模拟对比}
+  \caption*{上排：2019年1月北京\PM 重污染事件；下排：2019年7月北京\ozone 重污染事件。蓝线为观测值，红线为模型预测值。IGNN在捕捉浓度日变化和峰值特征方面表现优于CMAQ和WRF-Chem。}
+  \label{fig:ignn_vs_ctm}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{CMAQ和WRF-Chem模型参数化方案配置}
+  \label{tab:ctm_config}
+  \begin{tabular}{lcc}
+    \toprule
+    参数 & CMAQ & WRF-Chem \\
+    \midrule
+    模型版本 & V5.3 & v3.9.1 \\
+    水平分辨率 & 27-9-3km & 27-9-3km \\
+    网格嵌套 & 单向嵌套 & 双向嵌套 \\
+    垂直层数 & 14层 & 29层 \\
+    水平平流 & PPM & 正定方案 \\
+    垂直平流 & PPM & 正定方案 \\
+    水平扩散 & 涡旋扩散理论 & 二阶扩散 \\
+    垂直扩散 & ACM2 & 二阶扩散 \\
+    气相化学机理 & CB06 & RADM2 \\
+    气相化学求解器 & EBI & EBI \\
+    液相化学机理 & AQCHEM & AQCHEM with MADE \\
+    气溶胶化学 & AE7/ISORROPIA v2.2 & MADE \\
+    二次有机气溶胶 & AE7/VBS & SORGAM \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+表\ref{tab:ignn_vs_ctm_metrics}量化对比了三种模型的性能指标。
+
+\begin{table}[htbp]
+    \centering
+    \caption{IGNN与物理化学模型性能对比}
+    \caption*{基于2019年1月\PM 事件和2019年7月\ozone 事件的模拟结果。}
+    \label{tab:ignn_vs_ctm_metrics}
+    \begin{tabular}{@{}lccc|ccc@{}}
+        \toprule
+        & \multicolumn{3}{c}{\textbf{PM$_{2.5}$}} & \multicolumn{3}{c}{\textbf{O$_3$}} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        \textbf{模型} & \textbf{$r$} & \textbf{IA} & \textbf{MAE} & \textbf{$r$} & \textbf{IA} & \textbf{MAE} \\
+        \midrule
+        CMAQ     & 0.38 & 0.57 & 29.19 & 0.57 & 0.65 & 39.50 \\
+        WRF-Chem & 0.36 & 0.55 & 30.82 & 0.47 & 0.60 & 51.18 \\
+        \textbf{IGNN} & \textbf{0.84} & \textbf{0.91} & \textbf{15.44} & \textbf{0.90} & \textbf{0.94} & \textbf{12.36} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+结果表明：（1）IGNN在\PM 和\ozone 模拟上均显著优于CMAQ和WRF-Chem（PM$_{2.5}$：$r$=0.84 vs 0.38；O$_3$：$r$=0.90 vs 0.57）；（2）IGNN的计算效率显著高于传统物理化学模型；（3）物理化学模型在高浓度时段存在较大偏差，这可能与排放清单的不确定性、边界条件设定及参数化方案的局限性有关。IGNN作为数据驱动方法，能够直接从观测数据中学习复杂的非线性响应关系，因此在极端污染事件的模拟中表现更优。
+
+
+% ------------------------------------------------------------
+% 5.4 未来情景模拟结果与分析
+% ------------------------------------------------------------
+\section{模拟结果与分析}
+\label{sec:sim_results}
+
+\subsection{浓度演变趋势}
+\label{subsec:regional_trends}
+
+将2025-2050年的未来气象与多策略排放数据输入已训练好的IGNN模型，得到了\cqt{2+26}城市未来空气质量的整体演变趋势。
+
+模拟结果（如图\ref{fig:future_average}和表\ref{tab:future_trends_bthsa}所示）揭示了一个核心且值得高度关注的现象：\textbf{\PM 与\ozone 的浓度变化呈现出显著的相反趋势}。在所有六种排放策略下，\cqt{2+26}城市的年平均\PM 浓度均表现出显著的下降趋势，年均变化率在$-0.14$至$-0.37$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这表明，即使在全球持续高碳排放的背景下，只要实施既定的或更强化的污染物控制政策，\PM 治理仍能取得积极成效。
+
+然而，与\PM 的下降形成鲜明对比的是，年平均\ozone 浓度在除基准情景外的所有策略下都呈现出显著的上升趋势，年均变化率在$+0.07$至$+0.22$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这一结果预示着，未来\ozone 污染可能会取代\PM，成为该区域面临的主要大气环境挑战。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/future_average.png}
+  \caption{不同排放策略下\cqt{2+26}城市未来\PM 与\ozone 浓度变化趋势}
+  \caption*{（a）\PM 浓度在所有策略下均呈下降趋势；（b）\ozone 浓度除基准情景外均呈上升趋势。实线表示各5年间隔的年均浓度变化。六种策略按减排力度从弱到强排列。}
+  \label{fig:future_average}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{2025-2050年\cqt{2+26}城市模拟污染物浓度变化的线性拟合参数}
+    \caption*{斜率和年均变化（AAC）单位为$\mu$g m$^{-3}$ year$^{-1}$，截距单位为$\mu$g m$^{-3}$。斜率在$p < 0.05$水平显著的已加粗。六种策略按减排力度从弱到强排列。}
+    \label{tab:future_trends_bthsa}
+    \begin{tabular}{@{}lcccccc@{}}
+        \toprule
+        & \multicolumn{3}{c}{\textbf{PM$_{2.5}$}} & \multicolumn{3}{c}{\textbf{O$_3$}} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        \textbf{排放策略} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} \\
+        \midrule
+        Baseline      & \textbf{$-1.44$} & 53.87 & $-0.14$ & \textbf{$-0.49$} & 61.96 & $-0.05$ \\
+        Current Goals & \textbf{$-2.98$} & 38.90 & $-0.29$ & \textbf{0.69} & 67.88 & 0.07 \\
+        NDC Goals     & \textbf{$-2.89$} & 37.92 & $-0.29$ & \textbf{1.04} & 68.39 & 0.10 \\
+        2D Goals      & \textbf{$-3.54$} & 32.65 & $-0.35$ & \textbf{1.86} & 71.34 & 0.19 \\
+        Neutral Goals & \textbf{$-3.67$} & 31.83 & $-0.37$ & \textbf{2.07} & 71.81 & 0.21 \\
+        1.5D Goals    & \textbf{$-3.41$} & 29.81 & $-0.34$ & \textbf{2.22} & 72.43 & 0.22 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+这一看似矛盾的结果，实际上揭示了大气化学过程中的\textbf{\cqt{气候惩罚}（Climate Penalty）}效应。全球变暖本身将直接导致空气污染问题（尤其是\ozone 污染）的恶化。这一效应主要通过以下两个途径实现：
+
+\textbf{（1）加速化学反应}：\ozone 生成的光化学反应速率对温度高度敏感，在其他条件不变的情况下，温度越高，反应速率越快，\ozone 的生成量就越大\citep{cao2020future}。
+
+\textbf{（2）不利气象条件}：气候变化预计将导致极端天气事件的频率和强度增加，例如更频繁、更持久的热浪和大气静稳事件\citep{cai2017weather}，而这些天气条件恰恰是导致污染物累积和光化学烟雾爆发的最主要气象诱因。
+
+此外，\PM 浓度的下降通过减少对太阳辐射的散射，增强了到达地表的短波辐射强度，进一步加速了\ozone 的光化学生成\citep{li2019two}。
+
+
+\subsection{城市差异性分析}
+\label{subsec:city_diff}
+
+为探究区域内部的差异性，进一步分析了\cqt{当前目标情景}下六座特大城市（北京、天津、邢台、太原、淄博、郑州）的模拟结果。
+
+图\ref{fig:future_city}和表\ref{tab:future_trends_cities}展示了六城市的污染物浓度变化趋势。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/future_city.png}
+  \caption{当前目标策略下六城市未来\PM 与\ozone 浓度变化趋势}
+  \caption*{（a）六城市\PM 浓度均呈下降趋势，太原降幅最大；（b）\ozone 浓度在多数城市上升，但北京和太原呈微弱下降。点划线表示年均浓度变化，虚线表示2025-2050年线性趋势。}
+  \label{fig:future_city}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{2025-2050年六城市模拟污染物浓度变化的线性拟合参数}
+    \caption*{斜率和年均变化（AAC）单位为$\mu$g m$^{-3}$ year$^{-1}$，截距单位为$\mu$g m$^{-3}$。斜率在$p < 0.05$水平显著的已加粗。}
+    \label{tab:future_trends_cities}
+    \begin{tabular}{@{}lcccccc@{}}
+        \toprule
+        & \multicolumn{3}{c}{\textbf{PM$_{2.5}$}} & \multicolumn{3}{c}{\textbf{O$_3$}} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        \textbf{城市} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} \\
+        \midrule
+        北京   & \textbf{$-0.10$} & 30.72 & $-0.09$ & \textbf{$-0.14$} & 76.69 & $-0.14$ \\
+        天津   & \textbf{$-0.49$} & 47.44 & $-0.47$ & \textbf{0.13} & 58.34 & 0.12 \\
+        邢台   & \textbf{$-0.72$} & 42.22 & $-0.69$ & \textbf{0.20} & 71.81 & 0.19 \\
+        太原   & \textbf{$-1.39$} & 88.00 & $-1.33$ & \textbf{$-0.10$} & 83.50 & $-0.09$ \\
+        淄博   & \textbf{$-0.63$} & 37.19 & $-0.60$ & \textbf{0.22} & 74.56 & 0.21 \\
+        郑州   & \textbf{$-0.56$} & 32.50 & $-0.54$ & \textbf{0.16} & 67.31 & 0.16 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+结果显示，\PM 的下降趋势在各城市间存在显著差异。大部分城市的下降速率较为平缓（$-0.09$至$-0.72$ $\mu$g m$^{-3}$ year$^{-1}$），而\textbf{太原的下降趋势最为显著}（$-1.33$ $\mu$g m$^{-3}$ year$^{-1}$），同时其\PM 和\ozone 的模拟浓度也最高。这是因为太原拥有大量的煤炭工业，排放控制策略对煤炭使用的大幅削减导致了当地\PM 水平的快速下降\citep{cheng2021pathways}。
+
+在\ozone 变化方面，值得注意的是，\textbf{北京和太原的\ozone 浓度呈现微弱的下降趋势}，这与区域总体上升趋势形成对比。这可能与特大城市独特的排放源构成和光化学环境有关——这些城市可能处于\ozone 生成的\textbf{VOC控制区}，\NOx 的减排反而有利于降低\ozone 浓度。
+
+
+\subsection{重污染日频率演变规律}
+\label{subsec:heavy_days}
+
+除了平均浓度的变化，污染事件的发生频率是衡量空气质量的另一重要维度。定义日最大污染物浓度超过历史（2014-2020年）第75百分位数的日期为\cqt{重污染日}（\PM $>$ 88 $\mu$g m$^{-3}$或\ozone $>$ 92 $\mu$g m$^{-3}$）。表\ref{tab:historical_aq_stats}给出了历史空气质量数据的统计特征。
+
+\begin{table}[htbp]
+    \centering
+    \caption{\cqt{2+26}城市2014-2020年空气质量数据统计特征}
+    \caption*{所有数值单位为$\mu$g m$^{-3}$。第75百分位数（88和92）作为定义重污染日的阈值。}
+    \label{tab:historical_aq_stats}
+    \begin{tabular}{@{}lccccc@{}}
+        \toprule
+        \textbf{污染物} & \textbf{最小值} & \textbf{平均值} & \textbf{第75百分位数} & \textbf{最大值} & \textbf{标准差} \\
+        \midrule
+        PM$_{2.5}$ & 1.00 & 69.85 & 88.00 & 2056.00 & 60.48 \\
+        O$_3$      & 1.00 & 63.99 & 92.00 & 625.00  & 52.59 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+图\ref{fig:future_heavy_days}和表\ref{tab:future_heavy_days}展示了未来重污染日频率的模拟结果。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/future_heavy_days.png}
+  \caption{不同排放策略下未来重污染天数变化预测}
+  \caption*{（a）\PM 重污染天数在所有策略下持续下降，在部分严格策略下可被完全消除；（b）\ozone 重污染天数在多数策略下呈增加趋势。实线表示年度变化。}
+  \label{fig:future_heavy_days}
+\end{figure}
+
+\begin{table}[htbp]
+    \centering
+    \caption{2025-2050年\cqt{2+26}城市重污染日变化的线性拟合参数}
+    \caption*{斜率和年均变化（AAC）单位为天/年，截距单位为天。斜率在$p < 0.05$水平显著的已加粗。}
+    \label{tab:future_heavy_days}
+    \begin{tabular}{@{}lcccccc@{}}
+        \toprule
+        & \multicolumn{3}{c}{\textbf{PM$_{2.5}$重污染日}} & \multicolumn{3}{c}{\textbf{O$_3$重污染日}} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        \textbf{排放策略} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} \\
+        \midrule
+        Baseline      & \textbf{$-1.08$} & 100.00 & $-0.54$ & \textbf{$-0.48$} & 186.00 & $-0.24$ \\
+        Current Goals & \textbf{$-1.32$} & 44.00 & $-0.66$ & \textbf{0.24} & 215.00 & $-0.12$ \\
+        NDC Goals     & \textbf{$-1.24$} & 42.00 & $-0.62$ & \textbf{0.08} & 217.00 & 0.04 \\
+        2D Goals      & \textbf{$-1.16$} & 29.00 & $-0.67$ & \textbf{1.52} & 226.00 & 0.76 \\
+        Neutral Goals & \textbf{$-0.96$} & 24.00 & $-0.73$ & \textbf{1.72} & 228.00 & 0.86 \\
+        1.5D Goals    & \textbf{$-0.64$} & 16.00 & $-0.52$ & \textbf{1.76} & 228.00 & 0.88 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+结果与平均浓度的变化趋势高度一致。在大多数策略下，\PM 重污染日的年发生天数呈现出显著的下降趋势（$-0.52$至$-0.73$天/年）。尤为鼓舞的是，在三种最严格的减排策略下（1.5°C目标、2°C目标和碳中和目标），\textbf{\PM 重污染事件预计将分别在2030年、2032年和2040年被基本消除}。
+
+与此同时，\ozone 重污染日的年发生天数则普遍表现为增加趋势（$+0.04$至$+0.88$天/年），这再次印证了未来\ozone 污染风险的严峻性。
+
+
+% ------------------------------------------------------------
+% 5.6 本章小结
+% ------------------------------------------------------------
+\section{本章小结}
+\label{sec:sim_summary}
+
+本章依托综合图神经网络（IGNN）模型，系统开展了未来污染情景模拟研究。主要贡献与发现如下：
+
+\textbf{（1）构建了高效的未来空气质量代理模型}。IGNN模型采用\cqt{一对一映射}策略避免误差累积，在模拟历史\PM 与\ozone 浓度变化方面显著优于XGBoost、LightGBM和STGCN等方法（\PM：IA从0.67--0.74提升至0.79；\ozone：IA从0.86--0.91提升至0.93），且在典型污染事件模拟中优于CMAQ和WRF-Chem物理化学模型，计算效率显著提升（从数小时压缩至秒级），为大规模多情景探索提供了可能。
+
+\textbf{（2）揭示了\PM 与\ozone 的反向演变趋势与协同治理需求}。在所有排放策略下，\cqt{2+26}城市未来\PM 浓度将持续下降（年均$-0.14$至$-0.37$ $\mu$g m$^{-3}$），而\ozone 浓度普遍上升（年均$+0.07$至$+0.22$ $\mu$g m$^{-3}$）。这一\cqt{气候惩罚}效应表明，由于\PM 和\ozone 共享\NOx 等前驱物且生成机制相互影响，单一污染物控制策略可能引发负面效果，必须根据区域化学敏感性科学确定协同减排比例。该发现也与国家\cqt{双碳}目标高度契合——能源结构转型在减少CO$_2$排放的同时将天然带来空气质量改善的协同效益。
+
+\textbf{（3）量化了不同城市的差异化响应}。北京和太原的\ozone 浓度呈微弱下降趋势，可能与其处于VOC控制区有关，为因地制宜制定减排策略提供了科学依据。在三种最严格的减排策略下，\PM 重污染事件预计将分别在2030年、2032年和2040年被基本消除。
+
+本章研究仍存在局限：所选变量可能未涵盖所有关键大气过程，IGNN作为数据驱动方法在捕捉物理机制方面存在不足。未来可从构建物理约束混合模型、推广至其他城市群验证可迁移性、开发高分辨率预报接口等方向持续改进。

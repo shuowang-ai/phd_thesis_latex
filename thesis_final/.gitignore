@@ -1,0 +1,49 @@
+# LaTeX 编译产物
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.loa
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.xdv
+*.synctex.gz
+*.run.xml
+*.nav
+*.snm
+*.vrb
+missfont.log
+
+# 编译生成的 PDF
+*.pdf
+
+# markdown 缓存目录
+_markdown_*/
+
+# macOS 系统文件
+.DS_Store
+
+# 临时文件
+*.tmp
+*.bak
+*~
+
+# 编辑器文件
+*.swp
+*.swo
+.vscode/
+
+# 保留以下源文件（不忽略）：
+# - *.tex (文章内容)
+# - *.bib (参考文献)
+# - *.cls (文档类)
+# - *.sty (样式文件)
+# - *.bbx, *.cbx, *.bst (参考文献样式)
+# - *.lua (脚本)
+# - figures/ 目录下的图片
+# - Makefile, latexmkrc

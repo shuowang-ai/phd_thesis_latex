@@ -1,0 +1,251 @@
+% !TeX root = ./wangshuo_phdthesis.tex
+
+% 论文基本信息配置
+
+\bnusetup{
+  %******************************
+  % 注意：
+  %   1. 配置里面不要出现空行
+  %   2. 不需要的配置信息可以删除
+  %   3. 建议先阅读文档中所有关于选项的说明
+  %******************************
+  %
+  % 输出格式
+  %   选择打印版（print）或用于提交的电子版（electronic），前者会插入空白页以便直接双面打印
+  %
+  output = electronic,
+  %
+  % 标题
+  %   可使用“\\”命令手动控制换行
+  %
+  title  = {大气污染复杂系统的数据驱动建模：\\预测、推断与模拟},
+  title* = {Data-Driven Modeling of Air Pollution as a Complex System:\\Prediction, Inference, and Simulation},
+  %
+  % 学科门类
+  %   1. 学术型
+  %      - 中文
+  %        需注明所属的学科门类，例如：
+  %        哲学、经济学、法学、教育学、文学、历史学、理学、工学、农学、医学、
+  %        军事学、管理学、艺术学
+  %      - 英文
+  %        博士：Doctor of Philosophy
+  %        硕士：
+  %          哲学、文学、历史学、法学、教育学、艺术学门类，公共管理学科
+  %          填写“Master of Arts“，其它填写“Master of Science”
+  %   2. 专业型
+  %      直接填写专业学位的名称，例如：
+  %      教育博士、工程硕士等
+  %      Doctor of Education, Master of Engineering
+  %   3. 本科生不需要填写
+  %
+  % degree-category  = {教育硕士},
+  % degree-category* = {Master of Education},
+  %
+  % 培养单位
+  %   填写所属院系的全名
+  %
+  department = {系统科学学院},
+  %
+  % 学科
+  %   1. 研究生学术型学位，获得一级学科授权的学科填写一级学科名称，其他填写二级学科名称
+  %   2. 本科生填写专业名称，第二学位论文需标注“（第二学位）”
+  %
+  discipline  = {系统分析与集成},
+  discipline* = {System Analysis and Integration},
+  %
+  % 专业领域
+  %   1. 设置专业领域的专业学位类别，填写相应专业领域名称
+  %   2. 2019 级及之前工程硕士学位论文，在 `engineering-field` 填写相应工程领域名称
+  %   3. 其他专业学位类别的学位论文无需此信息
+  %
+  % professional-field  = {学科教学（数学）},
+  % professional-field* = {Subject Teaching（Mathematics）},
+  %
+  % 姓名
+  %
+  author  = {王硕},
+  author* = {Wang Shuo},
+  student-id = {202031250018},
+  %
+  % 导师
+  %   中文姓名和职称之间以英文逗号“,”分开，下同
+  %
+  supervisor  = {张江, 教授},
+  supervisor* = {Professor Zhang Jiang},
+  supervisor-department = {系统科学学院},
+  %
+  % 副导师
+  %
+  % associate-supervisor  = {陈文光, 教授},
+  % associate-supervisor* = {Professor Chen Wenguang},
+  %
+  % 联合导师
+  %
+  % co-supervisor  = {某某某, 教授},
+  % co-supervisor* = {Professor Mou Moumou},
+  %
+  % 日期
+  %   使用 ISO 格式；默认为当前时间
+  %
+  date = {2025-12-01},
+  %
+  % 是否在中文封面后的空白页生成书脊（默认 false）,仅博士需要。
+  %
+  include-spine = true,
+  spine-school = {北京师范大学},
+  %
+  % 密级和年限
+  %   秘密, 机密, 绝密
+  %
+  % secret-level = {秘密},
+  % secret-year  = {10},
+  %
+}
+
+% 载入所需的宏包
+
+% 定理类环境宏包
+\usepackage{amsthm}
+% 也可以使用 ntheorem
+% \usepackage[amsmath,thmmarks,hyperref]{ntheorem}
+
+\bnusetup{
+  %
+  % math-style = GB,  % GB | ISO | TeX
+  % 数学公式字体，如果认为xits字体不满意的话，可尝试更改为newcm.
+  math-font  = xits,  % stix | xits | libertinus | newcm 
+  % 图表编号时是否带有章节序号，默认为不带有false
+  figurestables-chapternumber=false,  %false / true
+}
+
+% 可以使用 nomencl 生成符号和缩略语说明
+% \usepackage{nomencl}
+% \makenomenclature
+
+% 表格加脚注
+\usepackage{threeparttable}
+
+% 表格中支持跨行
+\usepackage{multirow}
+
+% 固定宽度的表格。
+% \usepackage{tabularx}
+
+% 跨页表格
+\usepackage{longtable}
+
+% 算法
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% 量和单位
+\usepackage{siunitx}
+
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{makecell}
+\usepackage{booktabs}   % 用于三线表
+\usepackage{multirow}   % 用于多行单元格
+\usepackage{pifont}     % 用于显示对勾和叉号
+\usepackage{comment}
+\usepackage{csquotes}   % 中文引号
+
+% 参考文献使用 BibTeX + natbib 宏包
+% 顺序编码制
+\usepackage[sort]{natbib}
+\bibliographystyle{bnuthesis-numeric}
+
+% 著者-出版年制
+% \usepackage{natbib}
+% \bibliographystyle{bnuthesis-author-year}
+
+% 本科生参考文献的著录格式
+% \usepackage[sort]{natbib}
+% \bibliographystyle{bnuthesis-bachelor}
+
+% 参考文献使用 BibLaTeX 宏包
+% \usepackage[style=bnuthesis-numeric]{biblatex}
+% \usepackage[style=bnuthesis-author-year]{biblatex}
+% \usepackage[style=gb7714-2015]{biblatex}
+% \usepackage[style=apa]{biblatex}
+% \usepackage[style=mla-new]{biblatex}
+% 声明 BibLaTeX 的数据库
+% \addbibresource{ref/refs.bib}
+
+% 定义所有的图片文件在 figures 子目录下
+\graphicspath{{figures/}}
+
+% 数学命令
+\makeatletter
+\newcommand\dif{%  % 微分符号
+  \mathop{}\!%
+  \ifbnu@math@style@TeX
+    d%
+  \else
+    \mathrm{d}%
+  \fi
+}
+\makeatother
+
+% 处理中文引号问题
+\newcommand{\cqt}[1]{“#1”}  % Chinese Quote，使用正确的中文引号对
+
+% =========================================================
+% 核心命令定义（直接嵌入以确保 Overleaf 兼容性）
+% =========================================================
+% 污染物
+\def\PM{\ensuremath{\mathrm{PM}_{2.5}}\xspace}
+\def\PMten{\ensuremath{\mathrm{PM}_{10}}\xspace}
+\def\ozone{\ensuremath{\mathrm{O}_{3}}\xspace}
+\def\NOx{\ensuremath{\mathrm{NO}_{x}}\xspace}
+\def\NOtwo{\ensuremath{\mathrm{NO}_{2}}\xspace}
+\def\VOCs{\ensuremath{\mathrm{VOCs}}\xspace}
+\def\CO{\ensuremath{\mathrm{CO}}\xspace}
+\def\SOtwo{\ensuremath{\mathrm{SO}_{2}}\xspace}
+\def\AOD{\ensuremath{\mathrm{AOD}}\xspace}
+
+% 模型名称
+\def\ModelPred{\ensuremath{\mathrm{PM}_{2.5}}\text{-GNN}\xspace}
+\def\ModelSurr{PCDCNet\xspace}
+\def\ModelInfer{SPIN\xspace}
+\def\ModelSim{IGNN\xspace}
+\def\SystemName{KnowAir\xspace}
+
+% 损失函数
+\def\LossAOD{\ensuremath{\mathcal{L}_{\mathrm{AOD}}}\xspace}
+\def\LossInfer{\ensuremath{\mathcal{L}_{\mathrm{infer}}}\xspace}
+\def\LossInit{\ensuremath{\mathcal{L}_{\mathrm{init}}}\xspace}
+\def\LossDIC{\ensuremath{\mathcal{L}_{\mathrm{DIC}}}\xspace}
+
+% 评价指标
+\def\RMSE{\ensuremath{\mathrm{RMSE}}\xspace}
+\def\MAE{\ensuremath{\mathrm{MAE}}\xspace}
+\def\Rsquare{\ensuremath{R^{2}}\xspace}
+
+% 数据源
+\def\MEIC{MEIC\xspace}
+\def\ERAFive{ERA5\xspace}
+\def\CMAQ{CMAQ\xspace}
+\def\GNN{GNN\xspace}
+\def\GRU{GRU\xspace}
+\def\LSTM{LSTM\xspace}
+
+% hyperref 宏包在最后调用
+\usepackage{hyperref}
+
+% 只在"生成 PDF 书签"时生效的替换规则
+\pdfstringdefDisableCommands{%
+  % 你前面已经可以在这里放 \mathrm / \symcal 之类
+  % \def\mathrm#1{#1}%
+  % \def\symcal#1{#1}%
+
+  % 下面是关键：告诉 hyperref，书签里这些宏长这样
+  \def\PM{PM2.5}%
+  \def\ozone{O3}%
+  \def\ModelPred{PM2.5-GNN}%
+  \def\LossAOD{Loss-AOD}%
+  \def\LossInfer{Loss-Infer}%
+  \def\LossInit{Loss-Init}%
+}

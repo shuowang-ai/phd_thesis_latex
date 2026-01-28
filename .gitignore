@@ -1,0 +1,10 @@
+# 只管理 thesis_final/ 目录的源文件
+/*
+!thesis_final/
+!.gitignore
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
