@@ -80,7 +80,7 @@
   \centering
   \includegraphics[width=0.7\linewidth]{figures/ncua_network.png}
   \caption{京津冀及周边28城市的空间分布与网络结构}
-  \caption*{红色圆点表示城市位置，灰色连线表示基于空间邻近性构建的网络边。红色文字标注的六个城市（北京、天津、邢台、太原、淄博、郑州）为后续重点分析的特大城市。}
+  \caption*{红色圆点表示城市位置，灰色连线表示基于空间邻近性构建的网络边。红色文字标注的六个城市（北京、天津、邢台、太原、淄博、郑州）为后续重点分析的代表性城市。}
   \label{fig:bthsa_network}
 \end{figure}
 
@@ -173,9 +173,9 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ignn_arch.png}
+  \includegraphics[width=\linewidth]{figures/ignn_arch.pdf}
   \caption{IGNN模型架构框架图}
-  \caption*{模型以邻域气象和排放信息为输入，同时输出\PM 和\ozone 浓度。$\oplus$表示向量拼接操作。空间模块（GCN）对相关站点和信息执行空间聚合操作，时间模块在残差和图卷积之后执行时序特征提取。}
+  \caption*{模型以气象数据$\mathbf{M}$和排放数据$\mathbf{E}$的时间序列为输入，通过堆叠的时空建模模块（包含通道注意力、GCN空间聚合、时间卷积和残差连接）提取时空特征，最终经MLP输出\PM 和\ozone 浓度预测$\hat{\mathbf{X}}$。}
   \label{fig:ignn_arch}
 \end{figure}
 
@@ -279,9 +279,9 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ignn_scatter.png}
-  \caption{2019年北京站点IGNN模拟值与观测值散点图}
-  \caption*{（a）\PM 和（b）\ozone 的3小时浓度对比，共2920个数据点（365天$\times$8个时次）。\PM 线性回归斜率为0.74（$p < 0.05$），\ozone 相关系数达0.90（$p < 0.05$）。}
+  \includegraphics[width=\linewidth]{figures/ignn_scatter.pdf}
+  \caption{IGNN模拟值与观测值散点图}
+  \caption*{（a）\PM（$R^2=0.42$，MAE$=29.2\ \mu$g/m$^3$）和（b）\ozone（$R^2=0.78$，MAE$=18.5\ \mu$g/m$^3$）的浓度对比。颜色表示数据点密度，红色实线为线性回归拟合线，黑色虚线为1:1参考线。}
   \label{fig:ignn_scatter}
 \end{figure}
 
@@ -297,7 +297,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
   \centering
   \includegraphics[width=\linewidth]{figures/ignn_vs_ctm.pdf}
   \caption{IGNN与物理化学模型对典型污染过程的模拟对比}
-  \caption*{上排：2019年1月北京\PM 重污染事件；下排：2019年7月北京\ozone 重污染事件。蓝线为观测值，红线为模型预测值。IGNN在捕捉浓度日变化和峰值特征方面表现优于CMAQ和WRF-Chem。}
+  \caption*{（a）2019年1月北京\PM 重污染事件；（b）2019年7月北京\ozone 重污染事件。IGNN在捕捉浓度日变化和峰值特征方面表现优于CMAQ和WRF-Chem。}
   \label{fig:ignn_vs_ctm}
 \end{figure}
 
@@ -366,9 +366,9 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_average.png}
+  \includegraphics[width=\linewidth]{figures/future_average.pdf}
   \caption{不同排放策略下\cqt{2+26}城市未来\PM 与\ozone 浓度变化趋势}
-  \caption*{（a）\PM 浓度在所有策略下均呈下降趋势；（b）\ozone 浓度除基准情景外均呈上升趋势。实线表示各5年间隔的年均浓度变化。六种策略按减排力度从弱到强排列。}
+  \caption*{（a）\PM 浓度在所有策略下均呈下降趋势；（b）\ozone 浓度除基准情景外均呈上升趋势。实线表示年均浓度变化。六种策略包括：Current Goals（当前目标）、2D Goals（2度目标）、Baseline（基准情景）、1.5D Goals（1.5度目标）、NDC Goals（NDC目标）和Neutral Goals（碳中和目标）。}
   \label{fig:future_average}
 \end{figure}
 
@@ -405,15 +405,15 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 \subsection{城市差异性分析}
 \label{subsec:city_diff}
 
-为探究区域内部的差异性，进一步分析了\cqt{当前目标情景}下六座特大城市（北京、天津、邢台、太原、淄博、郑州）的模拟结果。
+为探究区域内部的差异性，进一步分析了\cqt{当前目标情景}下六个代表性城市（北京、天津、邢台、太原、淄博、郑州）的模拟结果。
 
 图\ref{fig:future_city}和表\ref{tab:future_trends_cities}展示了六城市的污染物浓度变化趋势。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_city.png}
+  \includegraphics[width=\linewidth]{figures/future_city.pdf}
   \caption{当前目标策略下六城市未来\PM 与\ozone 浓度变化趋势}
-  \caption*{（a）六城市\PM 浓度均呈下降趋势，太原降幅最大；（b）\ozone 浓度在多数城市上升，但北京和太原呈微弱下降。点划线表示年均浓度变化，虚线表示2025-2050年线性趋势。}
+  \caption*{（a）六城市\PM 浓度均呈下降趋势，太原降幅最大；（b）\ozone 浓度在多数城市呈上升趋势。六城市包括北京、天津、邢台、太原、淄博和郑州。}
   \label{fig:future_city}
 \end{figure}
 
@@ -440,7 +440,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 结果显示，\PM 的下降趋势在各城市间存在显著差异。大部分城市的下降速率较为平缓（$-0.09$至$-0.72$ $\mu$g m$^{-3}$ year$^{-1}$），而\textbf{太原的下降趋势最为显著}（$-1.33$ $\mu$g m$^{-3}$ year$^{-1}$），同时其\PM 和\ozone 的模拟浓度也最高。这是因为太原拥有大量的煤炭工业，排放控制策略对煤炭使用的大幅削减导致了当地\PM 水平的快速下降\citep{cheng2021pathways}。
 
-在\ozone 变化方面，值得注意的是，\textbf{北京和太原的\ozone 浓度呈现微弱的下降趋势}，这与区域总体上升趋势形成对比。这可能与特大城市独特的排放源构成和光化学环境有关——这些城市可能处于\ozone 生成的\textbf{VOC控制区}，\NOx 的减排反而有利于降低\ozone 浓度。
+在\ozone 变化方面，值得注意的是，\textbf{北京和太原的\ozone 浓度呈现微弱的下降趋势}，这与区域总体上升趋势形成对比。这可能与这些城市独特的排放源构成和光化学环境有关——这些城市可能处于\ozone 生成的\textbf{VOC控制区}，\NOx 的减排反而有利于降低\ozone 浓度。
 
 
 \subsection{重污染日频率演变规律}
@@ -467,9 +467,9 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_heavy_days.png}
+  \includegraphics[width=\linewidth]{figures/future_heavy_days.pdf}
   \caption{不同排放策略下未来重污染天数变化预测}
-  \caption*{（a）\PM 重污染天数在所有策略下持续下降，在部分严格策略下可被完全消除；（b）\ozone 重污染天数在多数策略下呈增加趋势。实线表示年度变化。}
+  \caption*{（a）\PM 重污染天数在所有策略下持续下降，在部分严格策略下可被完全消除；（b）\ozone 重污染天数在多数策略下呈增加趋势。}
   \label{fig:future_heavy_days}
 \end{figure}
 
