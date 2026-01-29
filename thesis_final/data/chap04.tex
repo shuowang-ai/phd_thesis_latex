@@ -186,11 +186,11 @@
 
 SPIN的整体架构如图~\ref{fig:model_architecture}所示，主要由三个功能模块组成，其设计理念与第\ref{chap:prediction}章的PCDCNet一脉相承：
 
-\textbf{（1）时序特征编码器（Temporal Feature Encoder）。}负责从各节点本地的气象与排放时间序列中提取高维动力学特征，为后续的空间传播提供物理信息丰富的初始状态。该模块对应于第\ref{subsec:paradigm}节所述的\textbf{嵌入层（Embed）}，将多源异构数据映射到统一的隐空间。
+\textbf{（1）时序特征编码器（Temporal Feature Encoder）。}负责从各节点本地的气象与排放时间序列中提取高维动力学特征，为后续的空间传播提供物理信息丰富的初始状态。该模块对应于第\ref{chap:methodology}章图\ref{fig:unified_framework}所示统一框架中的\textbf{编码层（Encoder）}，将多源异构数据映射到统一的隐空间。
 
-\textbf{（2）物理引导的图传播模块（Physics-Guided Graph Propagation）。}这是模型的核心，对应于第\ref{subsec:paradigm}节所述的\textbf{隐动力学层（Latent Dynamics）}。它通过并行设计的\cqt{扩散核}和\cqt{平流核}，在图结构上模拟污染物的各向同性扩散和各向异性平流输送过程，分别对应公式（\ref{eq:advection_diffusion}）中的扩散项与平流项。
+\textbf{（2）物理引导的图传播模块（Physics-Guided Graph Propagation）。}这是模型的核心，对应于统一框架中的\textbf{隐空间动力学（Latent Dynamics）}层。它通过并行设计的\cqt{扩散核}和\cqt{平流核}，在图结构上模拟污染物的各向同性扩散和各向异性平流输送过程，分别对应公式（\ref{eq:advection_diffusion}）中的扩散项与平流项。
 
-\textbf{（3）读出与生成模块（Readout \& Generation）。}对应于第\ref{subsec:paradigm}节所述的\textbf{读出层（Readout）}，将经过时空交互后的潜在表征映射回污染物浓度空间，生成最终的推断结果。
+\textbf{（3）读出与生成模块（Readout \& Generation）。}对应于统一框架中的\textbf{解码层（Decoder）}，将经过时空交互后的潜在表征映射回污染物浓度空间，生成最终的推断结果。
 
 \begin{figure}[htbp]
     \centering

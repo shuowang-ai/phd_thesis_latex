@@ -1,0 +1,253 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" font-family="Arial, sans-serif">
+  <!-- 背景 -->
+  <rect width="1200" height="700" fill="#fafafa"/>
+
+  <!-- 标题 -->
+  <text x="600" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">物理约束的时空图神经网络统一框架</text>
+
+  <!-- ========== 图例区域（顶部右侧） ========== -->
+  <g id="legend-top">
+    <rect x="900" y="45" width="280" height="55" rx="5" fill="white" stroke="#ddd" stroke-width="1"/>
+
+    <!-- 通用组件 -->
+    <rect x="915" y="55" width="18" height="18" rx="3" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="940" y="68" font-size="10" fill="#333">通用深度学习组件</text>
+
+    <!-- 创新组件 -->
+    <rect x="915" y="78" width="18" height="18" rx="3" fill="#fff3e0" stroke="#ff6f00" stroke-width="2.5"/>
+    <text x="940" y="91" font-size="10" fill="#333">本文创新点 (物理约束)</text>
+    <text x="1100" y="68" font-size="14" fill="#ff6f00">★</text>
+    <text x="1118" y="68" font-size="9" fill="#ff6f00">创新</text>
+  </g>
+
+  <!-- ========== 输入层 (通用) ========== -->
+  <g id="input-layer">
+    <text x="80" y="115" text-anchor="middle" font-size="11" font-weight="bold" fill="#1976d2">多源输入</text>
+
+    <!-- 污染物浓度 X -->
+    <rect x="20" y="130" width="120" height="40" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="80" y="148" text-anchor="middle" font-size="10">污染物浓度</text>
+    <text x="80" y="163" text-anchor="middle" font-size="12" font-weight="bold">X</text>
+
+    <!-- 气象变量 M -->
+    <rect x="20" y="180" width="120" height="40" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="80" y="198" text-anchor="middle" font-size="10">气象变量</text>
+    <text x="80" y="213" text-anchor="middle" font-size="12" font-weight="bold">M</text>
+
+    <!-- 排放数据 E -->
+    <rect x="20" y="230" width="120" height="40" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="80" y="248" text-anchor="middle" font-size="10">排放数据</text>
+    <text x="80" y="263" text-anchor="middle" font-size="12" font-weight="bold">E</text>
+  </g>
+
+  <!-- 输入到编码器的箭头 -->
+  <path d="M140 150 L175 195" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M140 200 L175 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M140 250 L175 205" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- ========== 编码层 (通用) ========== -->
+  <g id="encoder-layer">
+    <rect x="185" y="130" width="130" height="140" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="250" y="155" text-anchor="middle" font-size="12" font-weight="bold" fill="#1976d2">编码层</text>
+    <text x="250" y="172" text-anchor="middle" font-size="10" fill="#1976d2">(Encoder)</text>
+    <text x="250" y="200" text-anchor="middle" font-size="9" fill="#555">特征提取</text>
+    <text x="250" y="215" text-anchor="middle" font-size="9" fill="#555">异构数据融合</text>
+    <text x="250" y="230" text-anchor="middle" font-size="9" fill="#555">图结构嵌入</text>
+
+    <!-- 创新：物理约束标注 -->
+    <rect x="185" y="290" width="130" height="45" rx="4" fill="#fff3e0" stroke="#ff6f00" stroke-width="2.5"/>
+    <text x="200" y="307" font-size="12" fill="#ff6f00">★</text>
+    <text x="250" y="307" text-anchor="middle" font-size="9" font-weight="bold" fill="#ff6f00">图结构设计</text>
+    <text x="250" y="322" text-anchor="middle" font-size="8" fill="#e65100">风场有向图 / 距离图</text>
+    <path d="M250 290 L250 270" stroke="#ff6f00" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowhead-orange)"/>
+  </g>
+
+  <!-- 编码器到隐空间箭头 -->
+  <path d="M315 200 L360 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- ========== 隐空间动力学 (通用框架 + 创新内核) ========== -->
+  <g id="latent-layer">
+    <rect x="370" y="110" width="230" height="180" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="485" y="135" text-anchor="middle" font-size="12" font-weight="bold" fill="#1976d2">隐空间动力学</text>
+    <text x="485" y="152" text-anchor="middle" font-size="10" fill="#1976d2">(Latent Dynamics)</text>
+
+    <!-- 空间模块 (通用) -->
+    <rect x="390" y="165" width="90" height="50" rx="4" fill="#bbdefb" stroke="#1976d2" stroke-width="1.5"/>
+    <text x="435" y="185" text-anchor="middle" font-size="10" font-weight="bold">空间模块</text>
+    <text x="435" y="202" text-anchor="middle" font-size="8" fill="#666">GCN/ChebNet</text>
+
+    <!-- 时间模块 (通用) -->
+    <rect x="500" y="165" width="90" height="50" rx="4" fill="#bbdefb" stroke="#1976d2" stroke-width="1.5"/>
+    <text x="545" y="185" text-anchor="middle" font-size="10" font-weight="bold">时间模块</text>
+    <text x="545" y="202" text-anchor="middle" font-size="8" fill="#666">TCN/GRU</text>
+
+    <!-- 双向箭头 -->
+    <path d="M480 190 L500 190" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrowhead-blue)" marker-start="url(#arrowhead-blue-rev)"/>
+
+    <!-- 时空交替说明 -->
+    <text x="485" y="245" text-anchor="middle" font-size="8" fill="#666">[S-Conv → T-Conv]^L</text>
+    <text x="485" y="260" text-anchor="middle" font-size="8" fill="#666">时空交替建模</text>
+
+    <!-- 创新：物理约束标注 -->
+    <rect x="370" y="290" width="230" height="45" rx="4" fill="#fff3e0" stroke="#ff6f00" stroke-width="2.5"/>
+    <text x="385" y="307" font-size="12" fill="#ff6f00">★</text>
+    <text x="485" y="307" text-anchor="middle" font-size="9" font-weight="bold" fill="#ff6f00">物理启发的算子设计</text>
+    <text x="485" y="322" text-anchor="middle" font-size="8" fill="#e65100">扩散核 (对称) / 平流核 (非对称)</text>
+    <path d="M485 290 L485 290" stroke="#ff6f00" stroke-width="2" stroke-dasharray="4,2"/>
+  </g>
+
+  <!-- 隐空间到解码器箭头 -->
+  <path d="M600 200 L640 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- ========== 解码层 (通用) ========== -->
+  <g id="decoder-layer">
+    <rect x="650" y="130" width="130" height="140" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="715" y="155" text-anchor="middle" font-size="12" font-weight="bold" fill="#1976d2">解码层</text>
+    <text x="715" y="172" text-anchor="middle" font-size="10" fill="#1976d2">(Decoder)</text>
+    <text x="715" y="205" text-anchor="middle" font-size="9" fill="#555">隐表示 →</text>
+    <text x="715" y="220" text-anchor="middle" font-size="9" fill="#555">目标空间映射</text>
+
+    <!-- 创新：物理约束标注 -->
+    <rect x="610" y="290" width="130" height="45" rx="4" fill="#fff3e0" stroke="#ff6f00" stroke-width="2.5"/>
+    <text x="625" y="307" font-size="12" fill="#ff6f00">★</text>
+    <text x="675" y="307" text-anchor="middle" font-size="9" font-weight="bold" fill="#ff6f00">物理损失函数</text>
+    <text x="675" y="322" text-anchor="middle" font-size="8" fill="#e65100">质量守恒 / DIC约束</text>
+    <path d="M700 290 L700 270" stroke="#ff6f00" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowhead-orange)"/>
+  </g>
+
+  <!-- 解码器到输出箭头 -->
+  <path d="M780 200 L820 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- ========== 输出层 (通用) ========== -->
+  <g id="output-layer">
+    <rect x="830" y="155" width="130" height="60" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="895" y="180" text-anchor="middle" font-size="10">预测/推断/模拟结果</text>
+    <text x="895" y="200" text-anchor="middle" font-size="14" font-weight="bold">X̂</text>
+  </g>
+
+  <!-- ========== 真实标签 (通用) ========== -->
+  <g id="ground-truth">
+    <rect x="830" y="240" width="130" height="45" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="895" y="260" text-anchor="middle" font-size="10">观测数据</text>
+    <text x="895" y="275" text-anchor="middle" font-size="9" fill="#666">(Ground Truth)</text>
+  </g>
+
+  <!-- 输出和真实标签到损失函数 -->
+  <path d="M960 185 L1000 185 L1000 420" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M960 262 L1000 262" stroke="#666" stroke-width="2" fill="none"/>
+
+  <!-- ========== 损失函数区域 ========== -->
+  <g id="loss-area">
+    <!-- 总损失函数 (通用框架) -->
+    <rect x="185" y="370" width="320" height="70" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="345" y="395" text-anchor="middle" font-size="13" font-weight="bold" fill="#1976d2">总损失函数</text>
+    <text x="345" y="420" text-anchor="middle" font-size="14" font-style="italic">L = L_data + λL_physics</text>
+
+    <!-- 数据拟合损失 (通用) -->
+    <rect x="540" y="370" width="130" height="70" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="605" y="395" text-anchor="middle" font-size="10" font-weight="bold" fill="#1976d2">数据拟合损失</text>
+    <text x="605" y="415" text-anchor="middle" font-size="11" font-style="italic">L_data</text>
+    <text x="605" y="432" text-anchor="middle" font-size="8" fill="#666">MSE/MAE 监督学习</text>
+
+    <!-- 物理约束损失 (创新) -->
+    <rect x="700" y="370" width="130" height="70" rx="5" fill="#fff3e0" stroke="#ff6f00" stroke-width="2.5"/>
+    <text x="715" y="390" font-size="12" fill="#ff6f00">★</text>
+    <text x="765" y="395" text-anchor="middle" font-size="10" font-weight="bold" fill="#ff6f00">物理约束损失</text>
+    <text x="765" y="415" text-anchor="middle" font-size="11" font-style="italic" fill="#e65100">L_physics</text>
+    <text x="765" y="432" text-anchor="middle" font-size="8" fill="#666">DIC/AOD梯度约束</text>
+
+    <!-- 连接线 -->
+    <path d="M505 405 L540 405" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M670 405 L700 405" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- ========== 参数更新与反向传播 (通用) ========== -->
+  <g id="params-backprop">
+    <!-- 模型参数 -->
+    <rect x="870" y="380" width="100" height="50" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+    <text x="920" y="402" text-anchor="middle" font-size="10" fill="#1976d2">模型参数</text>
+    <text x="920" y="422" text-anchor="middle" font-size="14" font-weight="bold">Θ</text>
+
+    <!-- 损失到参数 -->
+    <path d="M830 405 L870 405" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+    <!-- 反向传播虚线 -->
+    <path d="M1050 405 L1100 405 L1100 100 L250 100 L250 130" stroke="#9c27b0" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#arrowhead-purple)"/>
+    <text x="675" y="92" text-anchor="middle" font-size="10" fill="#9c27b0">反向传播 (Backpropagation) - 端到端梯度优化</text>
+
+    <!-- 参数更新公式 -->
+    <rect x="1010" y="380" width="160" height="50" rx="5" fill="#f3e5f5" stroke="#9c27b0" stroke-width="1.5"/>
+    <text x="1090" y="400" text-anchor="middle" font-size="9" fill="#9c27b0">参数更新</text>
+    <text x="1090" y="418" text-anchor="middle" font-size="10" font-style="italic">Θ ← Θ - η∇L</text>
+  </g>
+
+  <!-- ========== 三类任务 ========== -->
+  <g id="tasks">
+    <rect x="185" y="470" width="985" height="85" rx="8" fill="#f5f5f5" stroke="#ccc" stroke-width="1"/>
+
+    <text x="677" y="492" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">统一框架支撑三类核心任务</text>
+
+    <!-- 预测任务 -->
+    <rect x="220" y="505" width="280" height="40" rx="4" fill="white" stroke="#ddd" stroke-width="1"/>
+    <text x="360" y="523" text-anchor="middle" font-size="11" font-weight="bold">预测任务 (第3章)</text>
+    <text x="360" y="538" text-anchor="middle" font-size="9" fill="#666">PM₂.₅-GNN, PCDCNet</text>
+
+    <!-- 推断任务 -->
+    <rect x="530" y="505" width="220" height="40" rx="4" fill="white" stroke="#ddd" stroke-width="1"/>
+    <text x="640" y="523" text-anchor="middle" font-size="11" font-weight="bold">推断任务 (第4章)</text>
+    <text x="640" y="538" text-anchor="middle" font-size="9" fill="#666">SPIN</text>
+
+    <!-- 模拟任务 -->
+    <rect x="780" y="505" width="220" height="40" rx="4" fill="white" stroke="#ddd" stroke-width="1"/>
+    <text x="890" y="523" text-anchor="middle" font-size="11" font-weight="bold">模拟任务 (第5章)</text>
+    <text x="890" y="538" text-anchor="middle" font-size="9" fill="#666">IGNN</text>
+  </g>
+
+  <!-- ========== 与数值模型对比 (创新点总结) ========== -->
+  <g id="compare">
+    <rect x="20" y="370" width="150" height="185" rx="5" fill="#fff3e0" stroke="#ff6f00" stroke-width="2"/>
+    <text x="95" y="392" text-anchor="middle" font-size="10" font-weight="bold" fill="#ff6f00">★ 核心创新点</text>
+
+    <text x="95" y="415" text-anchor="middle" font-size="8" font-weight="bold" fill="#333">区别于数值模型:</text>
+    <text x="95" y="432" text-anchor="middle" font-size="8" fill="#666">• 数据驱动参数学习</text>
+    <text x="95" y="447" text-anchor="middle" font-size="8" fill="#666">• 端到端梯度优化</text>
+    <text x="95" y="462" text-anchor="middle" font-size="8" fill="#666">• 自适应拟合观测</text>
+
+    <line x1="30" y1="475" x2="160" y2="475" stroke="#ffcc80" stroke-width="1"/>
+
+    <text x="95" y="492" text-anchor="middle" font-size="8" font-weight="bold" fill="#333">物理约束融合方式:</text>
+    <text x="95" y="509" text-anchor="middle" font-size="8" fill="#666">• 图结构 (编码层)</text>
+    <text x="95" y="524" text-anchor="middle" font-size="8" fill="#666">• 算子设计 (隐空间)</text>
+    <text x="95" y="539" text-anchor="middle" font-size="8" fill="#666">• 损失函数 (解码层)</text>
+  </g>
+
+  <!-- ========== 底部说明 ========== -->
+  <g id="bottom-note">
+    <rect x="185" y="580" width="985" height="50" rx="5" fill="white" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="677" y="600" text-anchor="middle" font-size="10" fill="#555">
+      <tspan font-weight="bold" fill="#1976d2">蓝色框</tspan>: 通用深度学习组件 (Encoder-Decoder, GCN, TCN, MSE Loss, Backpropagation)
+    </text>
+    <text x="677" y="618" text-anchor="middle" font-size="10" fill="#555">
+      <tspan font-weight="bold" fill="#ff6f00">橙色框 ★</tspan>: 本文创新 — 物理约束在三个层次的融合 (图结构设计、物理启发算子、质量守恒损失)
+    </text>
+  </g>
+
+  <!-- 箭头定义 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#ff6f00"/>
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9c27b0"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1976d2"/>
+    </marker>
+    <marker id="arrowhead-blue-rev" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#1976d2"/>
+    </marker>
+  </defs>
+</svg>
