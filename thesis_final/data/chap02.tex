@@ -216,7 +216,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
     \centering
     \includegraphics[width=0.95\textwidth]{figures/model_general_framework.pdf}
     \caption{物理约束的时空图神经网络统一框架}
-    \caption*{蓝色模块为通用深度学习组件，橙色标注（$\star$）为本文的核心创新——在编码层、隐空间动力学、解码层三个层次融入物理约束。模型通过损失函数$\mathcal{L}$计算预测结果$\hat{\mathbf{X}}$与观测数据的差异，并通过反向传播更新参数$\Theta$，实现数据驱动的端到端优化。}
+    \caption*{蓝色模块为深度学习流水线（Pipeline），橙色标注（$\star$）为本文的核心创新——在编码层、隐空间动力学、解码层三个层次融入先验知识。模型通过损失函数$\mathcal{L}$计算预测结果$\hat{\mathbf{X}}$与观测数据的差异，并通过反向传播更新参数$\Theta$，实现数据驱动的端到端优化。}
     \label{fig:unified_framework}
 \end{figure}
 
