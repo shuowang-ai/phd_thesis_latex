@@ -173,7 +173,7 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ignn_arch.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_ignn_arch.pdf}
   \caption{IGNN模型架构框架图}
   \caption*{模型以气象数据$\mathbf{M}$和排放数据$\mathbf{E}$的时间序列为输入，通过堆叠的时空建模模块（包含通道注意力、GCN空间聚合、时间卷积和残差连接）提取时空特征，最终经MLP输出\PM 和\ozone 浓度预测$\hat{\mathbf{X}}$。}
   \label{fig:ignn_arch}
@@ -285,7 +285,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ignn_scatter.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_ignn_scatter.pdf}
   \caption{IGNN模拟值与观测值散点图}
   \caption*{（a）\PM（$R^2=0.42$，MAE$=29.2\ \mu$g/m$^3$）和（b）\ozone（$R^2=0.78$，MAE$=18.5\ \mu$g/m$^3$）的浓度对比。颜色表示数据点密度，红色实线为线性回归拟合线，黑色虚线为1:1参考线。}
   \label{fig:ignn_scatter}
@@ -301,7 +301,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/ignn_vs_ctm.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_ignn_vs_ctm.pdf}
   \caption{IGNN与物理化学模型对典型污染过程的模拟对比}
   \caption*{（a）2019年1月北京\PM 重污染事件；（b）2019年7月北京\ozone 重污染事件。IGNN在捕捉浓度日变化和峰值特征方面表现优于CMAQ和WRF-Chem。}
   \label{fig:ignn_vs_ctm}
@@ -372,7 +372,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_average.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_future_average.pdf}
   \caption{不同排放策略下\cqt{2+26}城市未来\PM 与\ozone 浓度变化趋势}
   \caption*{（a）\PM 浓度在所有策略下均呈下降趋势；（b）\ozone 浓度除基准情景外均呈上升趋势。实线表示年均浓度变化。六种策略包括：Current Goals（当前目标）、2D Goals（2度目标）、Baseline（基准情景）、1.5D Goals（1.5度目标）、NDC Goals（NDC目标）和Neutral Goals（碳中和目标）。}
   \label{fig:future_average}
@@ -417,7 +417,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_city.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_future_city.pdf}
   \caption{当前目标策略下六城市未来\PM 与\ozone 浓度变化趋势}
   \caption*{（a）六城市\PM 浓度均呈下降趋势，太原降幅最大；（b）\ozone 浓度在多数城市呈上升趋势。六城市包括北京、天津、邢台、太原、淄博和郑州。}
   \label{fig:future_city}
@@ -473,7 +473,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/future_heavy_days.pdf}
+  \includegraphics[width=\linewidth]{figures/chap05_future_heavy_days.pdf}
   \caption{不同排放策略下未来重污染天数变化预测}
   \caption*{（a）\PM 重污染天数在所有策略下持续下降，在部分严格策略下可被完全消除；（b）\ozone 重污染天数在多数策略下呈增加趋势。}
   \label{fig:future_heavy_days}

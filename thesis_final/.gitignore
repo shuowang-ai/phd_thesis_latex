@@ -19,8 +19,9 @@
 *.vrb
 missfont.log
 
-# 编译生成的 PDF
-*.pdf
+# 编译生成的 PDF（保留 figures/ 目录下的图片）
+wangshuo_phdthesis.pdf
+bu.pdf
 
 # markdown 缓存目录
 _markdown_*/
