@@ -27,6 +27,7 @@
 % 3. 模型、物理算子与优化
 \item[\(f, \mathcal{F}_\Theta\)] 真实的空气质量生成过程 \(f(\mathbf{M}, \mathbf{E})\) 与参数为 \(\Theta\) 的深度学习近似模型。
 \item[\(C\)] 污染物浓度场的点值形式，用于对流-扩散方程表述。与向量形式$\mathbf{X}$的关系：$C_i = \mathbf{X}_i$。
+\item[\(S, D\)] 对流-扩散方程中的排放源项与沉降汇项。
 \item[\(\mathbf{u}\)] 风速矢量场，用于计算平流传输。
 \item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层的节点隐表示，$\mathbf{H}^{(l)} \in \mathbb{R}^{N \times F}$，$\mathbf{h}_i$为节点$i$的隐向量。
 \item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集，满足$\mathcal{V}_{\text{obs}} \cup \mathcal{V}_{\text{target}} = \mathcal{V}$。

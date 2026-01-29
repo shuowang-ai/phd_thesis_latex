@@ -146,21 +146,21 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 
 大气污染物浓度场的时空演化遵循对流-扩散方程（Advection-Diffusion Equation），该方程体现了质量守恒定律：
 \begin{equation}
-\frac{\partial C}{\partial t} = \underbrace{-\mathbf{u} \cdot \nabla C}_{\text{平流项}} + \underbrace{\nabla \cdot (K \nabla C)}_{\text{扩散项}} + \underbrace{R}_{\text{化学反应}} + \underbrace{E}_{\text{排放源}} - \underbrace{D}_{\text{沉降汇}}
+\frac{\partial C}{\partial t} = \underbrace{-\mathbf{u} \cdot \nabla C}_{\text{平流项}} + \underbrace{\nabla \cdot (K \nabla C)}_{\text{扩散项}} + \underbrace{R}_{\text{化学反应}} + \underbrace{S}_{\text{排放源}} - \underbrace{D}_{\text{沉降汇}}
 \label{eq:advection_diffusion}
 \end{equation}
-\noindent 式中，$C$为污染物浓度，$\mathbf{u}$为风速矢量，$K$为扩散系数，$R$、$E$、$D$分别为化学反应项、排放源项和沉降汇项。下面阐述各项的物理含义及其在图神经网络中的对应关系。
+\noindent 式中，$C$为污染物浓度，$\mathbf{u}$为风速矢量，$K$为扩散系数，$R$、$S$、$D$分别为化学反应项、排放源项和沉降汇项。下面阐述各项的物理含义及其在图神经网络中的对应关系。
 
 \textbf{平流项}$(-\mathbf{u} \cdot \nabla C)$反映污染物随大气运动的定向迁移，在GNN中可通过\textbf{有向图上的消息传递}实现。\textbf{扩散项}$(\nabla \cdot (K \nabla C))$描述湍流混合过程，在GNN中可通过\textbf{对称邻接矩阵}实现。\textbf{化学反应项$R$}表征光化学反应的生成与消耗\citep{seinfeld2016atmospheric}，在GNN中对应\textbf{节点级的非线性变换}。\textbf{沉降汇项$D$}描述污染物移除过程，可通过\textbf{时间维度的衰减机制}隐式建模。
 
-\textbf{排放源项$E$}刻画污染物的排放速率。现有数据驱动方法多采用\textbf{隐式代理}策略——通过时间特征或POI密度等间接变量近似排放的时空变化\citep{zheng2013u,yi2018deep,wang2021modeling}。这类方法本质上是学习\cqt{时间/空间$\rightarrow$浓度}的统计映射，\textbf{无法支撑未来情景模拟}。本文采用\textbf{显式排放数据}作为模型输入（第\ref{chap:prediction}--\ref{chap:simulation}章），使模型能够直接学习\cqt{排放$\rightarrow$浓度}响应映射，支撑假设情景模拟。
+\textbf{排放源项$S$}刻画污染物的排放速率。现有数据驱动方法多采用\textbf{隐式代理}策略——通过时间特征或POI密度等间接变量近似排放的时空变化\citep{zheng2013u,yi2018deep,wang2021modeling}。这类方法本质上是学习\cqt{时间/空间$\rightarrow$浓度}的统计映射，\textbf{无法支撑未来情景模拟}。本文采用\textbf{显式排放数据}作为模型输入（第\ref{chap:prediction}--\ref{chap:simulation}章），使模型能够直接学习\cqt{排放$\rightarrow$浓度}响应映射，支撑假设情景模拟。
 
 \subsection{质量守恒约束}
 \label{subsec:physics_constraints}
 
 对流-扩散方程的核心物理意义在于\textbf{质量守恒}。在封闭系统内，污染物总量的变化应等于源汇之差：
 \begin{equation}
-\frac{\partial}{\partial t} \int_{\Omega} C \, d\Omega = \int_{\Omega} (E - D + R) \, d\Omega - \oint_{\partial\Omega} \mathbf{F} \cdot \mathbf{n} \, dS
+\frac{\partial}{\partial t} \int_{\Omega} C \, d\Omega = \int_{\Omega} (S - D + R) \, d\Omega - \oint_{\partial\Omega} \mathbf{F} \cdot \mathbf{n} \, dS
 \label{eq:mass_conservation}
 \end{equation}
 \noindent 式中，$\Omega$为控制区域，$\partial\Omega$为区域边界，$\mathbf{F}$为通量，$\mathbf{n}$为边界法向量。该约束确保模型预测的浓度变化在物理上合理——区域内污染物的增减必须可追溯到排放、沉降、化学反应或边界通量。
@@ -185,7 +185,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 \end{equation}
 \noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），$\mathcal{L}_{\text{physics}}$为物理约束项，$\lambda$为平衡系数。物理约束项的设计可基于多种物理原理：
 
-典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = S$（$S$为源汇项），约束空间传输满足\cqt{质量守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
+典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = S$（$C$为污染物浓度，$S$为源汇项），约束空间传输满足\cqt{质量守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
 
 \textbf{（4）输入特征构建：显式编码物理驱动量}
 

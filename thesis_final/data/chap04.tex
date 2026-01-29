@@ -408,7 +408,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 这一约束迫使模型在没有任何邻居信息的情况下，仅凭本地的气象条件和排放强度，也能利用物理规律给出一个基准预测值（Baseline Estimate）。这为后续的图传播提供了稳健的起始状态，同时防止模型在图传播过程中\cqt{遗忘}观测信息，确保预测场在观测点处与真实值一致。
 
-从物理角度理解，$\mathcal{L}_{\mathrm{init}}$迫使TCN学习\cqt{局地生成（Local Production）}的映射关系——即在排放强度高、边界层低、静风的条件下，本地污染水平应该较高。这一关系是公式（\ref{eq:advection_diffusion}）中源项$E$和化学反应项$R$的数据驱动近似。
+从物理角度理解，$\mathcal{L}_{\mathrm{init}}$迫使TCN学习\cqt{局地生成（Local Production）}的映射关系——即在排放强度高、边界层低、静风的条件下，本地污染水平应该较高。这一关系是公式（\ref{eq:advection_diffusion}）中源项$S$和化学反应项$R$的数据驱动近似。
 
 
 \subsubsection{掩码AOD空间梯度损失（\LossAOD）}
