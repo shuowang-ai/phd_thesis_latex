@@ -428,7 +428,7 @@ PCDCNet旨在模拟数值模式（如CMAQ）的演化过程，其输入输出范
 \subsection{模型总体架构}
 \label{subsec:pcdcnet_architecture}
 
-如图\ref{fig:overall_framework}所示，PCDCNet通过三个专门设计的动力学模块来解耦大气过程，分别对应大气污染演化的三类核心物理机制：
+PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}统一框架。如图\ref{fig:overall_framework}所示，模型通过三个专门设计的动力学模块来解耦大气过程，分别对应大气污染演化的三类核心物理机制：
 
 \begin{figure}[htbp]
   \centering
