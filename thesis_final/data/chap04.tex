@@ -212,9 +212,9 @@ SPIN的整体架构如图~\ref{fig:model_architecture}所示，主要由三个�
 \label{eq:tcn_encoding}
 \end{equation}
 
-相较于循环神经网络（RNNs，如LSTM/GRU），TCN在本任务中具有显著优势：通过膨胀因果卷积（Dilated Causal Convolution），TCN能够以指数级扩大的感受野捕捉长周期的累积效应（例如过去24小时的排放累积）；同时支持并行处理整个时间序列，极大提升了大规模网格推断时的计算效率\citep{bai2018empirical}。
+相较于循环神经网络（RNNs，如LSTM/GRU），TCN在本任务中具有显著优势：通过膨胀卷积（Dilated Convolution），TCN能够以指数级扩大的感受野捕捉长周期的累积效应（例如过去24小时的排放累积）；同时支持并行处理整个时间序列，极大提升了大规模网格推断时的计算效率\citep{bai2018empirical}。
 
-TCN由多层因果膨胀卷积组成。第$l$层的输出为：
+TCN由多层膨胀卷积组成。第$l$层的输出为：
 \begin{equation}
 h^{(l)} = \text{ReLU}\left(\text{Conv1D}(h^{(l-1)}, W^{(l)}, \text{dilation}=2^l) + b^{(l)}\right)
 \label{eq:tcn_layer}

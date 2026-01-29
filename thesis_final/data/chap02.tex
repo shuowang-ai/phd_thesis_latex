@@ -80,10 +80,10 @@
 
 典型的STGNN架构包含交替堆叠的\textbf{空间模块}与\textbf{时间模块}。空间模块捕捉节点间的空间依赖关系；时间模块沿时间轴捕捉序列依赖关系，常用膨胀卷积（Dilated Convolution）：
 \begin{equation}
-\mathbf{Y}_t = \sum_{s=0}^{S-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
+\mathbf{Y}_t = \sum_{s=0}^{K-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
 \end{equation}
-\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$S$为卷积核大小。
+\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$K$为卷积核大小。
 
 STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻节点相互影响，时间上当前状态依赖历史演化。这与大气污染系统的物理特性高度吻合，为本文后续模型设计奠定了技术基础。
 
@@ -185,7 +185,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 \end{equation}
 \noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），$\mathcal{L}_{\text{physics}}$为物理约束项，$\lambda$为平衡系数。物理约束项的设计可基于多种物理原理：
 
-典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = Q$（$Q$为源汇项），约束空间传输满足\cqt{质量守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
+典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = S$（$S$为源汇项），约束空间传输满足\cqt{质量守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
 
 \textbf{（4）输入特征构建：显式编码物理驱动量}
 

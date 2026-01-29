@@ -162,7 +162,7 @@ Transformer架构凭借自注意力机制实现的长程依赖建模和全并行
 
 近年来，图神经网络(GNN)因其对非欧几里得空间数据的天然适用性，成为时空预测领域的主流技术架构\citep{zhou2020graph}。这类模型通过图结构(监测站点网络)引入归纳偏置，使用图卷积或改进的Transformer等空间模块刻画监测站点间的关联，配合时序卷积网络或LSTM等时间模块模拟污染物浓度的时间演变\citep{wu2020comprehensive}。
 
-\textbf{核心GNN架构}。Yu等人\citep{yu2018spatio}提出时空图卷积网络(STGCN)，通过图卷积捕捉空间依赖、一维卷积捕捉时序演化，建立了时空图建模的基础框架。Li等人\citep{li2018diffusion}提出扩散卷积循环神经网络(DCRNN)，将信息传播建模为有向图上的扩散过程，其双向随机游走机制与大气污染物的扩散传输过程具有天然的相似性——直接对应公式(\ref{eq:advection_diffusion})中的扩散项。Wu等人\citep{wu2019graph}提出Graph WaveNet，引入自适应邻接矩阵学习机制和膨胀因果卷积，无需预定义图结构即可端到端学习节点间的隐式依赖关系。
+\textbf{核心GNN架构}。Yu等人\citep{yu2018spatio}提出时空图卷积网络(STGCN)，通过图卷积捕捉空间依赖、一维卷积捕捉时序演化，建立了时空图建模的基础框架。Li等人\citep{li2018diffusion}提出扩散卷积循环神经网络(DCRNN)，将信息传播建模为有向图上的扩散过程，其双向随机游走机制与大气污染物的扩散传输过程具有天然的相似性——直接对应公式(\ref{eq:advection_diffusion})中的扩散项。Wu等人\citep{wu2019graph}提出Graph WaveNet，引入自适应邻接矩阵学习机制和膨胀卷积，无需预定义图结构即可端到端学习节点间的隐式依赖关系。
 
 \textbf{领域知识增强的图神经网络}。Qi等人\citep{qi2019hybrid}提出GC-LSTM模型，将图卷积嵌入LSTM单元内部实现时空联合建模。Wang等人\citep{wang2021modeling}提出注意力时序图卷积网络(ATGCN)，通过站点级注意力机制自适应编码多种时空依赖类型。Chen等人\citep{chen2023group}提出群组感知图神经网络(GAGNN)，构建城市图与城市群图的层级结构，通过可微分分组网络发现地理距离远但污染相关的城市间潜在依赖。王凯等\citep{cn_wangkai2023gcnlstm}提出GCN-LSTM城市臭氧预测模型，利用图卷积捕捉空间传输特征，结合LSTM提取时间依赖。汪宇晖\citep{cn_wangyuhui2023stgnn}提出自适应时空聚焦图卷积网络模型，通过多目标进化算法优化图结构，并结合长短周期时序分析进行\PM 预测。
 

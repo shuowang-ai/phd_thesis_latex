@@ -175,7 +175,7 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
   \centering
   \includegraphics[width=\linewidth]{figures/ignn_arch.png}
   \caption{IGNN模型架构框架图}
-  \caption*{模型以邻域气象和排放信息为输入，同时输出\PM 和\ozone 浓度。$\oplus$表示向量拼接操作。图卷积层（GCN）对相关站点和信息执行空间卷积操作，时间卷积层在残差和图卷积之后执行时间卷积操作。}
+  \caption*{模型以邻域气象和排放信息为输入，同时输出\PM 和\ozone 浓度。$\oplus$表示向量拼接操作。空间模块（GCN）对相关站点和信息执行空间聚合操作，时间模块在残差和图卷积之后执行时序特征提取。}
   \label{fig:ignn_arch}
 \end{figure}
 
