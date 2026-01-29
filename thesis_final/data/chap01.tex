@@ -86,7 +86,7 @@ CTMs的数学基础是对流--扩散方程（Advection-Diffusion Equation），�
 
 地球系统科学数据具备典型的\cqt{4V}特征\citep{reichstein2019deep}：\textbf{Volume}（体量庞大）——多源观测、数值模式与再分析资料持续积累，全球气象再分析数据集ERA5已累积超过PB量级的数据规模；\textbf{Velocity}（更新迅速）——实时监测与预报需求不断提升，空气质量监测数据以小时级频率持续更新；\textbf{Variety}（类型多元）——涵盖格点场、站点观测、卫星遥感、排放清单等多模态异构数据；\textbf{Veracity}（可信度差异）——不同来源数据的精度与可靠程度存在显著差异。传统数值模型难以在这种高维动态数据空间中实现实时求解与多源融合，而数据驱动方法能够在学习复杂非线性映射的同时，有效捕捉多要素间的时空耦合关系。
 
-近年来，以GraphCast\citep{lam2023learning}、Pangu-Weather\citep{bi2023accurate}、FourCastNet\citep{pathak2022fourcastnet}和Aurora\citep{bodnar2025foundation}为代表的AI气象大模型在全球天气预报领域展示出巨大潜力，标志着从\cqt{求解方程}向\cqt{从数据学习}的范式转变。GraphCast采用图神经网络架构\citep{battaglia2018relational}，在0.25°分辨率下预测227个大气变量，单次推理耗时不足60秒，在90\%的验证目标上优于欧洲中期天气预报中心（ECMWF）的高分辨率业务预报系统HRES\citep{lam2023learning}。Pangu-Weather引入三维地球特定Transformer架构，实现了相比数值模式约10000倍的计算加速\citep{bi2023accurate}。GenCast采用扩散模型架构生成集合预报，在97.2\%的验证目标上超越ECMWF业务集合预报系统\citep{price2025probabilistic}。Aurora作为新一代地球系统基础模型，拥有13亿参数规模，首次将预测范围从天气拓展至大气化学与空气质量领域\citep{bodnar2025foundation}。
+近年来，以GraphCast\citep{lam2023learning}、Pangu-Weather\citep{bi2023accurate}、FourCastNet\citep{pathak2022fourcastnet}和Aurora\citep{bodnar2025foundation}为代表的AI气象大模型在全球天气预报领域展示出巨大潜力，标志着从\cqt{求解方程}向\cqt{从数据学习}的范式转变。GraphCast采用图神经网络架构\citep{battaglia2018relational}，在0.25°分辨率下预测227个大气变量，单次推理耗时不足60秒，在1380个验证指标中约90\%的指标上优于欧洲中期天气预报中心（ECMWF）的高分辨率业务预报系统HRES\citep{lam2023learning}。Pangu-Weather引入三维地球特定Transformer架构，实现了相比数值模式约10000倍的计算加速\citep{bi2023accurate}。GenCast采用扩散模型架构生成集合预报，在97.2\%的验证指标上超越ECMWF业务集合预报系统\citep{price2025probabilistic}。Aurora作为新一代地球系统基础模型，拥有13亿参数规模，首次将预测范围从天气拓展至大气化学与空气质量领域\citep{bodnar2025foundation}。
 
 然而，将上述AI气象大模型迁移应用于大气污染领域时，仍面临若干关键瓶颈。
 
@@ -98,7 +98,7 @@ CTMs的数学基础是对流--扩散方程（Advection-Diffusion Equation），�
 
 \textbf{污染演化机制建模不完整}。现有AI预测模型大多采用自回归模式——依据历史污染物浓度序列预测未来浓度，而未显式建模公式（\ref{eq:advection_diffusion}）中\cqt{排放$\to$传输$\to$化学转化$\to$沉降}的完整污染演化链条。这意味着模型缺乏对排放源项$S$的显式响应能力：当排放发生变化（如减排政策实施、突发事故或春节假期排放骤变）时，自回归模型无法准确捕捉这种外部驱动的变化，也就难以支撑\cqt{如果减排50\%结果如何}这类假设情景推演与政策评估需求。
 
-\textbf{任务范围的局限性}。现有AI模型主要聚焦于时序预测单一任务，而大气污染治理实践需要的是一套完整的决策支持能力体系，包括：空间推断（评估未设站区域的污染水平）、情景模拟（评估不同减排方案的改善效果）。单一的预测功能难以满足精细化环境管理的多元需求。
+\textbf{任务范围的局限性}。现有AI模型主要聚焦于时序预测单一任务，而大气污染治理实践需要的是一套完整的决策支持能力体系，包括空间推断（评估未设站区域的污染水平）和情景模拟（评估不同减排方案的改善效果）。仅依靠时序预测功能难以满足精细化环境管理的多元需求。
 
 上述挑战表明：大气污染建模需要一种\textbf{融合领域知识与深度学习}的新范式——既保持数据驱动方法的计算效率与强拟合能力，又借助物理约束确保结果的合理性与可解释性；既能实现高精度的实时预测，又能支撑情景模拟与决策优化。这正是本文研究工作的核心目标与出发点。
 

@@ -661,7 +661,8 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 \begin{itemize}
     \item \textbf{机器学习基线}：MLP、XGBoost\citep{chen2016xgboost}、LightGBM\citep{ke2017lightgbm}；
     \item \textbf{通用时序模型}：LSTM\citep{hochreiter1997long}、GRU\citep{cho2014learning}、iTransformer\citep{liuitransformer}、TimeXer\citep{wang2024timexer}；
-    \item \textbf{空气质量专用模型}：GC-LSTM\citep{qi2019hybrid}、AirPhyNet\citep{hettigeairphynet}。
+    \item \textbf{空气质量专用模型}：GC-LSTM\citep{qi2019hybrid}、AirPhyNet\citep{hettigeairphynet}；
+    \item \textbf{消融变体}：nodesFC-GRU（用全连接层替代GNN的消融模型，用于验证图结构的必要性）。
 \end{itemize}
 
 表\ref{tab:methods_comparison_vertical}对比了各模型的原生能力特征。可以看到，PCDCNet是唯一同时具备时序建模、多变量预测、外源变量融合、空间建模和物理约束的方法，与数值模式CMAQ的能力对齐。
@@ -691,7 +692,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 \end{tabular}
 \end{table}
 
-\textbf{（4）实现细节。}模型基于PyTorch实现，图计算使用PyTorch Geometric（PyG）库\citep{fey2019fast}。训练在NVIDIA 4070S GPU上进行。主要超参数设置：隐层维度$d=32$，历史窗口$T'=24$（72小时），预测窗口$T=24$（72小时），学习率$10^{-4}$，批大小32，训练轮数100，早停patience为10。优化器使用Adam，学习率调度使用ReduceLROnPlateau。
+\textbf{（4）实现细节。}模型基于PyTorch实现，图计算使用PyTorch Geometric（PyG）库\citep{fey2019fast}。训练在NVIDIA RTX 4070 SUPER GPU上进行。主要超参数设置：隐层维度$d=32$，历史窗口$T'=24$（72小时），预测窗口$T=24$（72小时），学习率$10^{-4}$，批大小32，训练轮数100，早停patience为10。优化器使用Adam，学习率调度使用ReduceLROnPlateau。
 
 
 \subsection{PM$_{2.5}$-GNN实验结果}
