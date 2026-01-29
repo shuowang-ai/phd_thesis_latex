@@ -6,23 +6,23 @@
 keywords = {大气污染预测, 物理约束深度学习, 时空图神经网络, 多源数据融合, 空间推断, 排放响应模拟, 开放复杂巨系统},
 }
 
-大气污染是当前全球面临的最严峻环境与公共卫生挑战之一，每年导致约700万人过早死亡。我国\PM 年均浓度从2013年的72~\ug 大幅降至2023年的30~\ug，但与世界卫生组织指导值（5~\ug）仍有较大差距。更为棘手的是，\PM 持续下降而\ozone 浓度逐年攀升，这种分化态势给协同治理带来了新的科学难题。
+大气污染是当前全球最严峻的环境与公共卫生挑战之一，每年导致约700万人过早死亡。我国\PM 年均浓度从2013年的72~\ug 降至2023年的30~\ug，但与世界卫生组织指导值（5~\ug）仍有较大差距；\PM 持续下降而\ozone 浓度逐年攀升的分化态势，更给协同治理带来了新的科学难题。
 
-从系统科学视角审视，大气污染具备开放复杂巨系统的典型特征：排放、气象与化学演化三大子系统紧密交织并形成复杂反馈回路；大气化学反应呈现显著非线性；污染物跨区域传输沿特定地形廊道形成有向时变网络；多源观测数据在时空结构与物理内涵上差异显著。传统化学传输模式虽具物理可解释性，却受困于计算代价高、排放依赖强及情景模拟\cqt{组合爆炸}等问题；纯数据驱动方法虽计算高效，但缺乏物理规律的显式建模，泛化能力不足。
+从系统科学视角审视，大气污染具备开放复杂巨系统的典型特征：排放、气象与化学演化三大子系统紧密耦合，大气化学反应呈显著非线性，跨区域传输沿地形廊道形成有向时变网络，多源数据在时空结构与物理内涵上差异显著。传统化学传输模式虽具物理可解释性，却受困于计算代价高、排放依赖强及情景模拟\cqt{组合爆炸}等瓶颈；纯数据驱动方法虽计算高效，却缺乏物理规律的显式建模，泛化能力不足。
 
-针对上述困境，本研究提出\textbf{\cqt{物理约束的数据驱动建模}}范式，构建\cqt{理论$\rightarrow$数据$\rightarrow$建模$\rightarrow$应用$\rightarrow$部署}的完整研究体系，面向预测、推断与模拟三类核心任务，发展了一套物理与数据深度融合的空气质量建模体系。
+针对上述困境，本研究提出\textbf{\cqt{物理约束的数据驱动建模}}范式，沿\cqt{理论$\rightarrow$数据$\rightarrow$建模$\rightarrow$应用$\rightarrow$部署}链路，面向预测、推断与模拟三类核心任务，发展了一套物理与数据深度融合的空气质量建模方法体系。
 
-在多源数据融合方面，本文整合地面监测、卫星遥感（Himawari-8 AOD）、气象再分析（ERA5/GFS）与排放清单（\MEIC/\DPEC）四类异构数据，通过时空对齐与物理启发式图构建，在统一隐空间中实现多源信息融合。
+在多源数据融合方面，本文整合地面监测、卫星遥感（Himawari-8 AOD）、气象再分析（ERA5/GFS）与排放清单（\MEIC/\DPEC）四类异构数据，通过时空对齐与物理启发式图构建，在统一隐空间中实现多源信息的有效融合。
 
-在空气质量预测方面，本文提出\ModelPred 与\ModelSurr 模型。\ModelPred 利用风速向量投影定义边权重，首次在图神经网络框架下显式建模\cqt{上风向影响下风向}的定向传输规律。\ModelSurr 从对流--扩散方程出发，设计\LID--\STD--\TAD 三模块架构，分别对应化学反应、平流扩散与沉降累积过程，实现\cqt{过程解耦与联合建模}；引入领域一致性约束\DIC，将质量守恒嵌入训练目标。在京津冀及长三角72小时\PM 与\ozone 联合预报中，相比GC-LSTM等时空预测基准模型，\RMSE 降低10\%--30\%。
+在空气质量预测方面，本文提出\ModelPred 与\ModelSurr 模型。\ModelPred 利用风速向量投影定义边权重，首次在图神经网络框架下显式建模\cqt{上风向影响下风向}的定向传输规律；\ModelSurr 从对流--扩散方程出发，设计\LID--\STD--\TAD 三模块架构分别对应化学反应、平流扩散与沉降累积过程，实现\cqt{过程解耦与联合建模}，并引入领域一致性约束\DIC 将质量守恒嵌入训练目标。在京津冀及长三角72小时\PM 与\ozone 联合预报中，相比GC-LSTM等基准模型，\RMSE 降低10\%--30\%。
 
-在无观测区域推断方面，本文提出\ModelInfer 模型。针对污染传输特性，构建扩散--平流双图并行机制，解耦各向同性扩散与各向异性平流过程；针对AOD云遮挡与夜间缺测问题，提出\cqt{以空间梯度为约束而非输入}的融合策略，借助掩码机制规避缺失影响；采用动态节点掩码训练，赋予模型归纳式泛化能力。在30\%站点缺测条件下实现\MAE 为9.5~\ug 的高精度推断，相比IGNNK等空间插值基准模型，误差降低约25\%。
+在无观测区域推断方面，本文提出\ModelInfer 模型。针对污染传输特性，构建扩散--平流双图并行机制以解耦各向同性扩散与各向异性平流；针对AOD云遮挡与夜间缺测问题，提出\cqt{以空间梯度为约束而非输入}的融合策略；采用动态节点掩码训练赋予模型归纳式泛化能力。在30\%站点缺测条件下实现\MAE 为9.5~\ug 的高精度推断，相比IGNNK等基准模型误差降低约25\%。
 
-在情景模拟方面，本文构建\ModelSim 模型，首次将排放清单作为可控变量纳入深度学习框架，实现多情景污染高效模拟。相比WRF-CMAQ等传统化学传输模式数小时的计算，本模型将单情景推理压缩至秒级，为实时情景评估提供了可行的技术路径。基于该模型揭示了碳中和路径下\PM 与\ozone 的反向演变规律，为协同减排决策提供科学依据。
+在假设情景模拟方面，本文构建\ModelSim 模型，首次将排放清单作为可控变量纳入深度学习框架，实现多情景污染高效模拟。相比WRF-CMAQ等传统化学传输模式数小时的计算，本模型将单情景推理压缩至秒级，为实时情景评估提供可行技术路径。基于该模型揭示了碳中和路径下\PM 与\ozone 的反向演变规律，为协同减排决策提供科学依据。
 
-在工程应用方面，本文基于云原生架构部署\SystemName 系统，实现小时级滚动更新与自动化运维。系统已服务于国家重大活动空气质量保障，并在官方模型比对中取得综合评分第一。
+在工程应用方面，本文基于云原生架构部署\SystemName 系统，实现小时级滚动更新与自动化运维，已服务于国家重大活动空气质量保障，并在官方模型比对中取得综合评分第一。
 
-本研究的核心贡献在于：提出物理约束的数据驱动建模框架，在数据融合、模型结构和损失函数三个环节实现大气科学知识与深度学习的有效融合，推动大气污染模型从\cqt{能预测}向\cqt{能推断、能模拟}跃升，为空气质量精细化管理提供了科学可信的人工智能技术支撑。
+本研究的核心贡献在于：提出物理约束的数据驱动建模框架，在数据融合、模型结构与损失函数三个层面实现大气科学知识与深度学习的有机融合，推动大气污染建模从\cqt{能预测}向\cqt{能推断、能模拟}跃升，为空气质量精细化管理提供科学可信的智能技术支撑。
 
 \end{abstract}
 
@@ -31,22 +31,22 @@ keywords = {大气污染预测, 物理约束深度学习, 时空图神经网络,
 keywords* = {Air Pollution Prediction, Physics-Constrained Deep Learning, Spatiotemporal Graph Neural Network, Multi-Source Data Fusion, Spatial Inference, Emission Response Simulation, Open Complex Giant System},
 }
 
-Air pollution represents one of the most pressing environmental and public health challenges worldwide, causing approximately 7 million premature deaths annually. China's national annual average \PM concentration has declined from 72~\ug in 2013 to 30~\ug in 2023, yet a considerable gap remains compared to the WHO guideline of 5~\ug. More challenging still, the divergent trends of declining \PM and rising \ozone pose significant challenges for synergistic pollution control.
+Air pollution represents one of the most pressing environmental and public health challenges worldwide, causing approximately 7 million premature deaths annually. China's national annual average \PM concentration has declined from 72~\ug in 2013 to 30~\ug in 2023, yet a considerable gap remains compared to the WHO guideline of 5~\ug. The divergent trends of declining \PM and rising \ozone further pose new scientific challenges for synergistic pollution control.
 
-From a systems science perspective, atmospheric pollution exhibits typical characteristics of an open complex giant system: emissions, meteorology, and chemical evolution form tightly interwoven subsystems with complex feedback loops; atmospheric chemistry displays markedly nonlinear dynamics; cross-regional transport follows directed, time-varying networks shaped by terrain corridors; multi-source data differ substantially in spatiotemporal structure and physical interpretation. Traditional chemical transport models possess physical interpretability but are constrained by high computational costs, strong emission inventory dependence, and combinatorial explosion in scenario simulations. Pure data-driven approaches, while efficient, lack explicit physical modeling and demonstrate insufficient generalization.
+From a systems science perspective, atmospheric pollution exhibits typical characteristics of an open complex giant system: emissions, meteorology, and chemical evolution form tightly coupled subsystems; atmospheric chemistry displays markedly nonlinear dynamics; cross-regional transport follows directed, time-varying networks shaped by terrain corridors; and multi-source data differ substantially in spatiotemporal structure and physical interpretation. Traditional chemical transport models possess physical interpretability but are constrained by high computational costs, strong emission dependence, and combinatorial explosion in scenario simulations. Pure data-driven approaches, while computationally efficient, lack explicit physical modeling and demonstrate insufficient generalization.
 
-To address these challenges, this dissertation proposes a \textbf{physics-constrained data-driven modeling} paradigm, establishing a comprehensive research framework spanning ``theory$\rightarrow$data$\rightarrow$modeling$\rightarrow$application$\rightarrow$deployment'' for three core tasks: prediction, inference, and simulation.
+To address these challenges, this dissertation proposes a \textbf{physics-constrained data-driven modeling} paradigm along the ``theory$\rightarrow$data$\rightarrow$modeling$\rightarrow$application$\rightarrow$deployment'' pipeline, developing a methodological framework that deeply integrates physical knowledge with data-driven methods for three core tasks: prediction, inference, and simulation.
 
-For multi-source data fusion, this work integrates ground monitoring, satellite remote sensing (Himawari-8 AOD), meteorological reanalysis (ERA5/GFS), and emission inventories (\MEIC/\DPEC), achieving effective fusion within a unified latent space through spatiotemporal alignment and physics-inspired graph construction.
+For multi-source data fusion, this work integrates ground monitoring, satellite remote sensing (Himawari-8 AOD), meteorological reanalysis (ERA5/GFS), and emission inventories (\MEIC/\DPEC), achieving effective multi-source fusion within a unified latent space through spatiotemporal alignment and physics-inspired graph construction.
 
-For air quality prediction, this work proposes \ModelPred and \ModelSurr. \ModelPred utilizes wind velocity projections to define edge weights, achieving explicit modeling of ``upwind-to-downwind'' directional transport within the GNN framework for the first time. \ModelSurr designs a three-module architecture (\LID--\STD--\TAD) corresponding to chemical reactions, advection-diffusion, and deposition-accumulation respectively, achieving ``process decomposition with joint modeling.'' Domain-Informed Constraints (\DIC) embed mass conservation into training objectives. For 72-hour joint \PM and \ozone forecasting in BTH and YRD regions, \RMSE is reduced by 10\%--30\% compared to spatiotemporal prediction baselines such as GC-LSTM.
+For air quality prediction, this work proposes \ModelPred and \ModelSurr. \ModelPred utilizes wind velocity projections to define edge weights, achieving explicit modeling of ``upwind-to-downwind'' directional transport within the GNN framework for the first time. \ModelSurr designs a three-module architecture (\LID--\STD--\TAD) corresponding to chemical reactions, advection-diffusion, and deposition-accumulation respectively, achieving ``process decomposition with joint modeling,'' with Domain-Informed Constraints (\DIC) embedding mass conservation into training objectives. For 72-hour joint \PM and \ozone forecasting in BTH and YRD regions, \RMSE is reduced by 10\%--30\% compared to baselines such as GC-LSTM.
 
-For pollution inference in unmonitored areas, this work proposes \ModelInfer. A diffusion-advection dual-graph mechanism decouples isotropic diffusion from anisotropic advection. An innovative ``AOD spatial gradients as constraints rather than inputs'' strategy employs masking to circumvent missing data effects. Dynamic node masking training endows inductive generalization for unseen nodes. Under 30\% station missing conditions, \MAE of 9.5~\ug is achieved, reducing error by approximately 25\% compared to spatial interpolation baselines such as IGNNK.
+For pollution inference in unmonitored areas, this work proposes \ModelInfer. A diffusion-advection dual-graph mechanism decouples isotropic diffusion from anisotropic advection; an innovative ``AOD spatial gradients as constraints rather than inputs'' strategy addresses cloud occlusion and nighttime missing data; dynamic node masking training endows inductive generalization for unseen nodes. Under 30\% station missing conditions, \MAE of 9.5~\ug is achieved, reducing error by approximately 25\% compared to baselines such as IGNNK.
 
-For scenario simulation, this work develops \ModelSim, incorporating emission inventories as controllable variables within deep learning for the first time, enabling efficient multi-scenario simulation. Compared to traditional CTMs such as WRF-CMAQ requiring hours of computation, this model compresses single-scenario inference to seconds, providing a feasible technical pathway for real-time scenario assessment. The model reveals opposing \PM and \ozone evolution trends under carbon neutrality pathways, providing scientific basis for synergistic emission reduction decisions.
+For counterfactual scenario simulation, this work develops \ModelSim, incorporating emission inventories as controllable variables within deep learning for the first time, enabling efficient multi-scenario simulation. Compared to traditional CTMs such as WRF-CMAQ requiring hours of computation, this model compresses single-scenario inference to seconds, providing a feasible technical pathway for real-time scenario assessment. The model reveals opposing \PM and \ozone evolution trends under carbon neutrality pathways, providing scientific basis for synergistic emission reduction decisions.
 
-For engineering applications, the cloud-native \SystemName system is deployed with hourly rolling updates and automated operations. The system has supported air quality assurance for major national events and achieved the highest score in official model comparisons.
+For engineering applications, the cloud-native \SystemName system is deployed with hourly rolling updates and automated operations, serving air quality assurance for major national events and achieving the highest score in official model comparisons.
 
-The core contributions include: proposing a physics-constrained data-driven modeling framework integrating atmospheric science with deep learning at three levels---data fusion, model architecture, and loss functions; advancing air pollution models from ``capable of prediction'' to ``capable of inference and simulation,'' providing credible AI support for refined air quality management.
+The core contributions include: proposing a physics-constrained data-driven modeling framework that integrates atmospheric science with deep learning at three levels---data fusion, model architecture, and loss functions---advancing air pollution modeling from ``capable of prediction'' to ``capable of inference and simulation,'' and providing credible intelligent technology support for refined air quality management.
 
 \end{abstract*}

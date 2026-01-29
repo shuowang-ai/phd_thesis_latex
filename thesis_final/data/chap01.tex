@@ -15,7 +15,7 @@
 \subsection{大气污染问题的全球性挑战}
 \label{subsec:global_challenge}
 
-当前，大气污染已成为影响人类生存与发展的重大环境议题。世界卫生组织（World Health Organization, WHO）发布的监测数据显示，全球约有99\%的居民所处的空气质量条件未能达到该组织制定的健康指导标准\footnote{\url{https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data}}。每年因空气污染引发的过早死亡人数高达约700万\citep{world2021global,murray2020global}。在众多大气污染因子中，细颗粒物（Fine Particulate Matter, \PM）与近地面臭氧（Ground-Level Ozone, \ozone）由于其对公众健康造成的严重威胁，始终是科学研究和环境治理的重点关注对象。\PM 的空气动力学直径不超过2.5微米，这种极微小的粒径特性使其能够突破人体呼吸系统的防护屏障，抵达肺泡深处，进而随血液循环对各器官产生影响。大量流行病学研究证实，\PM 暴露与心血管病变、呼吸道疾患以及肺部恶性肿瘤的发生存在显著正相关\citep{burnett2018global}。\ozone 具有强烈的氧化性，持续暴露于高浓度环境会削弱呼吸系统机能，同时对农业生产造成减产威胁\citep{nuvolone2018effects,mills2018ozone}。
+当前，大气污染已成为影响人类生存与发展的重大环境议题。世界卫生组织（WHO）监测数据显示，全球约99\%的居民所处空气质量未达健康指导标准\footnote{\url{https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data}}，每年因空气污染导致的过早死亡人数高达约700万\citep{world2021global,murray2020global}。在众多污染因子中，细颗粒物（\PM）与近地面臭氧（\ozone）因其对公众健康的严重威胁，始终是科学研究和环境治理的重点对象。\PM 的空气动力学直径不超过2.5微米，能够突破呼吸系统防护屏障抵达肺泡深处，与心血管疾病、呼吸道疾患及肺癌的发生显著正相关\citep{burnett2018global}。\ozone 具有强氧化性，高浓度暴露会损害呼吸系统功能并威胁农业生产\citep{nuvolone2018effects,mills2018ozone}。
 
 作为全球最大的发展中经济体，中国在应对大气污染问题上的探索具有重要的示范意义。伴随着工业化与城镇化进程的快速推进，经济高速增长的同时也积累了突出的空气质量问题。面对这一挑战，中央政府实施了层层递进的治理举措。2013年，国务院颁布《大气污染防治行动计划》（\cqt{大气十条}）\footnote{\url{https://www.gov.cn/zwgk/2013-09/12/content_2486773.htm}}，首次设立\PM 浓度的刚性考核目标\citep{china2013action}。2018年，《打赢蓝天保卫战三年行动计划》\footnote{\url{https://www.gov.cn/zhengce/content/2018-07/03/content_5303158.htm}}进一步强化治理力度。2023年，《空气质量持续改善行动计划》\footnote{\url{https://www.gov.cn/zhengce/content/202312/content_6919000.htm}}将\PM 削减确立为核心主线，推进NOx与VOCs协同减排，力图实现减污降碳双重目标\citep{jiang2021government}。值得一提的是，清华大学研发的中国多尺度排放清单（Multi-resolution Emission Inventory for China, MEIC）在污染源头解析与减排成效评估中发挥了重要的数据支撑作用\citep{zheng2018trends,geng2024efficacy}。历经十余年坚持不懈的努力，全国\PM 年均浓度从2013年的72 $\mu$g/m$^3$\footnote{\url{https://www.mee.gov.cn/gkml/sthjbgw/qt/201403/t20140325_269648.htm}}大幅下降至2023年的30 $\mu$g/m$^3$\footnote{\url{https://www.mee.gov.cn/hjzl/sthjzk/zghjzkgb/202406/P020240604551536165161.pdf}}，重污染天气频次明显减少，空气质量改善速度在全球范围内首屈一指\citep{zhang2019drivers,geng2024efficacy,zhao2024challenges,cn_lishaolin2023daqishitiao}。
 
@@ -28,7 +28,7 @@
 \subsection{大气污染的复杂系统特性}
 \label{subsec:complex_system}
 
-运用系统科学（System Science）的分析视角，大气污染体系远非简单的线性叠加系统可以描述，而是具备\cqt{开放复杂巨系统}（Open Complex Giant System）的典型特征\citep{xuesen1993new}。按照钱学森先生对开放复杂巨系统的界定，大气污染系统在以下维度上呈现典型特征：\textbf{开放性}——系统与外界持续进行物质（污染物排放与沉降）、能量（太阳辐射与地表热通量）和信息（监测与预报反馈）的交换；\textbf{复杂性}——排放、气象、化学三大子系统紧密耦合，形成非线性反馈回路；\textbf{巨量性}——涉及数以千计的监测站点、数百种化学物种、以及多源异构的海量观测数据；\textbf{涌现性}——区域性重污染事件表现为城市群的同步响应，非单个节点行为的简单叠加\citep{cn_wangshang2023}。系统把握这些复杂性表征，是突破现有建模瓶颈、发展新一代智能预测模型的必要前提。
+从系统科学视角审视，大气污染体系具备\cqt{开放复杂巨系统}的典型特征\citep{xuesen1993new}：\textbf{开放性}——系统与外界持续进行物质、能量和信息的交换；\textbf{复杂性}——排放、气象、化学三大子系统紧密耦合，形成非线性反馈回路；\textbf{巨量性}——涉及数千监测站点、数百化学物种及多源异构的海量数据；\textbf{涌现性}——区域性重污染表现为城市群的同步响应，而非单节点行为的简单叠加\citep{cn_wangshang2023}。深刻理解这些复杂性特征，是突破现有建模瓶颈的必要前提。
 
 \subsubsection{多要素强耦合}
 
@@ -59,7 +59,7 @@
 \subsection{传统数值模型的原理与局限}
 \label{subsec:traditional_models}
 
-化学传输模型（Chemical Transport Models, CTMs）是大气环境科学领域模拟污染物时空演变过程的经典工具，其代表性模式包括社区多尺度空气质量模型（Community Multiscale Air Quality, CMAQ）\citep{byun2006review}、天气研究与预报--化学耦合模式（Weather Research and Forecasting model coupled with Chemistry, WRF-Chem）\citep{grell2005fully}以及全球大气化学传输模型（GEOS-Chem）\citep{bey2001global}等。历经数十年的迭代与完善，CTMs已成为空气质量业务预报、污染源头解析以及减排方案评估的核心技术支撑，在环境管理实践中发挥着难以替代的重要作用。
+化学传输模型（Chemical Transport Models, CTMs）是模拟污染物时空演变的经典工具，代表性模式包括CMAQ\citep{byun2006review}、WRF-Chem\citep{grell2005fully}和GEOS-Chem\citep{bey2001global}等。历经数十年迭代完善，CTMs已成为空气质量业务预报、源解析及减排评估的核心技术支撑。
 
 CTMs的数学基础是对流--扩散方程（Advection-Diffusion Equation），该方程从质量守恒定律出发，刻画污染物在大气中伴随风场输送（平流）、湍流混合（扩散）、化学转化、源排放以及沉降清除等过程的动态平衡关系（详见第\ref{chap:methodology}章）。CTMs通过数值方法在三维计算网格上求解该方程，显式地模拟污染物的排放、传输、化学转化与沉降过程，因此具备较好的物理可解释性与过程一致性。
 
@@ -82,9 +82,9 @@ CTMs的数学基础是对流--扩散方程（Advection-Diffusion Equation），�
 \subsection{AI与大数据时代的机遇与挑战}
 \label{subsec:ai_opportunity}
 
-近年来，深度学习技术与大数据方法的蓬勃发展为突破上述困境开辟了新的可能性路径。2019年，Reichstein等学者在\textit{Nature}期刊发表了一篇里程碑式的综述文章，正式提出\cqt{AI for Earth System Science}的研究范式\citep{reichstein2019deep}。该综述指出，深度学习能够自动从数据中提取时空特征以增进过程理解，借助混合建模（Hybrid Modeling）策略将物理过程模型与数据驱动方法有机结合，有望在保持机理可解释性的同时实现计算效率提升与数据融合能力增强。
+近年来，深度学习技术的蓬勃发展为突破上述困境开辟了新路径。2019年，Reichstein等在\textit{Nature}发表里程碑式综述，正式提出\cqt{AI for Earth System Science}研究范式\citep{reichstein2019deep}，指出深度学习能够自动从数据中提取时空特征，借助混合建模策略将物理过程模型与数据驱动方法有机结合，有望在保持机理可解释性的同时提升计算效率与数据融合能力。
 
-地球系统科学数据具备典型的\cqt{4V}特征\citep{reichstein2019deep}：\textbf{Volume}（体量庞大）——多源观测、数值模式与再分析资料持续积累，全球气象再分析数据集ERA5已累积超过PB量级的数据规模；\textbf{Velocity}（更新迅速）——实时监测与预报需求不断提升，空气质量监测数据以小时级频率持续更新；\textbf{Variety}（类型多元）——涵盖格点场、站点观测、卫星遥感、排放清单等多模态异构数据；\textbf{Veracity}（可信度差异）——不同来源数据的精度与可靠程度存在显著差异。传统数值模型难以在这种高维动态数据空间中实现实时求解与多源融合，而数据驱动方法能够在学习复杂非线性映射的同时，有效捕捉多要素间的时空耦合关系。
+地球系统科学数据具备典型的\cqt{4V}特征\citep{reichstein2019deep}：\textbf{Volume}（体量庞大，ERA5已累积超PB量级）、\textbf{Velocity}（小时级持续更新）、\textbf{Variety}（格点场、站点观测、卫星遥感、排放清单等多模态异构）、\textbf{Veracity}（不同来源数据可信度差异显著）。传统数值模型难以在这种高维动态数据空间中实现实时求解与多源融合，而数据驱动方法能够有效捕捉多要素间的时空耦合关系。
 
 近年来，以GraphCast\citep{lam2023learning}、Pangu-Weather\citep{bi2023accurate}、FourCastNet\citep{pathak2022fourcastnet}和Aurora\citep{bodnar2025foundation}为代表的AI气象大模型在全球天气预报领域展示出巨大潜力，标志着从\cqt{求解方程}向\cqt{从数据学习}的范式转变。GraphCast采用图神经网络架构\citep{battaglia2018relational}，在0.25°分辨率下预测227个大气变量，单次推理耗时不足60秒，在1380个验证指标中约90\%的指标上优于欧洲中期天气预报中心（ECMWF）的高分辨率业务预报系统HRES\citep{lam2023learning}。Pangu-Weather引入三维地球特定Transformer架构，实现了相比数值模式约10000倍的计算加速\citep{bi2023accurate}。GenCast采用扩散模型架构生成集合预报，在97.2\%的验证指标上超越ECMWF业务集合预报系统\citep{price2025probabilistic}。Aurora作为新一代地球系统基础模型，拥有13亿参数规模，首次将预测范围从天气拓展至大气化学与空气质量领域\citep{bodnar2025foundation}。
 
@@ -127,9 +127,9 @@ CTMs的数学基础是对流--扩散方程（Advection-Diffusion Equation），�
 \subsection{传统数值建模研究进展}
 \label{subsec:numerical_models}
 
-化学传输模型（CTMs）长期以来作为大气污染数值模拟的传统核心工具，其发展历程可追溯至20世纪70年代。在全球尺度上，具有代表性的模式系统包括GEOS-Chem\citep{bey2001global}、MOZART\citep{emmons2010description}以及CAM-chem\citep{lamarque2012cam}等；在区域尺度上，主流应用模式包括CMAQ\citep{byun2006review}、WRF-Chem\citep{grell2005fully}和CAMx\citep{emery2024comprehensive}等。这些模式通过数值求解第\ref{chap:methodology}章公式（\ref{eq:advection_diffusion}）所描述的对流--扩散方程，从物理化学机理角度刻画污染物的形成、输送、转化与清除全过程。
+化学传输模型（CTMs）的发展可追溯至20世纪70年代。全球尺度代表性模式包括GEOS-Chem\citep{bey2001global}、MOZART\citep{emmons2010description}和CAM-chem\citep{lamarque2012cam}；区域尺度主流模式包括CMAQ\citep{byun2006review}、WRF-Chem\citep{grell2005fully}和CAMx\citep{emery2024comprehensive}。这些模式通过数值求解对流--扩散方程（公式\ref{eq:advection_diffusion}），从物理化学机理角度刻画污染物的形成、输送、转化与清除过程。
 
-CMAQ是目前应用最为广泛的区域空气质量模式之一，由美国环保署（EPA）开发并维护，采用模块化架构设计，涵盖气相化学（CB6、SAPRC机制）、气溶胶热力学（ISORROPIA）、云化学过程、干湿沉降等完整的过程模块\citep{appel2021community}。WRF-Chem由美国国家大气研究中心（NCAR）开发，将气象模式WRF与化学模块紧密耦合，可实现气象--化学的双向反馈模拟\citep{grell2005fully}。GEOS-Chem由哈佛大学主导开发，采用全球--区域嵌套技术架构，适用于跨区域乃至全球尺度的污染物传输过程研究\citep{bey2001global}。
+CMAQ由美国EPA开发，采用模块化架构涵盖气相化学、气溶胶热力学、云化学及干湿沉降等完整过程模块\citep{appel2021community}。WRF-Chem由NCAR开发，实现气象--化学双向反馈耦合\citep{grell2005fully}。GEOS-Chem由哈佛大学主导，采用全球--区域嵌套架构，适用于跨区域传输研究\citep{bey2001global}。
 
 在国内研究方面，嵌套网格空气质量预报模式系统（NAQPMS）由中国科学院大气物理研究所自主开发，采用多尺度嵌套技术与数据同化模块，已在APEC会议、G20峰会等重大活动的空气质量保障工作中发挥关键作用\citep{cn_wangzifa2006naqpms,wang2014modeling,cn_chenxueshun2015naqpms}，体现了我国在大气污染数值模拟领域已具备独立自主的创新能力。
 
@@ -138,7 +138,7 @@ CMAQ是目前应用最为广泛的区域空气质量模式之一，由美国环�
 \subsection{数据驱动的大气污染建模研究}
 \label{subsec:ai_airquality}
 
-数据驱动的大气污染预测方法经历了从统计模型到深度学习的演进历程\citep{reichstein2019deep,karniadakis2021physics}，近年来已成为\PM 和\ozone 浓度预报的重要技术手段。本节系统梳理该领域的研究现状，重点关注深度学习时空建模、图神经网络以及物理约束神经网络等前沿方向，并指出现有方法存在的关键不足。
+数据驱动的大气污染预测方法经历了从统计模型到深度学习的演进\citep{reichstein2019deep,karniadakis2021physics}。本节系统梳理该领域研究现状，重点关注深度学习时空建模、图神经网络及物理约束神经网络等前沿方向。
 
 \subsubsection{统计与传统机器学习方法}
 
@@ -148,13 +148,13 @@ CMAQ是目前应用最为广泛的区域空气质量模式之一，由美国环�
 
 随着深度学习技术的快速发展，循环神经网络(RNN)及其变体被广泛应用于大气污染时序预测任务\citep{cn_zhuyanmin2020shendu}。长短期记忆网络(LSTM)是该领域应用最多的模型架构，通过门控机制捕捉长程时序依赖关系并有效缓解梯度消失问题\citep{li2017long}。Chang等人\citep{chang2020lstm}采用聚合LSTM架构融合多站点信息进行北京\PM 预测。尹文君等\citep{cn_yinwenjun2015dbn}提出基于深度信念网络(DBN)的预报模型，利用多层RBM结构自动学习特征表示。门控循环单元(GRU)通过简化门控结构减少参数量，在保持预测性能的同时提升计算效率\citep{faraji2022integrated}。然而，RNN类模型采用序贯计算方式，难以实现并行化处理，且主要关注时间维度，将各站点独立建模或简单拼接，忽视了站点间的空间关联特性。
 
-Transformer架构凭借自注意力机制实现的长程依赖建模和全并行计算能力，克服了RNN的序贯计算瓶颈，已成为空气质量预测的重要范式\citep{vaswani2017attention}。Liang等人\citep{liang2023airformer}提出AirFormer模型，采用分层Transformer架构处理大规模监测网络的72小时预报任务，其创新之处包括底层确定性阶段的新型自注意力机制和顶层随机性阶段的隐变量建模，有效处理了监测网络中的多尺度时空依赖问题。Yi等人\citep{yi2018deep}提出Deep Distributed Fusion Network，通过分布式融合架构整合空气质量、气象和天气预报数据，实现了多城市PM$_{2.5}$浓度的联合预测，展现了多源数据融合在深度学习框架中的潜力。陶辰亮\citep{cn_taochenliang2024}构建了融合循环神经网络、Transformer和梯度提升树的集成学习模型，结合SHAP可解释方法揭示了\ozone-\NOx-VOCs-\PM 之间的非线性交互关系。
+Transformer架构凭借自注意力机制的长程依赖建模和全并行计算能力，已成为空气质量预测的重要范式\citep{vaswani2017attention}。Liang等\citep{liang2023airformer}提出AirFormer，采用分层Transformer架构处理大规模监测网络的72小时预报。Yi等\citep{yi2018deep}通过分布式融合架构整合多源数据实现多城市\PM 联合预测。陶辰亮\citep{cn_taochenliang2024}构建融合RNN、Transformer和梯度提升树的集成模型，结合SHAP方法揭示\ozone-\NOx-VOCs-\PM 的非线性交互关系。
 
 近年来，通用时序预测模型的研究进展为大气污染预测提供了新的技术支撑。iTransformer\citep{liuitransformer}通过将注意力机制应用于变量维度而非时间维度，更有效地捕捉多变量时序数据中的跨通道依赖关系；TimeXer\citep{wang2024timexer}引入外生变量建模机制，使模型能够显式利用外部协变量增强预测性能，这一设计与大气污染预测中融合气象驱动的需求高度契合。在大气污染的具体应用中，TFB\citep{qiu2024tfb}构建了包含大气污染在内的多领域时序预测基准，对现有深度学习模型进行了全面评估；DUET\citep{qiu2025duet}通过双通道编码器分别建模污染物浓度的趋势成分和季节成分，有效处理了空气质量数据的复杂周期性模式。这些工作表明，通用时序预测框架经过领域适配后，能够在大气污染预测任务中取得具有竞争力的性能。
 
 \subsubsection{图神经网络时空建模方法}
 
-近年来，图神经网络(GNN)因其对非欧几里得空间数据的天然适用性，成为时空预测领域的主流技术架构\citep{zhou2020graph}。这类模型通过图结构(监测站点网络)引入归纳偏置，使用图卷积或改进的Transformer等空间模块刻画监测站点间的关联，配合时序卷积网络或LSTM等时间模块模拟污染物浓度的时间演变\citep{wu2020comprehensive}。
+图神经网络（GNN）因其对非欧几里得空间数据的天然适用性，已成为时空预测领域的主流架构\citep{zhou2020graph}。这类模型通过图结构引入归纳偏置，使用图卷积刻画站点间空间关联，配合时序模块模拟浓度的时间演变\citep{wu2020comprehensive}。
 
 \textbf{核心GNN架构}。Yu等人\citep{yu2018spatio}提出时空图卷积网络(STGCN)，通过图卷积捕捉空间依赖、一维卷积捕捉时序演化，建立了时空图建模的基础框架。Li等人\citep{li2018diffusion}提出扩散卷积循环神经网络(DCRNN)，将信息传播建模为有向图上的扩散过程，其双向随机游走机制与大气污染物的扩散传输过程具有天然的相似性——直接对应公式(\ref{eq:advection_diffusion})中的扩散项。Wu等人\citep{wu2019graph}提出Graph WaveNet，引入自适应邻接矩阵学习机制和膨胀卷积，无需预定义图结构即可端到端学习节点间的隐式依赖关系。
 
@@ -168,19 +168,19 @@ Transformer架构凭借自注意力机制实现的长程依赖建模和全并行
 
 除从数据中挖掘模式外，另一个重要的发展方向是将大气物理和化学机理融入数据驱动模型，形成物理约束的深度学习框架\citep{reichstein2019deep,raissi2019physics,cn_zhawenshu2022pinn}。
 
-\textbf{物理引导的图神经网络}。Hettige等人\citep{hettigeairphynet}提出AirPhyNet，是户外空气质量领域首个物理引导深度学习模型。其架构包含三个核心模块：GRU编码器将PM$_{2.5}$浓度编码为初始状态；GNN微分方程网络由物理规律约束，从连续性方程推导出扩散-平流微分方程；解码器生成最终预测。该模型将质量守恒原理直接嵌入网络结构，在稀疏数据和突变场景下展现出更强的鲁棒性。
+\textbf{物理引导的图神经网络}。Hettige等\citep{hettigeairphynet}提出AirPhyNet，是空气质量领域首个物理引导深度学习模型，将质量守恒原理直接嵌入GNN微分方程网络结构，在稀疏数据和突变场景下展现出更强的鲁棒性。
 
 Li等人\citep{li2023improving}提出物理启发深度图学习方法，采用欧拉2D网格系统，通过连续性方程编码流体物理，采用雷诺分解处理平流和扩散项。混合GCN与全残差深度网络架构能够生成物理一致的时空趋势，在外推场景下表现出显著优势。
 
 \textbf{物理约束损失函数}。Li等人\citep{li2025knowledge}的物理信息深度学习框架将平流-扩散方程编码为软约束，通过在损失函数中引入物理一致性惩罚项，引导模型学习符合大气动力学规律的表示。关键发现是物理约束从根本上改变了学习动态，有效降低了多污染物联合预测的系统性偏差。石佳超等\citep{cn_shijiachao2018cmaqnn}将CMAQ模型预测值与前馈神经网络结合，构建长三角PM$_{2.5}$浓度快速响应模型。张斌等\citep{cn_zhangbin2020jicheng}融合多种深度学习模型对CMAQ预报进行误差订正。黄丛吾等\citep{cn_huangcongwu2018mos}采用极端随机树方法优化WRF-CMAQ-MOS模型。
 
-\textbf{双分支物理-数据融合架构}。Tian等人\citep{tianair}提出Air-DualODE，是开放系统下物理引导的双分支神经ODE模型。该模型包括两个并行的动态分支：物理分支直接求解开放体系的边界感知扩散-平流方程，捕获由物理定律主导的污染物时空传播动态；数据驱动分支学习物理分支未能解释的额外依赖关系。两分支的隐表示在时间维度上对齐，通过融合模块加权合成最终预测，实现了物理可解释性与数据拟合能力的平衡。
+\textbf{双分支物理-数据融合架构}。Tian等\citep{tianair}提出Air-DualODE，包含并行的物理分支（求解边界感知扩散-平流方程）与数据驱动分支（学习额外依赖关系），通过融合模块加权合成最终预测，实现物理可解释性与数据拟合能力的平衡。
 
 \subsubsection{气象预报融合的关键缺失}
 
 值得特别指出的是，\textbf{多数现有数据驱动模型未能充分利用未来气象预报信息}，这是制约其业务化应用的关键缺陷。
 
-在传统数值空气质量模式中，气象预报是必不可少的驱动输入。以CMAQ(Community Multiscale Air Quality)模式为例，其运行依赖WRF(Weather Research and Forecasting)模式提供的气象场预报\citep{byun2006review}。关键气象变量包括：天气形势(海平面气压、位势高度)决定大气稳定度和传输模式；化学驱动因子(温度、相对湿度)影响化学反应速率和二次气溶胶形成；传输因子(风速/风向)控制污染物扩散和平流；垂直混合(边界层高度PBLH)决定垂直稀释能力。CMAQ、WRF-Chem、GEOS-Chem等化学传输模式在预报阶段\textbf{固有地使用未来气象预报}作为输入。
+在传统数值模式中，气象预报是必不可少的驱动输入。CMAQ等模式依赖WRF提供的气象场预报\citep{byun2006review}，关键变量包括决定大气稳定度的天气形势、影响化学反应的温度湿度、控制传输的风场及决定垂直稀释的边界层高度。CTMs在预报阶段\textbf{固有地使用未来气象预报}作为输入。
 
 与数值模式形成鲜明对比的是，多数机器学习模型仅使用历史气象观测数据。在许多方法中，气象要素往往被视为可有可无的辅助输入，通过浅层神经网络编码后在预测末段简单拼接进污染物特征中。这一局限的根本原因包括：(1)\textbf{时序错配}——机器学习模型使用历史气象观测与历史污染物浓度配对训练，预测时无法获取未来气象条件；(2)\textbf{时序依赖问题}——T+24h的空气质量取决于T+24h的气象条件而非T-24h的条件；(3)\textbf{预报时效衰减}——研究表明，无适当约束时模型性能随预报时间恶化，超过24小时后历史模式预测能力显著下降。
 
