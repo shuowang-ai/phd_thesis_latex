@@ -43,7 +43,7 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig_chap01_Q2_inference.pdf}
+    \includegraphics[width=\textwidth]{figures/chap04_inference_problem.pdf}
     \caption{大气污染空间推断问题示意图}
     \caption*{\textbf{输入}：观测站点历史时序$\mathbf{X}_{\text{obs}}^{t-T'+1:t}$（黑色圆点）、气象场$\mathbf{M}_F^{t-T'+1:t}$、排放场$\mathbf{E}_F^{t-T'+1:t}$、卫星AOD $\mathbf{X}^{\text{AOD},t-T'+1:t}$（斜线区域表示缺失）；\textbf{输出}：目标站点推断$\hat{\mathbf{X}}_{\text{target}}^{t}$（蓝色曲线）及网格推断$\hat{\mathbf{X}}_F^t$（红色热力图）；\textbf{模型}：基于扩散-平流双图机制构建图结构$\mathcal{G}$，通过$\mathcal{F}_\Theta$（SPIN）建模节点间的时空相关性。}
     \label{fig:inference_problem}
@@ -94,7 +94,7 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/study_area_map.pdf}
+    \includegraphics[width=0.90\textwidth]{figures/chap04_study_area.pdf}
     \caption{京津冀及周边地区研究区域与任务设置}
     \caption*{(a) 区域内的\cqt{2+26}城市分布；(b) 基于地理邻近性（$<$200 km）构建的空间图结构；(c) 152个地面监测站点的稀疏分布；(d) 用于网格化推断的$0.25^{\circ}$标准网格，其中绝大多数网格缺乏地面观测。}
     \label{fig:study_area}
@@ -194,7 +194,7 @@ SPIN的整体架构如图~\ref{fig:model_architecture}所示，主要由三个�
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=1.0\linewidth]{figures/model_architecture.pdf}
+    \includegraphics[width=1.0\linewidth]{figures/chap04_spin_arch.pdf}
     \caption{SPIN模型总体架构图}
     \caption*{模型首先利用TCN编码本地时序动态（左侧）；随后通过物理引导的图网络进行空间传播（中间），该网络由显式的\cqt{扩散核}（模拟各向同性扩散）和\cqt{平流核}（模拟风场驱动的各向异性输送）构成；最后通过共享的读出层生成推断结果（右侧）。}
     \label{fig:model_architecture}
@@ -291,7 +291,7 @@ $\max(\cdot, 0)$函数确保了权重的非负性和方向性：只有当风从$
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/kernels.pdf}
+    \includegraphics[width=0.9\textwidth]{figures/chap04_physics_kernels.pdf}
     \caption{物理核与AOD约束机制示意图}
     \caption*{(a) \textbf{平流核（Advection Kernel）}：通过计算风速向量在节点连线方向上的投影，构建有向图结构，显式建模污染物的定向输送。(b) \textbf{AOD梯度损失}：利用卫星AOD的空间梯度约束预测场，仅在有效观测区域（阴影部分）计算损失，以应对云层遮挡。}
     \label{fig:kernels}
@@ -573,9 +573,9 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/station_001_1002A.png}\\[0.35em]
-    \includegraphics[width=\textwidth]{figures/station_009_1018A.png}\\[0.35em]
-    \includegraphics[width=\textwidth]{figures/station_016_1034A.png}
+    \includegraphics[width=\textwidth]{figures/chap04_station_beijing.png}\\[0.35em]
+    \includegraphics[width=\textwidth]{figures/chap04_station_tianjin.png}\\[0.35em]
+    \includegraphics[width=\textwidth]{figures/chap04_station_shijiazhuang.png}
     \caption{京津冀核心城市群的推断表现}
     \caption*{从上至下分别为北京定陵站、天津前进道站、石家庄人民会堂站。即便在50\%站点不可见的情况下，模型依然保持了极高的相关性（$R^2 > 0.85$），准确捕捉了冬季污染过程的动态演变。}
     \label{fig:bj_group}
@@ -585,8 +585,8 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/station_072_2409A.png}\\[0.35em]
-    \includegraphics[width=\textwidth]{figures/station_070_2396A.png}
+    \includegraphics[width=\textwidth]{figures/chap04_station_shangqiu.png}\\[0.35em]
+    \includegraphics[width=\textwidth]{figures/chap04_station_xuchang.png}
     \caption{推断性能的上下界分析}
     \caption*{上图（商丘）展示了在密集邻居支持下的完美重建（$R^2=0.96$）；下图（许昌）展示了在复杂局部动态下的误差，但模型仍正确把握了污染起止时间和趋势方向。}
     \label{fig:rmse_extremes}
@@ -598,8 +598,8 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/station_056_1818A.png}\\[0.35em]
-    \includegraphics[width=\textwidth]{figures/station_023_1057A.png}
+    \includegraphics[width=\textwidth]{figures/chap04_station_edge.png}\\[0.35em]
+    \includegraphics[width=\textwidth]{figures/chap04_station_zhangjiakou.png}
     \caption{边缘稀疏区域的物理保真性}
     \caption*{下图（张家口人民公园站）展示了在极度缺乏上游信息时，物理引导机制确保了模型输出合理的背景趋势，而非随机噪声或幻觉值。}
     \label{fig:sparse_neighbors}
@@ -615,22 +615,22 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \centering
     \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=0.9\textwidth]{figures/frame_0521.png}
+        \includegraphics[width=0.9\textwidth]{figures/chap04_grid_ideal.png}
         \caption{案例(a)：理想一致性——结构迁移}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=0.9\textwidth]{figures/frame_0542.png}
+        \includegraphics[width=0.9\textwidth]{figures/chap04_grid_missing.png}
         \caption{案例(b)：完全缺失——物理回退}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=0.9\textwidth]{figures/frame_0640.png}
+        \includegraphics[width=0.9\textwidth]{figures/chap04_grid_conflict.png}
         \caption{案例(c)：结构冲突——鲁棒性}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=0.9\textwidth]{figures/frame_1003.png}
+        \includegraphics[width=0.9\textwidth]{figures/chap04_grid_calibration.png}
         \caption{案例(d)：幅度偏差——自动校准}
     \end{subfigure}
     \caption{网格化推断与AOD机制分析}

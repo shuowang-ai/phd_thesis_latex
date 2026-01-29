@@ -43,7 +43,7 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig_chap01_Q3_simulation.pdf}
+    \includegraphics[width=\textwidth]{figures/chap05_simulation_problem.pdf}
     \caption{未来情景模拟问题示意图}
     \caption*{\textbf{输入}：未来气象场$\mathbf{M}_{\text{future}}^{t-T'+1:t}$（CMIP6）和排放场$\mathbf{E}_{\text{future}}^{t-T'+1:t}$（DPEC）；\textbf{输出}：2025-2050年的\PM 和\ozone 浓度模拟$\hat{\mathbf{X}}_{\text{future}}^t$；\textbf{模型}：IGNN（$\mathcal{F}_\Theta$）通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）训练得到（图中上半部分，详见第\ref{subsec:train_infer_paradigm}节），学习排放-气象-浓度之间的响应关系后迁移至未来情景（图中下半部分）。}
     \label{fig:simulation_problem}
@@ -78,7 +78,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/ncua_network.png}
+  \includegraphics[width=0.7\linewidth]{figures/chap05_city_network.png}
   \caption{京津冀及周边28城市的空间分布与网络结构}
   \caption*{圆点表示城市位置，连线表示基于空间邻近性构建的网络边。北京、天津、邢台、太原、淄博、郑州六个城市为后续重点分析的代表性城市。}
   \label{fig:bthsa_network}
@@ -250,9 +250,15 @@ IGNN模型采用\textbf{两阶段范式}实现从历史学习到未来模拟的�
 \subsection{模型训练与验证}
 \label{subsec:ignn_validation}
 
-IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时间顺序划分为训练集（2014-2018年）、验证集（2019年）和测试集（2020年）。模型在NVIDIA Tesla K80 GPU上训练90轮，总耗时约3小时，模型文件大小仅119 KB。
+IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时间顺序划分为训练集（2014-2018年）、验证集（2019年）和测试集（2020年）。模型基于PyTorch实现。主要超参数设置：时间窗口$T'=24$（72小时），切比雪夫多项式阶数$K=3$，隐藏维度$d=32$，学习率$10^{-4}$，批大小32，优化器使用Adam。训练在NVIDIA Tesla K80 GPU上进行，共训练90轮，总耗时约3小时。训练后的模型文件大小仅119 KB，便于部署与快速推理。
 
-表\ref{tab:ignn_vs_ml}展示了IGNN与其他机器学习方法的性能对比。采用的评价指标包括：平均绝对误差（MAE）、一致性指数（IA）、相关系数（$r$）、归一化平均偏差（NMB）和归一化平均误差（NME）。
+\textbf{对比方法。}将IGNN与以下方法进行了对比：
+\begin{itemize}
+    \item \textbf{梯度提升模型}：XGBoost\citep{chen2016xgboost}、LightGBM\citep{ke2017lightgbm}，代表传统特征工程方法；
+    \item \textbf{时空图神经网络模型}：STGCN\citep{yu2018spatio}，代表深度学习时空建模方法。
+\end{itemize}
+
+表\ref{tab:ignn_vs_ml}展示了IGNN与上述方法的性能对比。采用的评价指标包括：平均绝对误差（MAE）、一致性指数（IA）、相关系数（$r$）、归一化平均偏差（NMB）和归一化平均误差（NME）。
 
 \begin{table}[htbp]
     \centering

@@ -35,7 +35,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/flowchart_dataflow.png}
+  \includegraphics[width=\linewidth]{figures/chap06_system_arch.png}
   \caption{KnowAir系统全链路架构图}
   \caption*{该架构包含两条核心数据流：数据采集链路（左侧，负责多源数据的周期性采集与预处理）和API服务链路（右侧，处理用户实时请求）。系统部署于云端Kubernetes集群，通过WAF、SLB和API网关实现安全访问控制与负载均衡。}
   \label{fig:system_architecture}
@@ -82,7 +82,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/flowchart_train_deploy.png}
+  \includegraphics[width=\linewidth]{figures/chap06_train_deploy.png}
   \caption{模型离线训练与自动化部署流水线}
   \caption*{上半部分展示自动化训练阶段：CronJob定时触发训练任务，容器实例拉取最新数据执行PyTorch训练，达标模型被版本化存入模型仓库。下半部分展示自动化部署阶段：GitOps流水线同步配置变更，ArgoCD检测到更新后自动执行滚动部署至生产环境。}
   \label{fig:mlops_pipeline}
@@ -110,7 +110,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/api_performance.jpeg}
+  \includegraphics[width=\linewidth]{figures/chap06_api_performance.jpeg}
   \caption{API服务性能监控面板}
   \caption*{左侧纵轴显示QPS（每秒查询数），右侧纵轴显示响应延迟（毫秒）。系统在高峰期保持稳定的低延迟响应（P99延迟$<$200ms），验证了微服务架构的高可用性。}
   \label{fig:api_performance}
@@ -157,13 +157,13 @@
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{北京市AQI预报性能\label{fig:online-aqi-beijing}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_aqi_metrics_beijing.png}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_beijing.png}} \\[1ex]
   \subcaptionbox{上海市AQI预报性能\label{fig:online-aqi-shanghai}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_aqi_metrics_shanghai.png}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_shanghai.png}} \\[1ex]
   \subcaptionbox{石家庄市AQI预报性能\label{fig:online-aqi-shijiazhuang}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_aqi_metrics_shijiazhuang.png}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_shijiazhuang.png}} \\[1ex]
   \subcaptionbox{郑州市AQI预报性能\label{fig:online-aqi-zhengzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_aqi_metrics_zhengzhou.png}} 
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_zhengzhou.png}} 
   \caption{代表性城市AQI预报性能时序对比}
   \caption*{各子图展示了不同预报时效（3h、6h、12h、24h、48h、72h）下的预测值与实测值（AQI\_OBS）对比。模型在短期预报（3--12h）中表现出色，随预报时效延长误差逐渐增加但仍保持良好的趋势把握能力。}
   \label{fig:online-aqi-metrics}
@@ -174,13 +174,13 @@
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{北京市\ozone 预报性能\label{fig:online-o3-beijing}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_o3_beijing.jpeg}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_beijing.jpeg}} \\[1ex]
   \subcaptionbox{广州市\ozone 预报性能\label{fig:online-o3-guangzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_o3_guangzhou.jpeg}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_guangzhou.jpeg}} \\[1ex]
   \subcaptionbox{上海市\ozone 预报性能\label{fig:online-o3-shanghai}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_o3_shanghai.jpeg}} \\[1ex]
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_shanghai.jpeg}} \\[1ex]
   \subcaptionbox{苏州市\ozone 预报性能\label{fig:online-o3-suzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/online_o3_suzhou.jpeg}} 
+    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_suzhou.jpeg}} 
   \caption{代表性城市\ozone 浓度预报性能时序对比}
   \caption*{臭氧具有显著的日周期变化特征——白天光化学反应活跃导致浓度升高，夜间则显著下降。AI方法能够有效捕捉这种周期性规律，模型预测很好地还原了臭氧的日变化振幅与相位。}
   \label{fig:online-o3-metrics}
@@ -274,7 +274,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/beijing_pollution.png}
+  \includegraphics[width=\linewidth]{figures/chap06_beijing_pollution.png}
   \caption{北京重污染事件的提前预报示例}
   \caption*{左图展示污染峰值期间的空气质量状况，右图展示污染消散后的状况。系统成功提前数日预报了该污染过程的发生与消散，预报结果与实际观测高度一致，充分验证了模型在真实业务场景中的可靠性。}
   \label{fig:beijing_pollution_case}
@@ -284,7 +284,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/monitor_beijing_lianghui.png}
+  \includegraphics[width=\linewidth]{figures/chap06_lianghui.png}
   \caption{全国两会期间北京AQI监测与预报对比}
   \caption*{图中各曲线代表不同预报时效的预测值，灰色曲线（AQI\_OBS）为实测值。图中最后几天出现的AQI突升对应沙尘暴事件，属于预报难点，但模型仍能把握其趋势特征。}
   \label{fig:lianghui_monitoring}
@@ -304,7 +304,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/caiyun_web.png}
+  \includegraphics[width=\linewidth]{figures/chap06_caiyun_platform.png}
   \caption{彩云科技空气质量可视化平台界面}
   \caption*{该平台提供全国范围的实时空气质量分布图，支持多污染物切换、时间动画播放和站点详情查询，已成为公众了解空气质量状况的重要渠道。}
   \label{fig:caiyun_web}
@@ -314,7 +314,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/monitoring_accuracy.png}
+  \includegraphics[width=\linewidth]{figures/chap06_monitoring_panel.png}
   \caption{系统运维监控面板}
   \caption*{该面板集成了多城市、多指标的实时监测与预报评估功能，包括各城市平均AQI分布（左上）、近期污染物浓度趋势（左中）、各时效预报误差时序（左下和右上）以及全国城市\PM MAE分布排序（右下）。}
   \label{fig:monitoring_accuracy}

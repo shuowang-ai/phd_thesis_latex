@@ -37,7 +37,7 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig_chap01_Q1_prediction.pdf}
+    \includegraphics[width=\textwidth]{figures/chap03_prediction_problem.pdf}
     \caption{大气污染时序预测问题示意图}
     \caption*{\textbf{输入}：历史空气质量观测$\mathbf{X}^{-T'+1:0}$（浅蓝色背景）、气象场$\mathbf{M}^{-T'+1:T}$、排放数据$\mathbf{E}^{-T'+1:T}$；\textbf{输出}：未来$T$个时间步的\PM 与\ozone 浓度预测$\hat{\mathbf{X}}^{1:T}$（浅粉色背景）；\textbf{模型}：基于空间距离构建图结构$\mathcal{G}$，通过PM$_{2.5}$-GNN/PCDCNet建模节点间的时空相关性。}
     \label{fig:prediction_problem}
@@ -60,7 +60,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.9\linewidth]{figures/iteration_framework.pdf}
+  \includegraphics[width=0.9\linewidth]{figures/chap03_io_paradigm.pdf}
   \caption{不同预测模型的输入输出范式对比}
   \caption*{XGBoost等机器学习方法对每个时间步独立预测，缺乏时序建模能力；传统自回归模型（如LSTM）仅依赖历史观测进行外推；Transformer模型虽能捕捉长程历史依赖，但仍缺乏未来信息；而本文PCDCNet通过滑动窗口融合历史观测、未来气象预报和排放数据，对齐数值模式CMAQ的代理模型范式，实现气象驱动的前向预测。}
   \label{fig:input_output_paradigm}
@@ -134,7 +134,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/temporal_nox.png}
+  \includegraphics[width=\linewidth]{figures/chap03_nox_diurnal.png}
   \caption{北京和上海典型监测站点的\NOx 排放日变化特征}
   \caption*{城区站点（1001A北京城区、1147A上海城区）呈现显著的早晚交通高峰；郊区站点（1010A北京郊区、3272A上海郊区）排放水平相对较低。数据已转换为UTC+0时间。}
   \label{fig:temporal_nox}
@@ -144,7 +144,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/spatial_emissions.pdf}
+  \includegraphics[width=\linewidth]{figures/chap03_emission_spatial.pdf}
   \caption{研究区域主要污染物排放的空间分布}
   \caption*{从左至右依次为：（a）工业部门\NOx 排放；（b）交通部门\PM 排放；（c）交通部门\NOx 排放；（d）电力部门\PM 排放。高排放区域主要集中在京津冀和长三角的城市密集区与工业聚集区。}
   \label{fig:spatial_emissions}
@@ -199,9 +199,9 @@
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{京津冀及周边地区（BTHSA）城市网络\label{fig:graph-bthsa}}
-    {\includegraphics[width=0.45\linewidth]{figures/map_graph_BTHSA.png}}
+    {\includegraphics[width=0.45\linewidth]{figures/chap03_graph_bthsa.png}}
   \subcaptionbox{长江三角洲地区（YRD）城市网络\label{fig:graph-yrd}}
-    {\includegraphics[width=0.45\linewidth]{figures/map_graph_YRD.png}}
+    {\includegraphics[width=0.45\linewidth]{figures/chap03_graph_yrd.png}}
   \caption{研究区域的城市网络图结构}
   \caption*{节点代表城市，边代表城市间的潜在污染传输通道。边的建立综合考虑了地理距离（$<$300km）和地形阻隔因素（山脉海拔差$<$1200m）。}
   \label{fig:multi-image}
@@ -217,7 +217,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/knowair_ds_v1_study_area.jpg}
+  \includegraphics[width=0.7\linewidth]{figures/chap03_knowair_study_area.jpg}
   \caption{KnowAir-DS-V1数据集研究区域}
   \caption*{研究范围为$103^{\circ}\text{E}$--$122^{\circ}\text{E}$、$28^{\circ}\text{N}$--$42^{\circ}\text{N}$，覆盖中国中东部184个城市，节点为地级市，连边阈值为300km，时间分辨率为3小时。该数据集用于PM$_{2.5}$-GNN模型的训练与评估。}
   \label{fig:knowair_v1_study_area}
@@ -240,7 +240,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/pm25_charateristics.png}
+  \includegraphics[width=0.6\linewidth]{figures/chap03_pm25_evolution.png}
   \caption{\PM 演化过程的特征示意图}
   \caption*{颜色表示浓度高低；蓝色箭头表示风驱动的跨区域传输；虚线表示局地扩散累积；山脉构成传输屏障。预测模型需要同时捕捉这些过程。}
   \label{fig:pm25_charateristics}
@@ -269,7 +269,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.4\linewidth]{figures/diffusion.png}
+  \includegraphics[width=0.4\linewidth]{figures/chap03_advection_coeff.png}
   \caption{平流系数的计算示意图}
   \caption*{源节点$j$的风速为$|v|$，风向为$\beta$；$\gamma$为$j$指向$i$的连线方向；$\alpha$为二者夹角；$d$为两节点距离。当风从$j$吹向$i$时（$\cos\alpha > 0$），平流系数为正。}
   \label{fig:advection_coeff}
@@ -305,7 +305,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/pm25gnn_model.png}
+  \includegraphics[width=0.8\linewidth]{figures/chap03_pm25gnn_arch.png}
   \caption{PM$_{2.5}$-GNN模型架构示意图}
   \caption*{模型由三个核心组件构成：（1）知识增强的消息传递模块，利用风驱边权重计算邻居节点的污染传输通量；（2）时空GRU单元，融合空间聚合信息与历史隐状态；（3）输出层，预测下一时刻的\PM 浓度。橙色箭头表示输入流（import），蓝色箭头表示输出流（export）。}
   \label{fig:pm25gnn_model}
@@ -432,7 +432,7 @@ PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/overall_framework.pdf}
+  \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_arch.pdf}
   \caption{PCDCNet模型总体架构}
   \caption*{模型由三个核心动力学模块构成：LID（局地交互动力学）建模本地化学反应与排放响应，STD（空间传输动力学）建模风驱平流与扩散传输，TAD（时间积累动力学）建模长时序累积与沉降效应。最终输出通过残差预测方式生成，并引入DIC约束确保物理一致性。}
   \label{fig:overall_framework}
@@ -748,7 +748,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/pm25gnn_leadtime.png}
+  \includegraphics[width=\linewidth]{figures/chap03_pm25gnn_leadtime.png}
   \caption{不同预测时效下各模型的RMSE和Pearson相关系数变化曲线}
   \caption*{基于滚动预测数据集。随着预测时效增加，所有模型的误差均呈上升趋势，但PM$_{2.5}$-GNN的误差增长速率最为平缓。在72小时预测末端，PM$_{2.5}$-GNN仍保持最优性能。}
   \label{fig:pm25gnn_leadtime}
@@ -844,7 +844,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/leadtime.png}
+  \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_leadtime.png}
   \caption{不同预测时效下各模型的MAE变化曲线}
   \caption*{左图为BTHSA区域的\PM 预测，右图为YRD区域的\ozone 预测。PCDCNet在所有时效上均保持最优性能，且误差随时效增长的速率最为平缓，表明DIC约束有效抑制了长时序预测中的误差累积。}
   \label{fig:leadtime}
@@ -868,7 +868,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/ablation.png}
+  \includegraphics[width=0.8\linewidth]{figures/chap03_ablation.png}
   \caption{PCDCNet消融实验结果}
   \caption*{左图为\PM 预测性能，右图为\ozone 预测性能。w/o Emission表示移除排放数据输入；w/o DIC表示移除领域知识约束；w/o LID/STD/TAD分别表示移除对应的动力学模块。移除任何模块均导致性能下降。}
   \label{fig:ablation}
@@ -886,7 +886,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/emis_ablation.png}
+  \includegraphics[width=0.8\linewidth]{figures/chap03_emission_ablation.png}
   \caption{不同排放物种对预测性能的贡献分析}
   \caption*{分别移除\NOx、VOC、SO$_2$等排放变量后，评估对\PM 和\ozone 预测的影响。结果表明，\NOx 和VOC对\ozone 预测贡献最大，SO$_2$对\PM 预测贡献显著。}
   \label{fig:emis_ablation}
@@ -904,7 +904,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/ablation.png}
+  \includegraphics[width=0.8\linewidth]{figures/chap03_ablation.png}
   \caption{参数敏感性分析}
   \caption*{左图：隐层维度敏感性分析，$d=32$取得最优性能，在模型容量与泛化能力之间达到平衡；右图：核心模块消融实验结果。}
   \label{fig:ablation_sensitivity}
@@ -918,7 +918,7 @@ $\lambda$为约束权重超参数，用于平衡预测精度与物理一致性�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/loss.png}
+  \includegraphics[width=\linewidth]{figures/chap03_loss_curves.png}
   \caption{训练过程中的损失曲线分析}
   \caption*{上排：不同$\lambda$值下的训练/验证预测损失；下排：对应的DIC损失（空间约束、时间约束、总约束）。当$\lambda=0$时，DIC损失虽未被直接优化，但仍呈下降趋势，表明STD模块具有隐式学习质量守恒的能力；当$\lambda>0$时，DIC损失下降更快且收敛值更低，验证了显式约束的有效性。}
   \label{fig:loss}
@@ -944,7 +944,7 @@ DIC约束效果分析的关键发现包括：
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/beijing_pollution.png}
+  \includegraphics[width=\linewidth]{figures/chap06_beijing_pollution.png}
   \caption{华北重污染过程预测案例}
   \caption*{左图为PCDCNet 72小时预测结果，右图为实际观测。模型成功提前72小时预警污染过程的启动、峰值时间与消退趋势，预测曲线与观测高度吻合。值得强调的是，该结果来源于系统业务化运行期间的实时截图，所涉及时段的数据在模型训练阶段从未出现，充分验证了模型在真实应用场景下的泛化能力。}
   \label{fig:case_beijing}
