@@ -73,10 +73,24 @@
 
 本文根据不同任务的特点灵活选择两种范式：第\ref{chap:prediction}章PM$_{2.5}$-GNN采用消息传递范式，利用其对边特征的灵活建模能力将风场编码为有向边权重；第\ref{chap:prediction}章PCDCNet采用基于拉普拉斯矩阵的一阶谱卷积，第\ref{chap:simulation}章IGNN采用ChebNet的多阶滤波特性捕捉多尺度空间依赖；第\ref{chap:inference}章SPIN则结合两种范式，分别建模扩散过程（谱卷积）和平流过程（有向消息传递）。
 
+\subsection{时空图神经网络}
+\label{subsec:stgnn}
+
+时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）在空间维度的图卷积基础上，进一步引入时间维度的建模能力，是处理时空序列预测问题的有效工具\citep{yu2018spatio,li2018diffusion}。
+
+典型的STGNN架构包含交替堆叠的空间卷积层与时间卷积层。\textbf{空间卷积层}捕捉节点间的空间依赖关系；\textbf{时间卷积层}沿时间轴捕捉序列依赖关系，常用膨胀因果卷积（Dilated Causal Convolution）：
+\begin{equation}
+\mathbf{Y}_t = \sum_{s=0}^{S-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
+\label{eq:tcn}
+\end{equation}
+\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$S$为卷积核大小。因果性约束确保模型只能使用过去信息进行预测。
+
+STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻节点相互影响，时间上当前状态依赖历史演化。这与大气污染系统的物理特性高度吻合，为本文后续模型设计奠定了技术基础。
+
 \subsection{图神经网络的训练：反向传播}
 \label{subsec:gnn_training}
 
-图神经网络的训练遵循深度学习的标准优化范式——基于梯度的反向传播算法\citep{goodfellow2016deep}。给定训练数据$\mathcal{D} = \{(\mathcal{G}_i, \mathbf{y}_i)\}_{i=1}^{M}$，其中$\mathcal{G}_i$为输入图，$\mathbf{y}_i$为目标标签，训练目标是最小化损失函数：
+图神经网络与时空图神经网络的训练均遵循深度学习的标准优化范式——基于梯度的反向传播算法\citep{goodfellow2016deep}。给定训练数据$\mathcal{D} = \{(\mathcal{G}_i, \mathbf{y}_i)\}_{i=1}^{M}$，其中$\mathcal{G}_i$为输入图，$\mathbf{y}_i$为目标标签，训练目标是最小化损失函数：
 \begin{equation}
 \mathcal{L}(\Theta) = \frac{1}{M} \sum_{i=1}^{M} \ell\left(f_\Theta(\mathcal{G}_i), \mathbf{y}_i\right) + \lambda R(\Theta)
 \label{eq:loss_function}
@@ -93,23 +107,9 @@
 \Theta^{(t+1)} = \Theta^{(t)} - \eta \nabla_\Theta \mathcal{L}
 \label{eq:sgd}
 \end{equation}
-\noindent 式中，$\eta$为学习率。
+\noindent 式中，$\Theta^{(t)}$为第$t$次迭代的模型参数，$\Theta^{(t+1)}$为更新后的参数，$\eta$为学习率，$\nabla_\Theta \mathcal{L}$为损失函数$\mathcal{L}$关于参数$\Theta$的梯度。
 
-从系统科学角度，GNN的训练过程可理解为\textbf{从观测数据中反演系统动力学}。损失函数度量模型输出与真实系统状态的偏差，反向传播通过梯度信息指导参数调整，使模型逐步逼近真实系统的演化规律。这种\cqt{数据驱动的动力学学习}范式是本文方法论的核心思想。
-
-\subsection{时空图神经网络}
-\label{subsec:stgnn}
-
-时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）在空间维度的图卷积基础上，进一步引入时间维度的建模能力，是处理时空序列预测问题的有效工具\citep{yu2018spatio,li2018diffusion}。
-
-典型的STGNN架构包含交替堆叠的空间卷积层与时间卷积层。\textbf{空间卷积层}捕捉节点间的空间依赖关系；\textbf{时间卷积层}沿时间轴捕捉序列依赖关系，常用膨胀因果卷积（Dilated Causal Convolution）：
-\begin{equation}
-\mathbf{Y}_t = \sum_{s=0}^{S-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
-\label{eq:tcn}
-\end{equation}
-\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$S$为卷积核大小。因果性约束确保模型只能使用过去信息进行预测。
-
-STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻节点相互影响，时间上当前状态依赖历史演化。这与大气污染系统的物理特性高度吻合，为本文后续模型设计奠定了技术基础。
+从系统科学角度，神经网络的训练过程可理解为\textbf{从观测数据中反演系统动力学}。损失函数度量模型输出与真实系统状态的偏差，反向传播通过梯度信息指导参数调整，使模型逐步逼近真实系统的演化规律。这种\cqt{数据驱动的动力学学习}范式是本文方法论的核心思想。
 
 
 % ------------------------------------------------------------
@@ -153,12 +153,12 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 
 
 % ------------------------------------------------------------
-% 2.3 大气污染动力学
+% 2.3 物理启发的领域知识
 % ------------------------------------------------------------
-\section{大气污染动力学}
+\section{物理启发的领域知识}
 \label{sec:atmospheric_dynamics}
 
-大气污染物的时空演化遵循严格的物理化学规律，对流-扩散方程是描述这一过程的核心数学工具。本节阐述大气污染动力学的基本原理，为后续物理约束的设计提供理论依据。
+纯数据驱动的图神经网络虽然具备强大的表示学习能力，但在地球科学领域面临两个核心挑战：一是数据稀疏性导致的过拟合风险，二是预测结果可能违背物理规律（如质量守恒）。将领域知识融入深度学习模型——即\textbf{物理启发的机器学习}（Physics-Informed Machine Learning）——是应对这些挑战的有效途径\citep{karniadakis2021physics,reichstein2019deep}。本节阐述大气污染动力学的基本原理，阐明如何将这些物理知识转化为神经网络的归纳偏置，为后续章节的模型设计提供理论依据。
 
 \subsection{对流-扩散方程}
 \label{subsec:advection_diffusion}
@@ -190,18 +190,70 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 \end{equation}
 \noindent 式中，$\mathbf{F}$为通量，$\mathbf{n}$为边界法向量。该约束确保模型预测的浓度变化在物理上合理——区域内污染物的增减必须可追溯到排放、沉降、化学反应或边界通量。
 
-\subsection{物理原理对深度学习建模的指导意义}
+\subsection{物理知识融入图神经网络的途径}
 \label{subsec:physics_guidance}
 
-上述大气污染动力学原理为本文的深度学习模型设计提供了明确的物理指导，具体体现在以下三个层面：
+深度学习模型设计的核心思想是\textbf{类比}——将待解决的科学问题映射到已有成熟解决方案的AI任务，从而选择合适的基础组件。\citet{reichstein2019deep}在综述中系统梳理了地球系统科学问题与深度学习架构的对应关系（见其Figure 2）：
+\begin{itemize}
+    \item \textbf{图像分类}$\rightarrow$\textbf{极端天气模式识别}：卷积神经网络（CNN）擅长从图像中提取空间特征，可用于识别飓风、大气河流等具有特定空间形态的天气系统；
+    \item \textbf{超分辨率重建}$\rightarrow$\textbf{统计降尺度}：图像超分辨率技术可类比应用于气候模式输出的空间降尺度；
+    \item \textbf{视频预测}$\rightarrow$\textbf{短期预报}：视频是时间演化的图像序列，与气象场的时空演化具有结构相似性；
+    \item \textbf{序列翻译}$\rightarrow$\textbf{动态时间序列建模}：循环神经网络（RNN/LSTM）擅长处理序列数据，可用于建模气象变量的时间演化。
+\end{itemize}
 
-\textbf{（1）网络架构设计}。对流-扩散方程中各物理过程的算子结构可直接映射为神经网络模块：平流项的方向性特征启发了\textbf{风场驱动的有向图设计}（第\ref{chap:prediction}章PM$_{2.5}$-GNN的动态边权重、第\ref{chap:inference}章SPIN的平流核）；扩散项的各向同性特征对应\textbf{对称邻接矩阵的图卷积}（第\ref{chap:inference}章SPIN的扩散核）；化学反应的非线性特征则通过\textbf{多层感知机}建模（各章模型的节点级变换层）。
+基于这一类比思想，大气污染的时空演化可理解为\textbf{图上的序列预测问题}——监测站点构成图的节点，浓度演化构成时间序列，站点间的空间关联构成图的边。因此，本文选择\textbf{时空图神经网络}作为基础架构，融合图卷积（建模空间依赖）与时序卷积（建模时间演化）的组合框架。
 
-\textbf{（2）损失函数设计}。质量守恒约束可转化为训练目标中的\textbf{物理惩罚项}：第\ref{chap:prediction}章PCDCNet的DIC损失（Domain-Informed Constraints）约束预测结果的时空连续性；第\ref{chap:inference}章SPIN的AOD梯度损失利用遥感观测的空间结构信息引导推断结果符合物理分布规律。这些物理约束作为正则化项与监督损失共同优化，在保持数据拟合能力的同时增强模型的物理一致性。
+在确定基础架构后，进一步的关键问题是：如何将大气污染领域的物理知识融入图神经网络？\citet{reichstein2019deep}提出了\textbf{混合建模}（Hybrid Modeling）的概念框架，将物理模型与机器学习的结合方式归纳为多种模式。本文在此框架基础上，针对图神经网络的特点，将物理知识的融入途径归纳为\textbf{图结构设计}、\textbf{网络架构设计}与\textbf{损失函数设计}三个层面。
 
-\textbf{（3）输入特征构建}。排放源项$E$和气象驱动$\mathbf{u}$、$K$等物理量被显式编码为模型输入特征，使模型能够学习\cqt{驱动$\rightarrow$响应}的映射关系，而非仅仅拟合浓度时序的统计规律。这种设计使得模型具备对排放情景变化的响应能力，为第\ref{chap:simulation}章的假设情景模拟奠定基础。
+\textbf{（1）图结构设计：将物理先验编码为图的拓扑结构}
 
-综上，本节所阐述的大气污染动力学原理贯穿于后续各章的模型设计之中，构成了\cqt{物理约束数据驱动建模}范式的理论内核。
+图神经网络的核心假设是\cqt{相邻节点具有相似特征或相互影响}，而\cqt{相邻}的定义由图的邻接矩阵$\mathbf{A}$决定。通过精心设计邻接矩阵，可将物理传输机制编码为图的拓扑结构：
+
+\begin{itemize}
+    \item \textbf{距离衰减}：基于地理距离构建边权重$A_{ij} = \exp(-d_{ij}^2 / \sigma^2)$，体现污染物浓度的空间相关性随距离衰减的物理规律；
+    \item \textbf{风场驱动的有向图}：将对流-扩散方程中的平流项$(-\mathbf{u} \cdot \nabla C)$转化为有向边权重。设节点$i$到$j$的方向向量为$\mathbf{r}_{ij}$，风速向量为$\mathbf{u}$，则边权重可设计为$A_{ij} \propto \max(0, \mathbf{u} \cdot \mathbf{r}_{ij})$，使上风向节点对下风向节点具有更强的影响力，而逆风方向的影响被抑制。本文第\ref{chap:prediction}章PM$_{2.5}$-GNN采用此设计。
+\end{itemize}
+
+\textbf{（2）网络架构设计：将物理过程解耦为网络模块}
+
+更进一步，可将对流-扩散方程的完整物理过程\textbf{解耦}为独立的网络模块，每个模块对应一类物理机制。本文第\ref{chap:prediction}章提出的PCDCNet模型正是这一思想的典型实现——将公式\eqref{eq:advection_diffusion}中的各项映射为三个专门的动力学模块：
+
+\begin{itemize}
+    \item \textbf{LID模块（Local Interaction Dynamics）}$\leftrightarrow$\textbf{化学反应项$R$与排放源项$E$}：化学反应和排放生成发生在每个站点局部，不涉及空间传输。LID通过节点级的\textbf{多层感知机}建模这类局地过程：$\mathbf{h}_i' = \text{MLP}(\mathbf{h}_i, \mathbf{e}_i, \mathbf{m}_i)$，学习排放、气象条件与化学反应的非线性响应关系。
+    \item \textbf{STD模块（Spatial Transport Dynamics）}$\leftrightarrow$\textbf{平流项与扩散项}：污染物的空间传输由风驱平流和湍流扩散共同决定。STD通过\textbf{图卷积}建模站点间的空间传输：$\mathbf{H}' = \text{GCN}(\mathbf{H}, \mathbf{A})$，其中邻接矩阵$\mathbf{A}$编码了风场驱动的传输方向性。
+    \item \textbf{TAD模块（Temporal Accumulation Dynamics）}$\leftrightarrow$\textbf{沉降汇项$D$与时间累积}：污染物浓度具有时间惯性，当前状态依赖历史演化。TAD通过\textbf{时间卷积}建模这种时序依赖：$\mathbf{H}' = \text{TCN}(\mathbf{H}_{1:t})$，捕捉浓度的累积效应与衰减规律。
+\end{itemize}
+
+这种\cqt{过程解耦}的设计思想使每个网络模块具有明确的物理对应，既保留了深度学习的灵活拟合能力，又增强了模型的可解释性——当模型预测异常时，可追溯到具体的物理过程模块进行诊断。
+
+本文第\ref{chap:inference}章提出的SPIN模型则采用另一种解耦方式——在\textbf{图卷积算子}层面将扩散与平流分离为两个并行的\cqt{物理核}：
+
+\begin{itemize}
+    \item \textbf{扩散核（Diffusion Kernel）}：基于\textbf{对称邻接矩阵}$\tilde{A}^{\mathcal{D}} = \mathbf{D}^{-1/2} A^{\mathcal{D}} \mathbf{D}^{-1/2}$，其中边权重仅依赖节点间距离$A^{\mathcal{D}}_{ij} = \exp(-d_{ij}^2/\sigma^2)$。对称归一化确保信息在节点间\textbf{双向均匀传播}，模拟各向同性的湍流扩散过程。
+    \item \textbf{平流核（Advection Kernel）}：基于\textbf{非对称邻接矩阵}$A^{\mathcal{A}}_{ij} = \text{ReLU}(\mathbf{u} \cdot \mathbf{r}_{ij})$，其中$\mathbf{u}$为风速向量，$\mathbf{r}_{ij}$为节点$i$指向$j$的方向向量。风向投影为正时边权重非零，为负时边权重为零，实现\textbf{单向信息传播}，模拟风驱动的各向异性平流输送。
+\end{itemize}
+
+SPIN通过门控机制动态融合两个核的输出：$\mathbf{H}' = g \odot \mathbf{H}^{\mathcal{D}} + (1-g) \odot \mathbf{H}^{\mathcal{A}}$，其中门控权重$g$由局地气象条件决定——静风时侧重扩散核，强风时侧重平流核。这种设计使模型能够根据实时气象条件自适应地调整传播策略。
+
+\textbf{（3）损失函数设计：将物理约束转化为优化目标}
+
+除了在模型架构中嵌入物理结构，还可通过损失函数\textbf{软约束}模型输出满足物理规律。总损失函数的一般形式为：
+\begin{equation}
+\mathcal{L} = \mathcal{L}_{\text{data}} + \lambda \mathcal{L}_{\text{physics}}
+\label{eq:physics_loss}
+\end{equation}
+\noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），$\mathcal{L}_{\text{physics}}$为物理约束项，$\lambda$为平衡系数。物理约束项的设计可基于多种物理原理：
+
+\begin{itemize}
+    \item \textbf{质量守恒约束}：大气科学中的连续方程（Continuity Equation）$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = S$是质量守恒定律的数学表达，其中$S$为源汇项。该方程表明：在无源汇区域，污染物不会凭空产生或消失，一个位置的流入必然对应其他位置的流出。在图神经网络中，可将连续方程离散化为节点级的质量平衡约束：通过空间传输模块产生的浓度变化在全局范围内应趋近于零。本文第\ref{chap:prediction}章PCDCNet的DIC损失（Domain-Informed Constraints，领域一致性约束）正是基于这一思想设计的——约束图卷积产生的邻域通量满足\cqt{零和守恒}（详见第\ref{chap:prediction}章公式\eqref{eq:dic_loss}），使模型学习到符合质量守恒定律的空间传输模式。
+    \item \textbf{辅助观测约束}：利用遥感等辅助数据源提供额外的物理约束。本文第\ref{chap:inference}章SPIN利用AOD（气溶胶光学厚度）的空间梯度信息约束推断结果的空间分布，使其符合遥感观测的物理结构。
+\end{itemize}
+
+\textbf{（4）输入特征构建：显式编码物理驱动量}
+
+将排放源项$E$、气象驱动（风速$\mathbf{u}$、温度、湿度等）显式编码为模型输入特征，使GNN能够学习\cqt{驱动$\rightarrow$响应}的映射关系，而非仅拟合浓度时序的统计规律。这种设计使模型具备对驱动变化的响应能力——当输入新的排放情景时，模型能够预测相应的浓度响应，为第\ref{chap:simulation}章的假设情景模拟奠定基础。
+
+综上，本节从图结构、图算子、损失函数和输入特征四个层面阐述了物理知识融入图神经网络的具体途径。这些设计贯穿于后续各章的模型之中，构成了本文\cqt{物理启发的时空图神经网络}范式的技术内核。
 
 
 % ------------------------------------------------------------
@@ -212,20 +264,20 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 
 前述各节介绍了图神经网络的基本原理（第\ref{sec:gnn_basics}节）、其在地球科学中的前沿应用（第\ref{sec:gnn_earth_science}节）以及大气污染动力学的物理基础（第\ref{sec:atmospheric_dynamics}节）。本节在此基础上，阐述\textbf{本文提出的物理约束时空图神经网络研究范式}，为后续三个应用章节奠定方法论框架。
 
-\subsection{核心思想：物理约束的数据驱动建模}
+\subsection{核心思想：物理启发的时空图神经网络}
 \label{subsec:core_idea}
 
-本文提出的研究范式可概括为\textbf{物理约束的数据驱动建模}——在深度学习的黑盒优化框架中嵌入大气科学的领域知识，实现\cqt{数据拟合}与\cqt{物理一致}的双重目标。
+本文提出的研究范式以\textbf{时空图神经网络}为核心建模工具，通过在其架构中嵌入大气科学的领域知识，实现\cqt{数据拟合}与\cqt{物理一致}的双重目标。
 
-纯数据驱动的深度学习模型虽然具有强大的拟合能力，但可能学习到违背物理规律的模式，尤其在数据稀疏或分布外样本上表现不佳\citep{karniadakis2021physics,kashinath2021physics}。物理约束融合旨在将领域知识嵌入深度学习框架，提升模型的物理一致性与泛化能力。
+选择图神经网络作为核心建模工具，源于其与大气污染系统的天然契合：监测站点/城市构成图的节点，站点间的空间关联（距离、风场、相关性）构成图的边，污染物的时空演化可建模为图上的信号传播过程。相比传统的全连接网络或卷积网络，GNN通过\textbf{图结构}显式编码空间拓扑关系，通过\textbf{消息传递}机制模拟污染物在站点间的传输过程，这与大气污染的扩散-平流物理机制具有结构上的对应性。
 
-根据约束嵌入的方式与位置，本文在\textbf{数据、模型、损失}三个环节融入物理知识\citep{willard2022integrating}：
+在此基础上，本文进一步将物理知识融入图神经网络框架。根据融入方式的不同，可在\textbf{数据、模型、损失}三个环节嵌入物理约束\citep{willard2022integrating}：
 
-\textbf{数据环节}——在数据预处理或特征工程阶段融入物理知识。例如，基于风场信息构建有向图结构，将大气传输的方向性先验编码到数据表示中。
+\textbf{数据环节}——通过图结构设计编码物理先验。例如，基于风场信息构建\textbf{有向图}，将大气传输的方向性先验编码到边的连接与权重中，使上风向节点对下风向节点具有更强的消息传递权重。
 
-\textbf{模型环节}——在网络架构设计中嵌入物理结构。例如，将对流-扩散方程的算子结构映射到神经网络模块，使模型输出天然满足特定的物理对称性或守恒律。
+\textbf{模型环节}——通过网络架构设计嵌入物理结构。例如，将对流-扩散方程的\textbf{平流项}映射为有向图卷积、\textbf{扩散项}映射为对称图卷积，使GNN的信息传播过程与物理传输机制相对应。
 
-\textbf{损失环节}——在训练目标中添加物理惩罚项。通过软约束方式鼓励模型输出满足物理规律，如质量守恒、时空连续性等。
+\textbf{损失环节}——通过物理惩罚项约束模型输出。在监督损失之外添加物理约束项（如时空连续性、质量守恒），引导GNN学习到符合物理规律的时空表示。
 
 \subsection{统一建模框架}
 \label{subsec:unified_framework}
