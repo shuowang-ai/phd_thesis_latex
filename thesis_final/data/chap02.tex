@@ -78,19 +78,19 @@
 
 时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）在空间维度的图卷积基础上，进一步引入时间维度的建模能力，是处理时空序列预测问题的有效工具\citep{yu2018spatio,li2018diffusion}。
 
-典型的STGNN架构包含交替堆叠的空间卷积层与时间卷积层。\textbf{空间卷积层}捕捉节点间的空间依赖关系；\textbf{时间卷积层}沿时间轴捕捉序列依赖关系，常用膨胀因果卷积（Dilated Causal Convolution）：
+典型的STGNN架构包含交替堆叠的\textbf{空间模块}与\textbf{时间模块}。空间模块捕捉节点间的空间依赖关系；时间模块沿时间轴捕捉序列依赖关系，常用膨胀卷积（Dilated Convolution）：
 \begin{equation}
 \mathbf{Y}_t = \sum_{s=0}^{S-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
 \end{equation}
-\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$S$为卷积核大小。因果性约束确保模型只能使用过去信息进行预测。
+\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为第$s$个卷积核权重，$\star$表示卷积操作，$d$为膨胀因子，$S$为卷积核大小。
 
 STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻节点相互影响，时间上当前状态依赖历史演化。这与大气污染系统的物理特性高度吻合，为本文后续模型设计奠定了技术基础。
 
 \subsection{图神经网络的训练}
 \label{subsec:gnn_training}
 
-图神经网络的训练遵循深度学习的标准优化范式——基于梯度的反向传播算法\citep{goodfellow2016deep}。训练目标是最小化损失函数$\mathcal{L}(\Theta) = \frac{1}{M} \sum_{i=1}^{M} \ell(f_\Theta(\mathcal{G}_i), \mathbf{y}_i)$，其中$f_\Theta$为参数$\Theta$的GNN模型，$\ell(\cdot)$为任务相关的损失函数。反向传播算法通过链式法则高效计算梯度，并采用Adam等优化器\citep{kingma2015adam}更新参数$\Theta^{(t+1)} = \Theta^{(t)} - \eta \nabla_\Theta \mathcal{L}$。从系统科学角度，这种训练过程可理解为\textbf{从观测数据中反演系统动力学}——损失函数度量模型输出与真实系统状态的偏差，梯度信息指导参数调整，使模型逐步逼近真实系统的演化规律。
+图神经网络的训练遵循深度学习的标准优化范式——基于梯度的反向传播算法\citep{goodfellow2016deep}。训练目标是最小化损失函数$\mathcal{L}(\Theta) = \frac{1}{M} \sum_{i=1}^{M} \ell(f_\Theta(\mathcal{G}_i), \mathbf{y}_i)$，其中$M$为训练样本数，$f_\Theta$为参数$\Theta$的GNN模型，$\mathcal{G}_i$为第$i$个输入图，$\mathbf{y}_i$为对应的标签，$\ell(\cdot)$为任务相关的损失函数。反向传播算法通过链式法则高效计算梯度，并采用Adam等优化器\citep{kingma2015adam}更新参数$\Theta^{(t+1)} = \Theta^{(t)} - \eta \nabla_\Theta \mathcal{L}$，其中$\eta$为学习率，$\nabla_\Theta \mathcal{L}$为损失函数关于参数的梯度。从系统科学角度，这种训练过程可理解为\textbf{从观测数据中反演系统动力学}——损失函数度量模型输出与真实系统状态的偏差，梯度信息指导参数调整，使模型逐步逼近真实系统的演化规律。
 
 
 % ------------------------------------------------------------
@@ -163,7 +163,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 \frac{\partial}{\partial t} \int_{\Omega} C \, d\Omega = \int_{\Omega} (E - D + R) \, d\Omega - \oint_{\partial\Omega} \mathbf{F} \cdot \mathbf{n} \, dS
 \label{eq:mass_conservation}
 \end{equation}
-\noindent 式中，$\mathbf{F}$为通量，$\mathbf{n}$为边界法向量。该约束确保模型预测的浓度变化在物理上合理——区域内污染物的增减必须可追溯到排放、沉降、化学反应或边界通量。
+\noindent 式中，$\Omega$为控制区域，$\partial\Omega$为区域边界，$\mathbf{F}$为通量，$\mathbf{n}$为边界法向量。该约束确保模型预测的浓度变化在物理上合理——区域内污染物的增减必须可追溯到排放、沉降、化学反应或边界通量。
 
 \subsection{物理知识融入图神经网络的途径}
 \label{subsec:physics_guidance}
@@ -185,7 +185,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
 \end{equation}
 \noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），$\mathcal{L}_{\text{physics}}$为物理约束项，$\lambda$为平衡系数。物理约束项的设计可基于多种物理原理：
 
-典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = S$，约束空间传输满足\cqt{零和守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
+典型的物理约束项包括：\textbf{质量守恒约束}——基于连续方程$\frac{\partial C}{\partial t} + \nabla \cdot (C \mathbf{u}) = Q$（$Q$为源汇项），约束空间传输满足\cqt{质量守恒}（本文第\ref{chap:prediction}章DIC损失）；\textbf{辅助观测约束}——利用遥感AOD等辅助数据源约束空间分布（本文第\ref{chap:inference}章）。
 
 \textbf{（4）输入特征构建：显式编码物理驱动量}
 
@@ -216,7 +216,7 @@ STGNN的本质是学习时空耦合系统的联合动力学——空间上相邻
     \centering
     \includegraphics[width=0.95\textwidth]{figures/model_general_framework.pdf}
     \caption{物理约束的时空图神经网络统一框架}
-    \caption*{蓝色模块为深度学习流水线（Pipeline），橙色标注（$\star$）为本文的核心创新——在编码层、隐空间动力学、解码层三个层次融入先验知识。模型通过损失函数$\mathcal{L}$计算预测结果$\hat{\mathbf{X}}$与观测数据的差异，并通过反向传播更新参数$\Theta$，实现数据驱动的端到端优化。}
+    \caption*{蓝色模块为深度学习流水线（Pipeline），橙色标注为本文的核心创新——在编码层、隐空间动力学、解码层三个层次融入先验知识。模型通过损失函数$\mathcal{L}$计算预测结果$\hat{\mathbf{X}}$与观测数据的差异，并通过反向传播更新参数$\Theta$，实现数据驱动的端到端优化。}
     \label{fig:unified_framework}
 \end{figure}
 
