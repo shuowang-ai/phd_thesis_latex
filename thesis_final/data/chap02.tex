@@ -45,7 +45,7 @@
 \end{equation}
 \noindent 式中$\theta_k$为可学习的多项式系数，$T_k(\cdot)$为$k$阶切比雪夫多项式，$\tilde{\mathbf{L}} = 2\mathbf{L}/\lambda_{\max} - \mathbf{I}$为归一化拉普拉斯矩阵，$K$控制滤波器的阶数（即感受野大小）。
 
-GCN\citep{kipf2017semi}进一步将ChebNet简化为一阶形式（取$K=1$），并引入归一化技巧以稳定训练：
+图卷积网络（Graph Convolutional Network, GCN）\citep{kipf2017semi}进一步将ChebNet简化为一阶形式（取$K=1$），并引入归一化技巧以稳定训练：
 \begin{equation}
 \mathbf{H}^{(l+1)} = \sigma\left(\tilde{\mathbf{D}}^{-\frac{1}{2}} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-\frac{1}{2}} \mathbf{H}^{(l)} \mathbf{W}^{(l)}\right)
 \label{eq:gcn}
