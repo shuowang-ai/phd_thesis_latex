@@ -92,7 +92,25 @@
 \subsection{排放清单数据（$\mathbf{E}$）}
 \label{subsec:emis_data}
 
-排放数据对应对流-扩散方程中的源项$S$，是本文方法区别于传统自回归模型的关键输入。采用清华大学MEIC清单\citep{zheng2018trends}\footnote{\url{http://meicmodel.org.cn/}}，包含\NOx、VOC、SO$_2$、NH$_3$、PM$_{2.5}$等物种的月均排放量，空间分辨率0.25°×0.25°。参照\cite{inventory}的方法，通过时间分配因子将月均排放降尺度至小时分辨率，考虑日变化（交通早晚高峰）、周变化和季节变化。
+排放数据对应对流-扩散方程中的源项$S$，是本文方法区别于传统自回归模型的关键输入。采用清华大学MEIC清单\citep{zheng2018trends}\footnote{\url{http://meicmodel.org.cn/}}，包含\NOx、VOC、SO$_2$、NH$_3$、PM$_{2.5}$等物种的月均排放量，空间分辨率0.25°×0.25°。参照\cite{inventory}的方法，通过时间分配因子将月均排放降尺度至小时分辨率，考虑日变化（交通早晚高峰）、周变化和季节变化。表\ref{tab:emission_variables}列出了排放清单中包含的主要变量及其物理意义。
+
+\begin{table}[htbp]
+    \centering
+    \caption{排放清单数据（$\mathbf{E}$）中包含的变量}
+    \caption*{排放向量$\mathbf{E}_i^t \in \mathbb{R}^{5}$包含5种主要污染物的排放强度，用于表征节点$i$在时刻$t$的人为排放特征。}
+    \label{tab:emission_variables}
+    \begin{tabular}{@{}lllp{5cm}@{}}
+        \toprule
+        \textbf{变量名称} & \textbf{符号} & \textbf{单位} & \textbf{物理意义} \\
+        \midrule
+        氮氧化物 & $E_{\text{NO}_x}$ & ton/h & \ozone 的关键前驱物，参与光化学反应 \\
+        挥发性有机物 & $E_{\text{VOC}}$ & ton/h & \ozone 的关键前驱物，与\NOx 协同生成\ozone \\
+        二氧化硫 & $E_{\text{SO}_2}$ & ton/h & 氧化生成硫酸盐，贡献于二次\PM \\
+        氨 & $E_{\text{NH}_3}$ & ton/h & 与酸性气体中和生成铵盐气溶胶 \\
+        一次\PM & $E_{\text{PM}_{2.5}}$ & ton/h & 直接排放的颗粒物 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \subsection{图结构构建（$\mathcal{G}$）}
 \label{subsec:graph_construction}
@@ -186,7 +204,28 @@
 \begin{equation}
     \boldsymbol{\xi}_i^t = [\hat{\mathbf{X}}_i^{t-1}, \mathbf{M}_i^t]
 \end{equation}
-\noindent 式中$\hat{\mathbf{X}}_i^{t-1}$为上一时刻的\PM 浓度预测值（或观测值），$\mathbf{M}_i^t$为当前时刻的气象特征向量。
+\noindent 式中$\hat{\mathbf{X}}_i^{t-1}$为上一时刻的\PM 浓度预测值（或观测值），$\mathbf{M}_i^t$为当前时刻的气象特征向量。表\ref{tab:pm25gnn_node_attributes}列出了节点属性中包含的所有气象变量。
+
+\begin{table}[htbp]
+    \centering
+    \caption{节点属性（$\mathbf{M}$）中包含的气象变量}
+    \caption*{节点属性向量$\mathbf{M}_i^t \in \mathbb{R}^{8}$包含8个气象特征，用于刻画节点$i$在时刻$t$的局地气象条件及其对\PM 垂直扩散的影响。}
+    \label{tab:pm25gnn_node_attributes}
+    \begin{tabular}{@{}llp{5cm}@{}}
+        \toprule
+        \textbf{变量名称} & \textbf{单位} & \textbf{物理意义} \\
+        \midrule
+        边界层高度（BLH） & m & 决定污染物垂直混合的空间范围 \\
+        K指数 & K & 反映大气层结稳定度 \\
+        风速u分量 & m/s & 东西方向风速 \\
+        风速v分量 & m/s & 南北方向风速 \\
+        2m气温 & K & 影响化学反应速率和大气稳定度 \\
+        相对湿度 & \% & 影响吸湿性增长和湿沉降 \\
+        总降水量 & m & 湿沉降清除机制 \\
+        地表气压 & Pa & 影响大气垂直运动 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 （2）边属性与平流系数。对于边特征，我们创新性地引入了平流系数（Advection Coefficient），将风场对污染传输的影响显式编码到图结构中。如图\ref{fig:advection_coeff}所示，设源节点$j$指向目标节点$i$，源节点的风速为$|v|$，两节点间距离为$d$，源节点风向$\beta$与两节点连线方向$\gamma$的夹角为$\alpha = |\gamma - \beta|$，则平流系数$S$定义为：
 

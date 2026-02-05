@@ -6,7 +6,7 @@
 \chapter{系统部署与落地应用}
 \label{chap:deployment}
 
-前述章节从预测、推断和模拟三个方面系统构建了物理约束的时空图神经网络方法体系，本章的核心任务在于将这些研究成果从实验室原型转化为能够经受真实世界考验的业务化系统，实现从\cqt{科学建模}到\cqt{工程服务}的跨越。本章将详细阐述系统架构设计、业务化验证过程以及商业化落地应用，展示物理约束深度学习方法在实际环境管理中的应用价值。
+前述章节从预测（第\ref{chap:prediction}章PCDCNet）、推断（第\ref{chap:inference}章SPIN）和模拟（第\ref{chap:simulation}章IGNN）三个方面系统构建了物理约束的时空图神经网络方法体系，本章的核心任务在于将这些研究成果从实验室原型转化为能够经受真实世界考验的业务化系统，实现从\cqt{科学建模}到\cqt{工程服务}的跨越。本章将详细阐述系统架构设计、业务化验证过程以及商业化落地应用，展示物理约束深度学习方法在实际环境管理中的应用价值。
 
 % ------------------------------------------------------------
 % 6.1 引言
@@ -16,7 +16,7 @@
 
 尽管深度学习模型在离线测试中展现出优异的预测性能，但从研究原型到实际业务系统的转化仍面临诸多挑战。传统数值模式系统（如\CMAQ+WRF）虽然具备物理可解释性，但存在更新频率低、计算资源需求高、运维成本大等瓶颈，难以满足日益增长的实时空气质量服务需求。如何构建一套低成本、高效率、可扩展的智能预报系统，实现模型的自动化训练、部署与持续迭代，已成为将AI技术真正服务于环境管理的关键工程问题。
 
-本章面临的核心挑战涵盖三个方面。其一为系统工程化与实时服务化，即如何将复杂的时空图神经网络模型从研究原型转化为可持续运行的业务系统，实现稳定、高频、可维护的预测服务。其二为数据实时性与多源同化，即如何融合实时气象预报、空气质量观测与排放估计等多源数据，达成小时级更新与快速响应。其三为可扩展性与智能化运维，即如何构建具备自动更新、免维护、云端调度能力的智能系统架构，降低传统数值模式系统的高运维成本。
+本章面临三方面核心挑战：其一，如何将复杂的时空图神经网络模型从研究原型转化为可持续运行的业务系统；其二，如何融合气象预报、空气质量观测与排放清单等多源数据实现小时级更新；其三，如何构建具备自动化运维能力的低成本系统架构。
 
 
 % ------------------------------------------------------------
@@ -41,9 +41,7 @@
   \label{fig:system_architecture}
 \end{figure}
 
-如图\ref{fig:system_architecture}所示，该架构包含两条异步且独立的核心数据流。数据采集链路是一条持续运行的后台数据流水线。部署在容器集群中的\cqt{数据接入服务}作为一个独立的微服务，会周期性地从各类外部数据源——涵盖全球天气预报系统（GFS、ERA5）、排放清单数据（MEIC、DPEC）以及国家空气质量监测网的实时观测数据——主动拉取原始数据。这些异构数据经过标准化的清洗和预处理后，被分别存入关系型数据库用于结构化存储，以及对象存储服务用于非结构化数据归档。该链路的设计确保了核心系统与外部数据源的解耦，为模型训练和推理提供了稳定、可靠的数据基础。
-
-API服务链路处理所有来自用户的实时数据请求。当C端/B端用户或环境监管部门等客户端发起数据请求时，请求首先经过网络与网关层，该层由Web应用防火墙（WAF）、服务器负载均衡（SLB）和API网关组成，构成系统安全与流量管理的第一道防线，负责流量清洗、DDoS防护、SSL卸载以及统一的API入口管理。随后，合法请求被路由至核心业务系统中的\cqt{模型推理服务}，该服务从高速缓存和数据库中加载所需的实时和历史特征数据，调用部署好的KnowAir模型进行即时计算，生成的预报结果沿逆向路径返回客户端。
+如图\ref{fig:system_architecture}所示，该架构包含两条核心数据流。数据采集链路周期性从GFS/ERA5气象预报、MEIC/DPEC排放清单及国家监测网实时观测等数据源拉取原始数据，经清洗预处理后存入数据库，为模型训练和推理提供数据基础。API服务链路处理用户的实时请求，经过WAF、SLB和API网关组成的安全层后，由模型推理服务加载特征数据并调用KnowAir模型进行计算，返回预报结果。
 
 \begin{table}[htbp]
     \centering
@@ -75,34 +73,20 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 表\ref{tab:system_components}总结了系统各核心组件的功能与技术选型。整个系统采用业界成熟的云原生技术栈，确保了高可用性、可扩展性和运维便捷性。
 
 
-\subsection{MLOps自动化训练流水线}
+\subsection{自动化训练与部署流水线}
 \label{subsec:mlops}
 
-为实现模型从开发到生产的快速、可靠流转，本研究借鉴并实施了MLOps（Machine Learning Operations）的核心思想，构建了一套覆盖模型全生命周期的自动化工作流。
+为实现模型的持续迭代与自动化部署，本研究构建了覆盖模型全生命周期的MLOps工作流，如图\ref{fig:mlops_pipeline}所示。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/chap06_train_deploy.png}
   \caption{模型离线训练与自动化部署流水线}
-  \caption*{上半部分展示自动化训练阶段：CronJob定时触发训练任务，容器实例拉取最新数据执行PyTorch训练，达标模型被版本化存入模型仓库。下半部分展示自动化部署阶段：GitOps流水线同步配置变更，ArgoCD检测到更新后自动执行滚动部署至生产环境。}
+  \caption*{上半部分为自动化训练阶段：定时任务触发训练，达标模型版本化存入模型仓库；下半部分为自动化部署阶段：GitOps流水线检测到更新后自动执行滚动部署。}
   \label{fig:mlops_pipeline}
 \end{figure}
 
-\subsubsection{自动化模型训练与版本化}
-
-为确保模型能够持续从最新数据中学习，以对抗模型漂移（Model Drift）并适应不断变化的大气环境，本研究设计并实现了一套自动化的离线训练流水线，如图\ref{fig:mlops_pipeline}上半部分所示。
-
-该流水线由部署在容器集群中的调度层（Scheduler）发起，其核心是一个Kubernetes CronJob定时任务控制器，根据预设时间表定时触发训练任务。任务触发后，训练执行层（Executor）立即启动专用训练Pod，该Pod首先连接到数据存储层，从数据库和对象存储中拉取涵盖最新周期的全量训练数据。数据准备就绪后，Pod执行核心的PyTorch模型训练过程，可利用GPU资源加速以缩短训练时间。
-
-训练完成后，系统对新生成的模型进行严格的评估与验证，通过在预留验证集上计算关键性能指标（RMSE、MAE等）判断新模型性能是否优于当前生产环境模型。若性能达标，新模型被视为不可变（immutable）模型制品，赋予唯一版本号，安全存入作为模型仓库的对象存储服务；若性能不达标，则本次训练流程结束，生产环境模型保持不变。
-
-\subsubsection{基于GitOps的声明式持续部署}
-
-为实现高效、安全且可靠的软件交付，本系统采用业界先进的GitOps作为核心部署方法论，如图\ref{fig:mlops_pipeline}下半部分所示。GitOps的核心思想是将Git仓库作为系统期望状态的唯一真实来源（Single Source of Truth），并采用代码与配置分离的最佳实践。
-
-整个流程始于开发者：当开发者将新的业务代码推送到代码仓库（AppRepo）后，自动触发CI/CD流水线。该流水线执行代码编译、单元测试、安全扫描等自动化步骤，并将通过测试的代码构建成不可变的Docker镜像，推送到镜像仓库。CI/CD流水线的最后一步自动修改独立的配置仓库（ConfigRepo），更新对应服务的Kubernetes部署文件，将镜像标签更改为新版本。
-
-此时，部署在生产环境容器集群中的GitOps控制器（ArgoCD）发挥作用。ArgoCD作为持续运行的操作员（Operator），实时监控配置仓库状态。检测到部署文件变更后，它立即将Git仓库中定义的\cqt{期望状态}与集群中的\cqt{实际状态}进行比对，并自动执行\cqt{协调}（Reconciliation）操作，通过滚动更新策略将新版本服务平滑部署上线。
+训练流水线通过Kubernetes CronJob定时触发，自动拉取最新数据执行PyTorch训练。训练完成后，系统在验证集上评估新模型性能，若优于当前生产模型则版本化存储，否则保持不变。部署流水线采用GitOps方法论，通过CI/CD流水线自动构建Docker镜像并更新配置，GitOps控制器检测到变更后自动执行滚动部署，实现从代码提交到生产上线的全程自动化。
 
 
 \subsection{系统性能与成本分析}
@@ -110,7 +94,7 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/chap06_api_performance.jpeg}
+  \includegraphics[width=0.9\linewidth]{figures/chap06_api_performance.jpeg}
   \caption{API服务性能监控面板}
   \caption*{左侧纵轴显示QPS（每秒查询数），右侧纵轴显示响应延迟（毫秒）。系统在高峰期保持稳定的低延迟响应（P99延迟$<$200ms），验证了微服务架构的高可用性。}
   \label{fig:api_performance}
@@ -152,45 +136,20 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 \subsection{在线预报性能监测}
 \label{subsec:online_monitoring}
 
-为全面评估模型的实战表现，建立了覆盖全国主要城市的在线预报性能持续监测体系，对AQI、\PM、\ozone 等关键指标进行实时跟踪与评估。
+为评估模型的实战表现，建立了覆盖全国主要城市的在线预报性能监测体系。图\ref{fig:online-aqi-metrics}展示了北京、上海、石家庄、郑州四个代表性城市的AQI预报性能，短期预报与实测值高度吻合，中长期预报仍能较好把握污染变化趋势。
 
 \begin{figure}[htbp]
   \centering
-  \subcaptionbox{北京市AQI预报性能\label{fig:online-aqi-beijing}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_beijing.png}} \\[1ex]
-  \subcaptionbox{上海市AQI预报性能\label{fig:online-aqi-shanghai}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_shanghai.png}} \\[1ex]
-  \subcaptionbox{石家庄市AQI预报性能\label{fig:online-aqi-shijiazhuang}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_shijiazhuang.png}} \\[1ex]
-  \subcaptionbox{郑州市AQI预报性能\label{fig:online-aqi-zhengzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_aqi_zhengzhou.png}} 
+  \subcaptionbox{北京市\label{fig:online-aqi-beijing}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_beijing.png}}
+  \subcaptionbox{上海市\label{fig:online-aqi-shanghai}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_shanghai.png}}
   \caption{代表性城市AQI预报性能时序对比}
-  \caption*{各子图展示了不同预报时效（3h、6h、12h、24h、48h、72h）下的预测值与实测值（AQI\_OBS）对比。模型在短期预报（3--12h）中表现出色，随预报时效延长误差逐渐增加但仍保持良好的趋势把握能力。}
+  \caption*{各子图展示了不同预报时效（3h--72h）下的预测值与实测值对比。模型在短期预报中表现出色，随预报时效延长仍保持良好的趋势把握能力。}
   \label{fig:online-aqi-metrics}
 \end{figure}
 
-图\ref{fig:online-aqi-metrics}展示了北京、上海、石家庄、郑州四个代表性城市的AQI预报性能。从图中可以观察到：短期预报与实测值高度吻合，中期预报仍能较好把握污染变化趋势，即使在较长预报时效下，模型依然能够捕捉主要污染过程的峰值时间与量级。
-
-\begin{figure}[htbp]
-  \centering
-  \subcaptionbox{北京市\ozone 预报性能\label{fig:online-o3-beijing}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_beijing.jpeg}} \\[1ex]
-  \subcaptionbox{广州市\ozone 预报性能\label{fig:online-o3-guangzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_guangzhou.jpeg}} \\[1ex]
-  \subcaptionbox{上海市\ozone 预报性能\label{fig:online-o3-shanghai}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_shanghai.jpeg}} \\[1ex]
-  \subcaptionbox{苏州市\ozone 预报性能\label{fig:online-o3-suzhou}}
-    {\includegraphics[width=0.9\linewidth]{figures/chap06_o3_suzhou.jpeg}} 
-  \caption{代表性城市\ozone 浓度预报性能时序对比}
-  \caption*{臭氧具有显著的日周期变化特征——白天光化学反应活跃导致浓度升高，夜间则显著下降。AI方法能够有效捕捉这种周期性规律，模型预测很好地还原了臭氧的日变化振幅与相位。}
-  \label{fig:online-o3-metrics}
-\end{figure}
-
-图\ref{fig:online-o3-metrics}展示了臭氧（\ozone）的预报性能。臭氧浓度具有显著的日周期变化特征，这种规律性的周期变化恰好是数据驱动方法的优势所在：AI模型能够从历史数据中准确学习这种周期性模式，而传统数值模型因光化学反应机理的复杂性往往难以精确刻画。
-
-值得注意的是，从预报难度角度，臭氧对数据驱动模型与传统数值模型呈现截然相反的特性。对于本文采用的AI模型，臭氧的可预报性反而优于PM$_{2.5}$，其根本原因在于臭氧浓度具有高度规律的日周期变化模式——白天光化学生成、夜间滴定消耗的昼夜节律极为稳定，而深度学习模型擅长从历史数据中捕捉并外推这种周期性规律。
-
-然而，对于CMAQ、WRF-Chem等传统数值模型，臭氧预报却是公认的技术难点。如第\ref{subsec:traditional_models}节所述，臭氧是典型的二次污染物，其生成涉及NO$_x$与VOC在紫外辐射下的复杂光化学反应链。数值模型为刻画这一过程需耦合包含上百个化学方程的气相机理（如CB06、RADM2），计算复杂度极高。更关键的是，臭氧预报精度高度依赖前驱物排放清单的准确性：VOC与NO$_x$的排放量、时空分布及配比的任何偏差都会通过非线性化学反应被放大。此外，臭氧生成存在\cqt{VOC控制区}与\cqt{NO$_x$控制区}的非线性响应特征，使排放误差影响更难预判。相比之下，数据驱动方法通过端到端学习直接建立输入特征与臭氧浓度的映射，有效规避了显式求解光化学方程组的需求，在保持精度的同时降低了对排放清单的敏感性。
+值得注意的是，臭氧对数据驱动模型与传统数值模型呈现截然相反的预报难度特性。对于AI模型，臭氧的可预报性优于\PM，因为臭氧浓度具有高度规律的日周期变化模式，深度学习模型擅长捕捉这种周期性规律。而对于CMAQ等传统数值模型，臭氧预报是公认的技术难点——需耦合包含上百个化学方程的气相机理，且高度依赖前驱物排放清单的准确性。数据驱动方法通过端到端学习规避了显式求解光化学方程组的需求，在保持精度的同时降低了对排放清单的敏感性。
 
 \subsection{上海进博会保障案例}
 \label{subsec:ciie_case}
@@ -204,29 +163,21 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 \begin{table}[htbp]
 \centering
 \caption{KnowAir模型与传统数值模型的预报性能对比}
-\caption*{在长三角地区测试中，KnowAir模型在\PM、\ozone、PM$_{10}$三种污染物预报任务上均取得最优性能。表中RMSE为均方根误差（越小越好），R为相关系数（越大越好）。}
+\caption*{在长三角地区测试中，KnowAir模型在三种污染物预报任务上均取得最优性能。RMSE为均方根误差（$\downarrow$越小越好），R为相关系数（$\uparrow$越大越好）。}
 \label{tab:model_vs_numerical}
-\begin{tabular}{@{}llcc@{}}
+\small
+\begin{tabular}{@{}llccccc@{}}
 \toprule
-\textbf{污染物} & \textbf{模型} & \textbf{RMSE} $\downarrow$ & \textbf{R} $\uparrow$ \\
+\textbf{污染物} & \textbf{指标} & \textbf{CMAQ-1} & \textbf{CMAQ-2} & \textbf{WRF-Chem} & \textbf{NAQPMS} & \textbf{KnowAir} \\
 \midrule
-\multirow{5}{*}{\PM} & \CMAQ (run 1) & 18.3 & 0.395 \\
-& \CMAQ (run 2) & 14.5 & 0.425 \\
-& WRF-Chem & 25.1 & 0.641 \\
-& NAQPMS & 21.4 & 0.588 \\
-& \textbf{KnowAir} & \textbf{5.7} & \textbf{0.820} \\
+\multirow{2}{*}{\PM} & RMSE & 18.3 & 14.5 & 25.1 & 21.4 & \textbf{5.7} \\
+& R & 0.395 & 0.425 & 0.641 & 0.588 & \textbf{0.820} \\
 \midrule
-\multirow{5}{*}{\ozone} & \CMAQ (run 1) & 48.3 & 0.548 \\
-& \CMAQ (run 2) & 38.2 & 0.563 \\
-& WRF-Chem & 79.5 & 0.644 \\
-& NAQPMS & 96.6 & 0.585 \\
-& \textbf{KnowAir} & \textbf{38.4} & \textbf{0.756} \\
+\multirow{2}{*}{\ozone} & RMSE & 48.3 & 38.2 & 79.5 & 96.6 & \textbf{38.4} \\
+& R & 0.548 & 0.563 & 0.644 & 0.585 & \textbf{0.756} \\
 \midrule
-\multirow{5}{*}{PM$_{10}$} & \CMAQ (run 1) & 15.4 & 0.457 \\
-& \CMAQ (run 2) & 14.8 & 0.519 \\
-& WRF-Chem & 21.3 & 0.601 \\
-& NAQPMS & 15.9 & 0.650 \\
-& \textbf{KnowAir} & \textbf{7.3} & \textbf{0.856} \\
+\multirow{2}{*}{PM$_{10}$} & RMSE & 15.4 & 14.8 & 21.3 & 15.9 & \textbf{7.3} \\
+& R & 0.457 & 0.519 & 0.601 & 0.650 & \textbf{0.856} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -237,11 +188,7 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 
 在进博会举办期间，本AI模型的每日预报结果与传统专家会商模式进行了直接对比。结果显示，AI模型展现出三方面显著优势。
 
-精确度优势：AI模型能够提供具体的单值预测，而专家会商则提供较宽泛的区间预测，这种精确性对于精细化管控决策具有重要参考价值。
-
-准确性优势：AI模型的单值预测结果持续优于专家会商的区间预测。在多个预报日次中，AI模型预测与实测值的偏差显著小于专家会商区间的中值偏差，部分情况下专家会商给出的预测区间甚至完全偏离了实测范围。
-
-中长期预报优势：这种优势在中长期预报中尤为明显。在提前多日的预报中，AI模型仍能基本把握污染等级，而专家会商给出的区间预测参考价值相对有限。
+精确度优势：AI模型能够提供具体的单值预测，而专家会商提供较宽泛的区间预测。准确性优势：AI模型预测与实测值的偏差显著小于专家会商区间的中值偏差。中长期预报优势：在提前多日的预报中，AI模型仍能基本把握污染等级，优势更为明显。
 
 
 \subsection{粤港澳模型比对测试}
@@ -270,11 +217,11 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 \subsubsection{面向公众的应用}
 \label{subsec:b2c}
 
-在\cqt{彩云天气}APP中，KnowAir模型为数千万用户提供直观、及时的空气质量预报服务。主要功能涵盖三个方面：（1）\textbf{高分辨率污染物空间分布图}——基于SPIN模型的空间推断能力，生成覆盖全国的高分辨率污染物浓度场，用户可直观查看所在区域及周边的空气质量状况；（2）\textbf{精细化AQI和污染物浓度预报}——提供未来多日的逐小时污染物浓度预报，帮助用户合理安排户外活动；（3）\textbf{重污染天气追踪与预警}——对即将来临的重污染过程提前发出预警，涵盖污染过程的起止时间、峰值浓度和影响范围。
+在\cqt{彩云天气}APP中，KnowAir模型为数千万用户提供空气质量预报服务，主要功能包括：基于SPIN模型的高分辨率污染物空间分布图、未来多日逐小时污染物浓度预报，以及重污染天气的提前预警。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/chap06_beijing_pollution.png}
+  \includegraphics[width=0.95\linewidth]{figures/chap06_beijing_pollution.png}
   \caption{北京重污染事件的提前预报示例}
   \caption*{左图展示污染峰值期间的空气质量状况，右图展示污染消散后的状况。系统成功提前数日预报了该污染过程的发生与消散，预报结果与实际观测高度一致，充分验证了模型在真实业务场景中的可靠性。}
   \label{fig:beijing_pollution_case}
@@ -285,18 +232,18 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/chap06_lianghui.png}
-  \caption{全国两会期间北京AQI监测与预报对比}
+  \caption{春季重大活动期间北京AQI监测与预报对比}
   \caption*{图中各曲线代表不同预报时效的预测值，灰色曲线（AQI\_OBS）为实测值。图中最后几天出现的AQI突升对应沙尘暴事件，属于预报难点，但模型仍能把握其趋势特征。}
   \label{fig:lianghui_monitoring}
 \end{figure}
 
-图\ref{fig:lianghui_monitoring}进一步展示了重大活动期间更长时间序列的预报性能。总体而言，各预报时效的预测曲线与实测值保持良好一致。特别值得指出的是，图中最后几天出现的AQI突升对应一次沙尘暴过境事件。沙尘暴属于突发性、高频信号的极端天气事件，其预报难度远高于常规污染过程。尽管如此，模型仍能较好地捕捉到污染物浓度快速上升的趋势，体现了一定的极端事件响应能力。
+图\ref{fig:lianghui_monitoring}进一步展示了全国两会期间更长时间序列的预报性能。总体而言，各预报时效的预测曲线与实测值保持良好一致。特别值得指出的是，图中最后几天出现的AQI突升对应一次沙尘暴过境事件。沙尘暴属于突发性、高频信号的极端天气事件，其预报难度远高于常规污染过程。尽管如此，模型仍能较好地捕捉到污染物浓度快速上升的趋势，体现了一定的极端事件响应能力。
 
 
 \subsubsection{面向企业的服务}
 \label{subsec:b2b}
 
-模型产生的高精度预报数据被封装成标准的数据API服务，为众多行业的头部企业提供支持。服务覆盖多个行业领域：科技公司将其用于智能家居空气净化器联动和手机天气应用；智能汽车企业将其集成于车载空调系统的智能空气质量管理；物流企业借此实现户外作业人员健康保护和路线优化；金融机构用于健康保险风险评估；零售企业则用于空气净化产品的智能推荐。这种广泛的商业采纳是对模型数据准确性、稳定性及其商业价值的最有力印证。
+模型产生的高精度预报数据被封装成标准API服务，为科技、智能汽车、物流、金融、零售等行业的头部企业提供支持，应用场景涵盖智能家居联动、车载空气质量管理、户外作业健康保护和保险风险评估等。这种广泛的商业采纳是对模型准确性和稳定性的有力印证。
 
 
 \subsubsection{可视化监控与运维平台}
@@ -304,7 +251,7 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/chap06_caiyun_platform.png}
+  \includegraphics[width=0.95\linewidth]{figures/chap06_caiyun_platform.png}
   \caption{彩云科技空气质量可视化平台界面}
   \caption*{该平台提供全国范围的实时空气质量分布图，支持多污染物切换、时间动画播放和站点详情查询，已成为公众了解空气质量状况的重要渠道。}
   \label{fig:caiyun_web}
@@ -314,7 +261,7 @@ API服务链路处理所有来自用户的实时数据请求。当C端/B端用�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{figures/chap06_monitoring_panel.png}
+  \includegraphics[width=0.95\linewidth]{figures/chap06_monitoring_panel.png}
   \caption{系统运维监控面板}
   \caption*{该面板集成了多城市、多指标的实时监测与预报评估功能，包括各城市平均AQI分布（左上）、近期污染物浓度趋势（左中）、各时效预报误差时序（左下和右上）以及全国城市\PM MAE分布排序（右下）。}
   \label{fig:monitoring_accuracy}
