@@ -341,7 +341,7 @@ PM$_{2.5}$-GNN在KnowAir-DS数据集上的实验表明，相比于GC-LSTM等基�
 \begin{itemize}
     \item \textbf{多污染物联合预测}：同时预报\PM 与\ozone 浓度，并建模其协同效应；
     \item \textbf{排放响应建模}：融合排放清单作为动态输入，实现对排放变化的显式响应；
-    \item \textbf{物理化学动力学建模}：设计LID-STD-TAD三模块架构，分别建模局地化学反应、空间传输和时间累积过程；
+    \item \textbf{物理化学动力学建模}：设计LID--STD--TAD三模块架构，分别建模局地化学反应、空间传输和时间累积过程；
     \item \textbf{领域知识约束}：引入DIC约束，将质量守恒嵌入训练目标。
 \end{itemize}
 
@@ -918,7 +918,7 @@ PCDCNet采用以下训练策略：
 
 \begin{itemize}
     \item \textbf{排放响应建模}：将排放清单作为动态输入变量纳入模型框架，实现对排放变化的显式响应能力，为后续的情景模拟应用奠定基础；
-    \item \textbf{LID-STD-TAD三模块架构}：分别对应公式\eqref{eq:advection_diffusion}中的化学反应与排放项（R、E）、平流与扩散项、沉降项与时间累积（D），实现\cqt{过程解耦+联合建模}，增强了模型的物理可解释性；
+    \item \textbf{LID--STD--TAD三模块架构}：分别对应公式\eqref{eq:advection_diffusion}中的化学反应与排放项（R、E）、平流与扩散项、沉降项与时间累积（D），实现\cqt{过程解耦+联合建模}，增强了模型的物理可解释性；
     \item \textbf{领域知识约束（DIC）}：将质量守恒原则嵌入损失函数，引导模型学习物理一致的传输模式，有效抑制长时序预测中的误差累积。
 \end{itemize}
 
