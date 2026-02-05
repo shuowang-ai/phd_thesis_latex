@@ -447,7 +447,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \begin{algorithm}[htbp]
 \caption{SPIN 模型训练与推理流程}
-\caption*{算法包含四个核心阶段：动态节点掩码（模拟数据缺失场景）、TCN时序编码（提取本地物理特征）、双图传播（物理引导的空间信息交互）、以及复合损失优化（融合推断损失、初始化损失和AOD梯度约束）。}
+\caption*{\textbf{SPIN 模型训练与推理流程}：算法包含四个核心阶段：动态节点掩码（模拟数据缺失场景）、TCN时序编码（提取本地物理特征）、双图传播（物理引导的空间信息交互）、以及复合损失优化（融合推断损失、初始化损失和AOD梯度约束）。}
 \label{alg:spin}
 \begin{algorithmic}[1]
     \REQUIRE 训练数据集$\mathcal{D}$，初始化参数$\Theta$，学习率$\alpha$，掩码比例$r_{\text{mask}}$
