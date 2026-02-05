@@ -930,4 +930,4 @@ PCDCNet采用以下训练策略：
 
 从方法论角度，本章的核心贡献在于：将第\ref{chap:methodology}章公式\eqref{eq:advection_diffusion}所描述的大气物理化学过程（平流、扩散、化学反应、排放、沉降）显式地映射到深度学习架构设计中，构建了\cqt{Embed$\to$LID$\to$STD$\to$TAD$\to$Readout}的完整建模框架。这种\cqt{观测空间$\leftrightarrow$隐空间$\leftrightarrow$观测空间}的表示学习范式，不仅约束了模型的输入输出映射，更重要的是约束了模型学习到的隐空间表示本身，使其具备物理意义与一致性。
 
-PCDCNet的成功构建，不仅实现了高精度的实时预报，更为后续章节开展基于多源数据融合的\textbf{空间推断}（第\ref{chap:inference}章）和基于排放清单的\textbf{情景模拟}（第\ref{chap:simulation}章）奠定了坚实的建模基础。
+PCDCNet的成功构建，不仅实现了高精度的实时预报，更为后续章节开展基于多源数据融合的\textbf{空间推断}（第\ref{chap:inference}章）和基于排放清单的\textbf{情景模拟}（第\ref{chap:simulation}章）奠定了坚实的建模基础。在第\ref{chap:deployment}章中，PCDCNet将作为核心预报引擎部署到KnowAir智能预报系统中实现业务化运行，并与\CMAQ、WRF-Chem、NAQPMS等传统数值模式进行直接对比评估，以验证其在真实业务场景中的实战表现。
