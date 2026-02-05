@@ -466,11 +466,11 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
         \STATE \textbf{阶段3：物理引导的图传播}
         \STATE 根据当前时刻风场更新平流图$\tilde{\mathbf{A}}^{\mathcal{A}}$
         \FOR{$l \leftarrow 1$ to $L$}
-            \STATE $\mathbf{Z}^{\mathcal{D}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{D}} \mathbf{W}^{\mathcal{D}} \mathbf{H}^{(l-1)}$ \COMMENT{扩散消息}
-            \STATE $\mathbf{Z}^{\mathcal{A}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{A}} \mathbf{W}^{\mathcal{A}} \mathbf{H}^{(l-1)}$ \COMMENT{平流消息}
-            \STATE $\mathbf{G} \leftarrow \sigma(\mathbf{W}_g [\mathbf{Z}^{\mathcal{D}}, \mathbf{Z}^{\mathcal{A}}])$ \COMMENT{门控权重}
-            \STATE $\mathbf{Z} \leftarrow \mathbf{G} \odot \mathbf{Z}^{\mathcal{D}} + (1-\mathbf{G}) \odot \mathbf{Z}^{\mathcal{A}}$ \COMMENT{融合}
-            \STATE $\mathbf{H}^{(l)} \leftarrow \text{ReLU}(\mathbf{H}^{(l-1)} + \mathbf{Z})$ \COMMENT{残差更新}
+            \STATE $\mathbf{H}^{\mathcal{D}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{D}} \mathbf{W}^{\mathcal{D}} \mathbf{H}^{(l-1)}$ \COMMENT{扩散消息}
+            \STATE $\mathbf{H}^{\mathcal{A}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{A}} \mathbf{W}^{\mathcal{A}} \mathbf{H}^{(l-1)}$ \COMMENT{平流消息}
+            \STATE $\mathbf{G} \leftarrow \sigma(\mathbf{W}_g [\mathbf{H}^{\mathcal{D}}, \mathbf{H}^{\mathcal{A}}])$ \COMMENT{门控权重}
+            \STATE $\Delta\mathbf{H} \leftarrow \mathbf{G} \odot \mathbf{H}^{\mathcal{D}} + (1-\mathbf{G}) \odot \mathbf{H}^{\mathcal{A}}$ \COMMENT{融合}
+            \STATE $\mathbf{H}^{(l)} \leftarrow \text{ReLU}(\mathbf{H}^{(l-1)} + \Delta\mathbf{H})$ \COMMENT{残差更新}
         \ENDFOR
 
         \STATE \textbf{阶段4：读出与损失计算}
