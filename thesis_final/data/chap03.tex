@@ -83,7 +83,7 @@
 
 气象数据服务于对流-扩散方程中的平流项和扩散项建模。采用两个互补数据源：
 
-\textbf{离线训练}：ERA5再分析数据集\citep{hersbach2020era5}，空间分辨率0.25°×0.25°，时间分辨率1小时。
+\textbf{离线训练}：ERA5再分析数据集\citep{hersbach2020era5}，空间分辨率0.25°×0.25°。
 
 \textbf{在线部署}：GFS预报产品，每日更新4次，提供未来15天气象预报。
 
@@ -99,9 +99,9 @@
 
 基于第\ref{chap:methodology}章的消息传递范式，构建空间图$\mathcal{G} = (\mathcal{V}, \mathcal{E})$。两节点$i$、$j$间建立边当且仅当：（1）地理距离$d_{ij} < 300$km（对应72小时内约4m/s风速的传输尺度）；（2）无高于1200m的山脉阻隔（物理屏障约束）。
 
-具体地，节点$i$与$j$的连边，可以写为：
+具体地，设节点$i$的地理位置为$\rho_i = (\text{lat}_i, \text{lon}_i)$，表示其纬度和经度坐标。节点$i$与$j$之间的邻接关系定义为：
 \begin{equation}
-    A_{ij} = H(d_{\max} - d_{ij}) \cdot H(h_{\max} - \Delta h_{ij})
+    A_{ij} = H(d_\theta - d_{ij}) \cdot H(m_\theta - m_{ij})
 \label{eq:adjacency}
 \end{equation}
 \noindent 其中$H(x)$为Heaviside阶跃函数：
@@ -109,7 +109,21 @@
     H(x) = \begin{cases} 1, & x > 0 \\ 0, & x \leq 0 \end{cases}
 \label{eq:heaviside}
 \end{equation}
-\noindent 式中$d_{ij}$为节点$i$与$j$之间的地理距离，$d_{\max} = 300$km为距离阈值；$\Delta h_{ij}$为两节点间最高山脉海拔，$h_{\max} = 1200$m为海拔阈值。图\ref{fig:multi-image}展示了基于公式\eqref{eq:adjacency}构建的两个研究区域的城市网络结构。
+
+\noindent $d_{ij}$为节点$i$与$j$之间的地理距离，采用L2范数计算：
+\begin{equation}
+    d_{ij} = \|\rho_i - \rho_j\|_2
+\label{eq:distance}
+\end{equation}
+
+\noindent $m_{ij}$为两节点连线路径上的相对山脉高度，定义为路径上最高点与两端点中较高者的海拔差：
+\begin{equation}
+    m_{ij} = \sup_{\lambda \in (0,1)} \left\{ h\left(\lambda\rho_i + (1-\lambda)\rho_j\right) \right\} - \max\left\{h(\rho_i), h(\rho_j)\right\}
+\label{eq:mountain}
+\end{equation}
+\noindent 其中$h(\cdot)$为地形高程函数，$\lambda\rho_i + (1-\lambda)\rho_j$表示两城市连线上的插值点。该定义的物理含义是：只有当路径上存在显著高于两端城市的山脉时，$m_{ij}$才会取较大正值，从而阻断连边。
+
+阈值参数设置为$d_\theta = 300$km和$m_\theta = 1200$m。距离阈值对应污染物在典型风速（约4m/s）下72小时内的传输尺度；海拔阈值则反映山脉对边界层内污染物传输的阻隔效应。图\ref{fig:multi-image}展示了基于公式\eqref{eq:adjacency}构建的两个研究区域的城市网络结构。
 
 \begin{figure}[htbp]
   \centering
@@ -129,7 +143,15 @@
 
 基于上述多源数据，我们构建并公开发布了\textbf{KnowAir-DS}系列数据集\citep{wang2020pm2}：
 
-\textbf{KnowAir-DS-V1}（2015-2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于PM$_{2.5}$-GNN评估。
+\textbf{KnowAir-DS-V1}（2015-2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于PM$_{2.5}$-GNN评估。图\ref{fig:knowair_v1_study_area}展示了KnowAir-DS-V1的研究区域及基于公式\eqref{eq:adjacency}构建的城市网络图结构。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/chap03_knowair_study_area.jpg}
+  \caption{KnowAir-DS-V1数据集研究区域与城市网络}
+  \caption*{左图为研究区域地理范围，覆盖中国中东部184个城市；右图为基于公式\eqref{eq:adjacency}构建的城市网络图$\mathcal{G}$，节点代表城市，边代表满足距离阈值（$d < 300$km）和地形约束的潜在污染传输通道。}
+  \label{fig:knowair_v1_study_area}
+\end{figure}
 
 \textbf{KnowAir-DS-V2}（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016-2019）、验证集（2020-2021）、测试集（2022-2023）。
 
@@ -256,22 +278,22 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 算法\ref{alg:pm25_gnn}给出了PM$_{2.5}$-GNN的完整训练与推理流程。
 
 \begin{algorithm}[htbp]
-\caption{PM$_{2.5}$-GNN的训练与推理流程}
+\caption{PM$_{2.5}$-GNN 模型训练与推理流程}
 \caption*{算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
     \REQUIRE 初始观测值 $\mathbf{X}^{0}$，未来$T$步的节点属性 $\{\mathbf{M}^t\}_{t=1}^T$ 和边属性 $\{\mathbf{A}^t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}^t\}_{t=1}^T$（推理）
 
-    \STATE 初始化所有节点的GRU隐状态 $\{\mathbf{h}_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
+    \STATE 初始化所有节点的GRU隐状态 $\{h_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
     \STATE 初始化预测序列 $\hat{\mathbf{X}}^0 \leftarrow \mathbf{X}^0$
     
     \FOR{$t \leftarrow 1$ to $T$}
         \FOR{每个节点 $i \in \mathcal{V}$}
             \STATE $\boldsymbol{\xi}_i^t \leftarrow [\hat{\mathbf{X}}_i^{t-1}, \mathbf{M}_i^t]$ \COMMENT{构建节点输入特征}
             \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{A}_{j\to i}^t]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathbf{A}_{i\to j}^t])))$ \COMMENT{净通量聚合}
-            \STATE $\mathbf{h}_i^t \leftarrow \text{GRUcell}([\boldsymbol{\xi}_i^t, \zeta_i^t], \mathbf{h}_i^{t-1})$ \COMMENT{时空状态更新}
-            \STATE $\hat{\mathbf{X}}_i^t \leftarrow \Omega(\mathbf{h}_i^t)$ \COMMENT{浓度预测}
+            \STATE $h_i^t \leftarrow \text{GRUcell}([\boldsymbol{\xi}_i^t, \zeta_i^t], h_i^{t-1})$ \COMMENT{时空状态更新}
+            \STATE $\hat{\mathbf{X}}_i^t \leftarrow \Omega(h_i^t)$ \COMMENT{浓度预测}
         \ENDFOR
     \ENDFOR
 
@@ -512,7 +534,7 @@ PCDCNet采用以下训练策略：
 算法\ref{alg:algorithm}给出了PCDCNet的完整训练与推理流程。
 
 \begin{algorithm}[htbp]
-\caption{PCDCNet的训练与推理流程}
+\caption{PCDCNet 模型训练与推理流程}
 \caption*{算法包含历史编码和预测两个阶段。每个时间步依次执行：嵌入层融合多源数据、LID模块处理局地化学反应、STD模块处理空间传输、TAD模块处理时间累积、残差预测生成浓度。训练时同时优化预测损失和DIC约束损失。}
 \label{alg:algorithm}
 \begin{algorithmic}[1]
