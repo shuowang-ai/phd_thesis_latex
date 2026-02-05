@@ -143,15 +143,15 @@
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{北京市\label{fig:online-aqi-beijing}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_aqi_beijing.png}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_aqi_beijing.png}}\\[0.3em]
   \subcaptionbox{上海市\label{fig:online-aqi-shanghai}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_aqi_shanghai.png}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_aqi_shanghai.png}}\\[0.3em]
   \subcaptionbox{石家庄市\label{fig:online-aqi-shijiazhuang}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_aqi_shijiazhuang.png}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_aqi_shijiazhuang.png}}\\[0.3em]
   \subcaptionbox{郑州市\label{fig:online-aqi-zhengzhou}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_aqi_zhengzhou.png}}
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_aqi_zhengzhou.png}}
   \caption{代表性城市AQI预报性能时序对比}
-  \caption*{横轴为时间，纵轴为AQI值。各子图中黑色曲线为实际观测值（OBS），彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。四个城市的预报精度均表现优异，各时效预报曲线与观测曲线高度吻合，污染过程的峰谷特征得到准确刻画。}
+  \caption*{横轴为时间，纵轴为AQI值。各子图中紫色曲线（带浅紫色填充区域）为实际观测值（OBS），其余彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。四个城市的预报精度均表现优异，各时效预报曲线与观测曲线高度吻合，污染过程的峰谷特征得到准确刻画。}
   \label{fig:online-aqi-metrics}
 \end{figure}
 
@@ -166,15 +166,15 @@
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{北京市\label{fig:online-o3-beijing}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_o3_beijing.jpeg}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_o3_beijing.jpeg}}\\[0.3em]
   \subcaptionbox{上海市\label{fig:online-o3-shanghai}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_o3_shanghai.jpeg}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_o3_shanghai.jpeg}}\\[0.3em]
   \subcaptionbox{广州市\label{fig:online-o3-guangzhou}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_o3_guangzhou.jpeg}}\\[0.8em]
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_o3_guangzhou.jpeg}}\\[0.3em]
   \subcaptionbox{苏州市\label{fig:online-o3-suzhou}}
-    {\includegraphics[width=0.85\linewidth]{figures/chap06_o3_suzhou.jpeg}}
+    {\includegraphics[width=0.95\linewidth]{figures/chap06_o3_suzhou.jpeg}}
   \caption{代表性城市臭氧预报性能时序对比}
-  \caption*{横轴为时间，纵轴为臭氧浓度（$\mu$g/m$^3$）。臭氧预报精度整体优于AQI，各时效预报曲线与观测高度吻合，日变化的峰谷特征得到精确刻画。苏州在个别极端高值日存在轻微低估。}
+  \caption*{横轴为时间，纵轴为臭氧浓度（$\mu$g/m$^3$）。各子图中紫色曲线（带浅紫色填充区域）为实际观测值（OBS），其余彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。臭氧预报精度整体优于AQI，各时效预报曲线与观测高度吻合，日变化的峰谷特征得到精确刻画。苏州在个别极端高值日存在轻微低估。}
   \label{fig:online-o3-metrics}
 \end{figure}
 
@@ -260,7 +260,7 @@
   \centering
   \includegraphics[width=\linewidth]{figures/chap06_lianghui.png}
   \caption{春季重大活动期间北京AQI监测与预报对比}
-  \caption*{横轴为日期，纵轴为AQI值。灰色曲线（AQI\_OBS）为逐小时实测值；彩色曲线分别为提前6小时（6h）、12小时（12h）、24小时（24h）、48小时（48h）、72小时（72h）发布的预报值。图中最后几天AQI突升对应沙尘暴过境事件，属于突发性极端事件，预报难度远高于常规污染过程，但模型仍能把握其上升趋势。}
+  \caption*{横轴为日期，纵轴为AQI值。紫色曲线（带浅紫色填充区域，AQI\_OBS）为逐小时实测值；其余彩色曲线分别为提前6小时（6h）、12小时（12h）、24小时（24h）、48小时（48h）、72小时（72h）发布的预报值。图中最后几天AQI突升对应沙尘暴过境事件，属于突发性极端事件，预报难度远高于常规污染过程，但模型仍能把握其上升趋势。}
   \label{fig:lianghui_monitoring}
 \end{figure}
 
