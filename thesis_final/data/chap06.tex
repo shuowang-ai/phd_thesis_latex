@@ -136,20 +136,47 @@
 \subsection{在线预报性能监测}
 \label{subsec:online_monitoring}
 
-为评估模型的实战表现，建立了覆盖全国主要城市的在线预报性能监测体系。图\ref{fig:online-aqi-metrics}展示了北京、上海、石家庄、郑州四个代表性城市的AQI预报性能，短期预报与实测值高度吻合，中长期预报仍能较好把握污染变化趋势。
+为评估模型的实战表现，建立了覆盖全国主要城市的在线预报性能监测体系。
+
+图\ref{fig:online-aqi-metrics}展示了北京、上海、石家庄、郑州四个代表性城市的AQI预报性能。从整体表现来看，模型在短期预报（3--12h）中与观测值高度吻合，中长期预报（24--72h）仍能较好把握污染变化趋势。具体而言，北京和上海作为超大城市，监测网络密集、数据质量高，模型预报精度表现优异，各时效预报曲线与观测曲线贴合紧密；石家庄位于污染传输通道核心区，受区域传输影响显著，模型在污染累积阶段的预报存在一定滞后，但峰值位置和量级把握较好；郑州作为中部城市，在夏季臭氧主导的AQI高值时段预报精度略有下降，反映出复合污染条件下的预报挑战。
 
 \begin{figure}[htbp]
   \centering
   \subcaptionbox{北京市\label{fig:online-aqi-beijing}}
     {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_beijing.png}}
   \subcaptionbox{上海市\label{fig:online-aqi-shanghai}}
-    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_shanghai.png}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_shanghai.png}}\\[0.5em]
+  \subcaptionbox{石家庄市\label{fig:online-aqi-shijiazhuang}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_shijiazhuang.png}}
+  \subcaptionbox{郑州市\label{fig:online-aqi-zhengzhou}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_zhengzhou.png}}
   \caption{代表性城市AQI预报性能时序对比}
-  \caption*{横轴为时间，纵轴为AQI值。各子图中黑色曲线为实际观测值（OBS），彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。例如，\cqt{3h}曲线表示在实际时刻前3小时发布的预报结果。模型在短期预报（3--12h）中几乎与观测重合，随预报时效延长（24--72h）仍保持良好的趋势把握能力。}
+  \caption*{横轴为时间，纵轴为AQI值。各子图中黑色曲线为实际观测值（OBS），彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。北京、上海预报精度高，石家庄在传输型污染过程中存在一定滞后，郑州在复合污染时段精度略有下降。}
   \label{fig:online-aqi-metrics}
 \end{figure}
 
-值得注意的是，臭氧对数据驱动模型与传统数值模型呈现截然相反的预报难度特性。对于AI模型，臭氧的可预报性优于\PM，因为臭氧浓度具有高度规律的日周期变化模式，深度学习模型擅长捕捉这种周期性规律。而对于CMAQ等传统数值模型，臭氧预报是公认的技术难点——需耦合包含上百个化学方程的气相机理，且高度依赖前驱物排放清单的准确性。数据驱动方法通过端到端学习规避了显式求解光化学方程组的需求，在保持精度的同时降低了对排放清单的敏感性。
+值得注意的是，臭氧对数据驱动模型与传统数值模型呈现截然相反的预报难度特性，这一现象深刻揭示了数据驱动方法的独特优势。
+
+正如第\ref{chap:introduction}章所述，臭氧作为典型的二次污染物，其生成涉及\NOx 与挥发性有机物（VOCs）在太阳辐射下的复杂光化学反应，包含上百个化学方程和数千种中间产物。传统化学传输模式（如CMAQ）必须显式求解这些耦合的气相化学机理（如CB05、SAPRC-07等），不仅计算量巨大，更高度依赖前驱物排放清单的时空精度——任何排放输入的偏差都会通过非线性化学反应被放大，导致臭氧预报成为数值模式公认的技术难点。
+
+然而，对于数据驱动模型，臭氧反而是可预报性最好的污染物之一。其原因在于：臭氧浓度呈现高度规律的日周期变化模式——白天光化学反应活跃时生成累积，午后达到峰值，夜间被NO滴定消耗降至谷值。这种强周期性特征恰好是深度学习模型最擅长捕捉的时序规律。如第\ref{chap:methodology}章所讨论的，数据驱动方法通过端到端学习，将复杂的光化学反应过程隐式编码于模型参数中，规避了显式求解化学方程组的需求，从而在保持甚至超越传统模式精度的同时，大幅降低了对排放清单的敏感性。这一结果有力地验证了物理约束数据驱动建模范式在处理复杂化学演化过程中的优势。
+
+图\ref{fig:online-o3-metrics}展示了北京、上海、广州、苏州四个城市的臭氧预报性能。可以看到，臭氧预报的精度整体优于AQI预报：各时效预报曲线与观测曲线几乎完全重合，日变化的峰值时间、峰值高度和夜间谷值均得到精确刻画。北京和上海的臭氧预报表现最优，72小时预报仍能准确把握日变化节律；广州作为华南典型城市，臭氧浓度水平高、日变化幅度大，模型同样展现出优异的预报能力；苏州位于长三角臭氧高值区，受区域光化学传输影响，模型在个别极端高值日的峰值存在轻微低估，但整体预报质量仍处于较高水平。这一结果验证了数据驱动方法在臭氧预报任务上的独特优势。
+
+\begin{figure}[htbp]
+  \centering
+  \subcaptionbox{北京市\label{fig:online-o3-beijing}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_o3_beijing.jpeg}}
+  \subcaptionbox{上海市\label{fig:online-o3-shanghai}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_o3_shanghai.jpeg}}\\[0.5em]
+  \subcaptionbox{广州市\label{fig:online-o3-guangzhou}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_o3_guangzhou.jpeg}}
+  \subcaptionbox{苏州市\label{fig:online-o3-suzhou}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap06_o3_suzhou.jpeg}}
+  \caption{代表性城市臭氧预报性能时序对比}
+  \caption*{横轴为时间，纵轴为臭氧浓度（$\mu$g/m$^3$）。臭氧预报精度整体优于AQI，各时效预报曲线与观测高度吻合，日变化的峰谷特征得到精确刻画。苏州在个别极端高值日存在轻微低估。}
+  \label{fig:online-o3-metrics}
+\end{figure}
 
 \subsection{上海进博会保障案例}
 \label{subsec:ciie_case}
