@@ -143,12 +143,12 @@
 
 本节的核心问题是：大气污染建模的物理基础是什么？如何将这些物理知识转化为神经网络的归纳偏置（Inductive Bias，即学习算法从有限数据泛化时所依赖的先验假设\citep{battaglia2018relational}）？
 
-在大气污染物理领域，存在两个核心的约束方程：\textbf{对流-扩散方程}（公式\eqref{eq:advection_diffusion}）描述污染物浓度场的时空演化规律，\textbf{质量守恒方程}（公式\eqref{eq:mass_conservation}）作为其积分形式，约束封闭系统内污染物总量的收支平衡。传统化学传输模式（如CMAQ、WRF-Chem）通过数值方法直接求解这些方程来模拟污染物演化。本文的策略有所不同：不直接求解方程，而是将这两个核心约束\textbf{隐式地融入图神经网络的架构与训练过程}中——对流-扩散的动力学通过隐空间的消息传递机制体现，质量守恒约束则在解码到物理空间后，以损失函数的形式与数据拟合项并列作用。
+在大气污染物理领域，存在两个核心的约束方程：\textbf{对流-扩散方程}（公式\eqref{eq:advection_diffusion}）描述污染物浓度场的时空演化规律，\textbf{质量守恒方程}（公式\eqref{eq:mass_conservation}）作为其积分形式，约束封闭系统内污染物总量的收支平衡。化学传输模式（如CMAQ、WRF-Chem）通过数值方法直接求解这些方程来模拟污染物演化。本文的策略有所不同：不直接求解方程，而是将这两个核心约束\textbf{隐式地融入图神经网络的架构与训练过程}中——对流-扩散的动力学通过隐空间的消息传递机制体现，质量守恒约束则在解码到物理空间后，以损失函数的形式与数据拟合项并列作用。
 
 \subsection{对流-扩散方程}
 \label{subsec:advection_diffusion}
 
-大气污染物浓度场的时空演化遵循对流-扩散方程，这是传统化学传输模式求解的基本控制方程：
+大气污染物浓度场的时空演化遵循对流-扩散方程，这是化学传输模式求解的基本控制方程：
 \begin{equation}
 \frac{\partial C}{\partial t} = \underbrace{-\mathbf{u} \cdot \nabla C}_{\text{平流项}} + \underbrace{\nabla \cdot (K \nabla C)}_{\text{扩散项}} + \underbrace{R}_{\text{化学反应}} + \underbrace{S}_{\text{排放源}} - \underbrace{D}_{\text{沉降汇}}
 \label{eq:advection_diffusion}

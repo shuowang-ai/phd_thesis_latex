@@ -2,59 +2,48 @@
 
 \begin{denotation}[3cm]
 
-% 1. 核心变量集合 (合并了具体的污染物、气象、排放子项，大幅减少行数)
-\item[\(\mathbf{X}^t, \hat{\mathbf{X}}^t\)] 时间 \(t\) 的空气质量观测值与预测值集合（单位：\(\mu\)g/m\(^3\)）。$\mathbf{X} \in \mathbb{R}^{N \times D_X}$，其中 $D_X$ 为污染物种类数，包含 PM\(_{2.5}\)、PM\(_{10}\)、O\(_3\)、NO\(_2\) 等。
-\item[\(\mathbf{M}^t, \mathbf{E}^t\)] 时间 \(t\) 的气象变量集合与排放变量集合。
+% 1. 核心变量
+\item[\(\mathbf{X}^t, \hat{\mathbf{X}}^t\)] 时间 \(t\) 的空气质量观测值与预测值（单位：\(\mu\)g/m\(^3\)），$\mathbf{X} \in \mathbb{R}^{N \times D_X}$，包含 PM\(_{2.5}\)、PM\(_{10}\)、O\(_3\)、NO\(_2\) 等污染物。
+\item[\(\mathbf{M}^t, \mathbf{E}^t\)] 时间 \(t\) 的气象变量与排放变量集合。
     \begin{itemize}
         \item \(\mathbf{M}^t\) 包含：气温 ($M_{\text{t2m}}$)、露点 ($M_{\text{d2m}}$)、边界层高度 ($M_{\text{blh}}$)、风速 ($M_{u}$, $M_{v}$) 等
         \item \(\mathbf{E}^t\) 包含：NO\(_x\) ($E_{\text{NO}_x}$)、VOC ($E_{\text{VOC}}$)、SO\(_2\) ($E_{\text{SO}_2}$) 等
     \end{itemize}
-    
-\item[\(\mathbf{X}_F^t, \mathbf{M}_F^t, \mathbf{E}_F^t\)] 对应上述变量的连续空间场（Field），表示在整个研究区域内的连续分布，用于网格化推断与模拟任务。
-\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为对污染物空间分布的间接约束。附带有效性掩码 $\boldsymbol{\Omega}^{\text{AOD}} \in \{0,1\}^{N}$，用于标记云层遮挡等无效观测区域。
+\item[\(\mathbf{X}_F^t\)] 污染物浓度的连续空间场（Field），用于网格化推断与模拟任务。
+\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带有效性掩码 $\boldsymbol{\Omega}^{\text{AOD}} \in \{0,1\}^{N}$标记云遮挡区域。
 
 % 2. 图结构与时空参数
-\item[\(\mathcal{G}_t = (\mathcal{V}, \mathcal{E}_t)\)] 动态图结构，\(\mathcal{V}\) 为站点/城市节点集合，\(\mathcal{E}_t\) 为基于风场或距离构建的边集合。
+\item[\(\mathcal{G}_t = (\mathcal{V}, \mathcal{E}_t)\)] 动态图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}_t\) 为基于风场或距离构建的边集。
 \item[\(\mathbf{A}, \tilde{\mathbf{A}}\)] 图邻接矩阵与归一化后的邻接矩阵。
-\item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$与归一化拉普拉斯矩阵，用于谱图卷积。
-\item[\(\boldsymbol{\Lambda}, \mathbf{U}\)] 拉普拉斯矩阵的特征值对角矩阵与特征向量矩阵，满足$\mathbf{L} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top$。
-\item[\(g_\theta(\cdot)\)] 可学习的频谱滤波器，作用于图的频谱域。
-\item[\(K\)] 大气扩散系数，用于对流-扩散方程中的扩散项。
-\item[\(t=0\)] 起报时刻（Forecast Initialization Time），即最后一个可获取空气质量观测数据的时间戳。\(t \leq 0\) 表示历史时刻，\(t>0\) 表示未来待预测时刻。
-\item[\(T', T\)] 历史输入窗口长度与未来预测窗口长度。\(T'\) 个历史时间步用于捕捉时序演化规律，\(T\) 个未来时间步为预测目标。
-\item[\(\tau\)] 预测步长（Lead Time），即从起报时刻到目标预测时刻的时间间隔。
+\item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$与归一化拉普拉斯矩阵。
+\item[\(K\)] 大气扩散系数，用于对流-扩散方程的扩散项。
+\item[\(t=0\)] 起报时刻，\(t \leq 0\) 为历史时刻，\(t>0\) 为未来预测时刻。
+\item[\(T', T\)] 历史输入窗口与未来预测窗口长度。
 
-% 3. 模型、物理算子与优化
-\item[\(f, \mathcal{F}_\Theta\)] 真实的空气质量生成过程 \(f(\mathbf{M}, \mathbf{E})\) 与参数为 \(\Theta\) 的深度学习近似模型。
-\item[\(C\)] 污染物浓度场的点值形式，用于对流-扩散方程表述。与向量形式$\mathbf{X}$的关系：$C_i = \mathbf{X}_i$。
+% 3. 模型与物理算子
+\item[\(\mathcal{F}_\Theta\)] 参数为 \(\Theta\) 的深度学习模型，学习真实空气质量生成过程 \(f(\mathbf{M}, \mathbf{E})\) 的映射。
+\item[\(C\)] 污染物浓度场的点值形式，用于对流-扩散方程表述。
 \item[\(S, D\)] 对流-扩散方程中的排放源项与沉降汇项。
 \item[\(\mathbf{u}\)] 风速矢量场，用于计算平流传输。
-\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层的节点隐表示，$\mathbf{H}^{(l)} \in \mathbb{R}^{N \times F}$，$\mathbf{h}_i$为节点$i$的隐向量。
-\item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集，满足$\mathcal{V}_{\text{obs}} \cup \mathcal{V}_{\text{target}} = \mathcal{V}$。
-\item[\(\mathcal{T}_{\text{hist}}, \mathcal{T}_{\text{future}}\)] 历史时间集与未来时间集，分别用于模型训练与推理/模拟。
-\item[\(\nabla, \increment\)] 空间梯度算子（用于扩散/平流约束）与时间差分算子。
+\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。
+\item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集。
+\item[\(\nabla\)] 空间梯度算子，用于扩散/平流约束。
 \item[\(\mathcal{L}_{\mathrm{total}}\)] 总损失函数，由监督损失与物理约束损失组成。
-\item[\(\mathcal{L}_{\mathrm{Pred}}, \mathcal{L}_{\mathrm{DIC}}\)] 预测损失（L1误差）与领域一致性约束损失（第\ref{chap:prediction}章PCDCNet）。
-\item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{init}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失、初始化损失与AOD梯度约束损失（第\ref{chap:inference}章SPIN）。
+\item[\(\mathcal{L}_{\mathrm{Pred}}, \mathcal{L}_{\mathrm{DIC}}\)] 预测损失与领域一致性约束损失（第\ref{chap:prediction}章）。
+\item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失与AOD梯度约束损失（第\ref{chap:inference}章）。
 
-% 4. 缩略语 (按字母顺序排列)
-% 4. 通用缩略语 (Abbreviations)
-\item[AOD] Aerosol Optical Depth (气溶胶光学厚度)，在部分文献中亦称为 AOT (Aerosol Optical Thickness)。
-\item[AQF] Air Quality Forecast (空气质量预报)。
-\item[CMAQ] Community Multiscale Air Quality (社区多尺度空气质量模型)，传统的数值化学传输模式。
-\item[CTM] Chemical Transport Model (化学传输模式)，基于大气物理化学机理方程求解的数值模型统称，如 CMAQ 和 WRF-Chem。
-\item[CMIP6] Coupled Model Intercomparison Project Phase 6 (第六次国际耦合模式比较计划)，本文使用其 SSP-RCP 情景下的气象数据进行未来模拟。
-\item[MEIC] Multi-resolution Emission Inventory for China (中国多尺度排放清单模型)。
-\item[DPEC] Dynamic Projection model for Emissions in China (中国未来排放动态评估模型)，本文使用其与 CMIP6 耦合的未来排放清单数据。
-\item[ECMWF / ERA5] European Centre for Medium-Range Weather Forecasts 及其第五代再分析数据。
-\item[GFS] Global Forecast System (全球预报系统)，由美国国家海洋和大气管理局 (NOAA) 运行的全球数值天气预报系统。\item[GNN / GCN] Graph Neural Network / Graph Convolutional Network (图神经网络/图卷积网络)。
-\item[GRU / LSTM] Gated Recurrent Unit / Long Short-Term Memory (门控循环单元/长短期记忆网络)，处理时间序列的 RNN 变体。
-\item[PCDCNet] Physical-Chemical Dynamics and Constraints Network (物理-化学动力学约束网络)，本文提出的正向预测模型。
-\item[DIC] Domain-Informed Constraints (领域一致性约束)，基于质量守恒原理设计的物理损失函数（第\ref{chap:prediction}章）。
-\item[SPIN] Spatiotemporal Physics-Guided Inference Network (物理引导时空推断网络)，本文提出的无缝推断模型。
-\item[IGNN] Integrated Graph Neural Network (集成图神经网络)，本文用于长期情景模拟的模型。
-\item[KnowAir] 领域知识驱动的空气质量智能预报系统，涵盖数据融合、模型推理与可视化展示等模块。
-\item[KnowAir-DS] KnowAir 配套数据集，包含站点观测、气象再分析及排放清单等多源数据。目前发布两个版本：KnowAir-DS-V1和KnowAir-DS-V2。
-\item[SOTA] State-of-the-Art (当前最佳水平)。
+% 4. 缩略语
+\item[AOD] Aerosol Optical Depth (气溶胶光学厚度)。
+\item[CTM] Chemical Transport Model (化学传输模式)，如 CMAQ、WRF-Chem。
+\item[MEIC] Multi-resolution Emission Inventory for China (中国多尺度排放清单)。
+\item[DPEC] Dynamic Projection model for Emissions in China (中国未来排放动态评估模型)。
+\item[ERA5 / GFS] ECMWF第五代再分析数据 / 美国全球预报系统。
+\item[GNN / GCN] Graph Neural Network / Graph Convolutional Network (图神经网络/图卷积网络)。
+\item[GRU / LSTM] Gated Recurrent Unit / Long Short-Term Memory (门控循环单元/长短期记忆网络)。
+\item[PCDCNet] Physical-Chemical Dynamics and Constraints Network，本文提出的预测模型。
+\item[DIC] Domain-Informed Constraints (领域一致性约束)，基于质量守恒设计。
+\item[SPIN] Spatiotemporal Physics-Guided Inference Network，本文提出的推断模型。
+\item[IGNN] Integrated Graph Neural Network，本文提出的情景模拟模型。
+\item[KnowAir] 本文构建的空气质量智能预报系统。
 
 \end{denotation}
