@@ -145,7 +145,7 @@
   \subcaptionbox{上海市\label{fig:online-aqi-shanghai}}
     {\includegraphics[width=0.48\linewidth]{figures/chap06_aqi_shanghai.png}}
   \caption{代表性城市AQI预报性能时序对比}
-  \caption*{各子图展示了不同预报时效（3h--72h）下的预测值与实测值对比。模型在短期预报中表现出色，随预报时效延长仍保持良好的趋势把握能力。}
+  \caption*{横轴为时间，纵轴为AQI值。各子图中黑色曲线为实际观测值（OBS），彩色曲线分别为提前3小时、6小时、12小时、24小时、48小时、72小时发布的预报值。例如，\cqt{3h}曲线表示在实际时刻前3小时发布的预报结果。模型在短期预报（3--12h）中几乎与观测重合，随预报时效延长（24--72h）仍保持良好的趋势把握能力。}
   \label{fig:online-aqi-metrics}
 \end{figure}
 
@@ -163,7 +163,7 @@
 \begin{table}[htbp]
 \centering
 \caption{KnowAir模型与传统数值模型的预报性能对比}
-\caption*{在长三角地区测试中，KnowAir模型在三种污染物预报任务上均取得最优性能。RMSE为均方根误差（$\downarrow$越小越好），R为相关系数（$\uparrow$越大越好）。}
+\caption*{在长三角地区测试中，KnowAir模型在三种污染物预报任务上均取得最优性能。RMSE为预报值与实测值之间的均方根误差（$\downarrow$越小越好），R为预报值与实测值之间的Pearson相关系数（$\uparrow$越大越好，反映模型对污染变化趋势的把握能力）。}
 \label{tab:model_vs_numerical}
 \small
 \begin{tabular}{@{}llccccc@{}}
@@ -198,13 +198,13 @@
 
 \subsubsection{参赛表现与结果}
 
-在官方公布的结果中，KnowAir模型（PCDCNet）在与包括各大高校、科研院所以及业务单位在内的众多模型的激烈竞争中，取得了\textbf{综合评分中位数第一名、均值第二名}的优异成绩。官方发布的评估结果直观展示了KnowAir模型的得分分布，其箱体和中位线均位于所有模型的最高区间，表现出极强的稳定性和准确性。
+在官方公布的结果中，KnowAir系统在与包括各大高校、科研院所以及业务单位在内的众多模型的激烈竞争中，取得了\textbf{综合评分中位数第一名、均值第二名}的优异成绩。官方评估结果显示，KnowAir的得分分布箱体和中位线均位于所有模型的最高区间，表现出极强的稳定性和准确性。
 
 \subsubsection{结果分析与讨论}
 
 本次比对中取得均值第一名的模型来自华南理工大学，其技术路线为先采用\CMAQ 数值模式并结合了最新的区域排放清单进行模拟，再利用AI模型进行后处理订正。该方法的成功证明了传统物理模型结合精细化输入在机理表达上的重要价值\citep{cn_zhuyun2023,zhuyun2024}。
 
-然而，该技术路线对计算资源和人力投入要求极高：需要运行完整的气象驱动模型和化学传输模型，并依赖高精度、持续更新的区域排放清单。与之形成鲜明对比的是，KnowAir模型作为一套端到端的AI系统，仅需普通配置的云服务器，即可在数分钟内完成全国范围的预报，展现了显著的计算效率和经济性优势。
+然而，该技术路线对计算资源和人力投入要求极高：需要运行完整的气象驱动模型和化学传输模型，并依赖高精度、持续更新的区域排放清单。与之形成对比，KnowAir系统仅需普通配置的云服务器即可在数分钟内完成全国范围预报，展现了显著的计算效率优势。
 
 这一结果充分证明，本文提出的物理引导深度学习范式，在保持SOTA（State-of-the-Art）级别准确性的同时，极大降低了预报系统的部署和运行成本，为空气质量预报服务的普及化提供了技术基础。
 
@@ -212,18 +212,18 @@
 \subsection{商业化落地}
 \label{subsec:commercial}
 
-本研究的最终价值在于其成功的商业化落地。KnowAir模型作为核心技术引擎，已深度整合进彩云科技的C端和B端业务线，服务于数千万用户和众多头部企业。
+本研究的最终价值在于其成功的商业化落地。KnowAir系统已深度整合进彩云科技的业务线，服务于数千万用户和众多头部企业。
 
 \subsubsection{面向公众的应用}
 \label{subsec:b2c}
 
-在\cqt{彩云天气}APP中，KnowAir模型为数千万用户提供空气质量预报服务，主要功能包括：基于SPIN模型的高分辨率污染物空间分布图、未来多日逐小时污染物浓度预报，以及重污染天气的提前预警。
+在\cqt{彩云天气}APP中，KnowAir系统为数千万用户提供空气质量预报服务，主要功能包括：基于SPIN的高分辨率污染物空间分布图、基于PCDCNet的未来多日逐小时浓度预报，以及重污染天气的提前预警。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\linewidth]{figures/chap06_beijing_pollution.png}
   \caption{北京重污染事件的提前预报示例}
-  \caption*{左图展示污染峰值期间的空气质量状况，右图展示污染消散后的状况。系统成功提前数日预报了该污染过程的发生与消散，预报结果与实际观测高度一致，充分验证了模型在真实业务场景中的可靠性。}
+  \caption*{图为彩云天气APP界面截图。左图展示污染峰值期间（重度污染）的空气质量状况，右图展示污染消散后（优良）的状况。图中颜色表示\PM 浓度，红色/紫色表示高浓度，绿色表示低浓度。系统成功提前数日预报了该污染过程的发生与消散时间，预报结果与实际观测高度一致。}
   \label{fig:beijing_pollution_case}
 \end{figure}
 
@@ -233,7 +233,7 @@
   \centering
   \includegraphics[width=\linewidth]{figures/chap06_lianghui.png}
   \caption{春季重大活动期间北京AQI监测与预报对比}
-  \caption*{图中各曲线代表不同预报时效的预测值，灰色曲线（AQI\_OBS）为实测值。图中最后几天出现的AQI突升对应沙尘暴事件，属于预报难点，但模型仍能把握其趋势特征。}
+  \caption*{横轴为日期，纵轴为AQI值。灰色曲线（AQI\_OBS）为逐小时实测值；彩色曲线分别为提前6小时（6h）、12小时（12h）、24小时（24h）、48小时（48h）、72小时（72h）发布的预报值。图中最后几天AQI突升对应沙尘暴过境事件，属于突发性极端事件，预报难度远高于常规污染过程，但模型仍能把握其上升趋势。}
   \label{fig:lianghui_monitoring}
 \end{figure}
 
@@ -257,7 +257,7 @@
   \label{fig:caiyun_web}
 \end{figure}
 
-图\ref{fig:caiyun_web}展示了面向公众的空气质量可视化平台界面\footnote{\url{https://caiyunapp.com/map/}}。该平台基于KnowAir模型的输出，提供全国范围的实时空气质量分布图，支持\PM、\ozone、PM$_{10}$等多污染物切换，以及未来多日的时间动画播放功能。
+图\ref{fig:caiyun_web}展示了面向公众的空气质量可视化平台界面\footnote{\url{https://caiyunapp.com/map/}}。该平台基于KnowAir系统的输出，提供全国范围的实时空气质量分布图，支持\PM、\ozone、PM$_{10}$等多污染物切换及未来多日的时间动画播放功能。
 
 \begin{figure}[htbp]
   \centering
