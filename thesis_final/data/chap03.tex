@@ -379,7 +379,7 @@ PCDCNet旨在模拟数值模式（如CMAQ）的演化过程，其输入输出范
 \subsection{模型总体架构}
 \label{subsec:pcdcnet_architecture}
 
-PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}统一框架。如图\ref{fig:overall_framework}所示，模型通过三个专门设计的动力学模块来解耦大气过程，分别对应大气污染演化的三类核心物理机制：
+PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}统一框架，通过三个专门设计的动力学模块来解耦大气过程（图\ref{fig:overall_framework}）。
 
 \begin{figure}[htbp]
   \centering
@@ -389,15 +389,15 @@ PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的
   \label{fig:overall_framework}
 \end{figure}
 
-如图\ref{fig:overall_framework}右上角所示，大气连续性方程$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u}C) = S - D$描述了浓度场$C$的时空演化，三个动力学模块分别对应该方程的不同物理项：
+三个动力学模块的设计直接源于第\ref{chap:methodology}章的对流-扩散方程（公式\eqref{eq:advection_diffusion}），各模块分别对应该方程的不同物理项：
 
-LID（Local Interaction Dynamics）：对应方程右端的源汇项$S - D$，建模发生在局地的排放源$S$（一次排放与光化学生成）和沉降汇$D$（干/湿沉降），这些过程不涉及站点间的空间传输；
+LID（Local Interaction Dynamics）：对应方程中的化学反应项$R$与源汇项$S - D$，建模发生在局地的排放源$S$（一次排放与光化学生成）、化学反应$R$和沉降汇$D$（干/湿沉降），这些过程不涉及站点间的空间传输；
 
-STD（Spatial Transport Dynamics）：对应方程左端的平流-扩散项$\nabla \cdot (\mathbf{u}C)$，通过图神经网络的消息传递与邻域聚合机制建模污染物在风场驱动下的空间传输过程；
+STD（Spatial Transport Dynamics）：对应方程中的平流项$-\mathbf{u} \cdot \nabla C$与扩散项$\nabla \cdot (K\nabla C)$，通过图神经网络的消息传递与邻域聚合机制建模污染物在风场驱动下的空间传输过程；
 
 TAD（Temporal Accumulation Dynamics）：对应方程左端的时间演化项$\frac{\partial C}{\partial t}$，通过GRU的门控记忆机制捕捉污染物浓度的长时序累积与衰减规律。
 
-此外，如图\ref{fig:overall_framework}所示，STD模块设置了独立的读出层（Readout），将隐状态$\mathbf{H}_t^S$显式映射为空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$。该分支与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC（领域知识约束）模块，通过质量守恒原则约束传输过程的物理一致性（详见\ref{subsec:pcdcnet_training}节）。这种\cqt{过程解耦+联合建模}的设计使得每个模块具有明确的物理对应，既保留了深度学习的灵活拟合能力，又增强了模型的可解释性。
+此外，如图\ref{fig:overall_framework}右上角所示，STD模块设置了独立的读出层（Readout），将隐状态$\mathbf{H}_t^S$显式映射为空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$。该分支与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC（领域知识约束）模块，通过质量守恒原则约束传输过程的物理一致性（详见\ref{subsec:pcdcnet_training}节）。图中右上角标注的大气连续性方程即对应该DIC约束，而非整体模型的建模依据。这种\cqt{过程解耦+联合建模}的设计使得每个模块具有明确的物理对应，既保留了深度学习的灵活拟合能力，又增强了模型的可解释性。
 
 
 \subsubsection{嵌入层：多源数据融合}
@@ -413,7 +413,7 @@ TAD（Temporal Accumulation Dynamics）：对应方程左端的时间演化项$\
 
 
 \subsubsection{局地交互动力学模块（LID）}
-局地交互动力学（Local Interaction Dynamics, LID）模块对应大气连续性方程右端的源汇项$S - D$，模拟发生在网格或站点内部的排放生成（$S$）与化学转化过程。
+局地交互动力学（Local Interaction Dynamics, LID）模块对应对流-扩散方程（公式\eqref{eq:advection_diffusion}）右端的化学反应项$R$与源汇项$S - D$，模拟发生在网格或站点内部的排放生成（$S$）、化学转化（$R$）与沉降（$D$）过程。
 
 在大气化学中，源项$S$包括一次排放（直接排放的颗粒物）和二次生成——\ozone 的生成依赖于\NOx 和VOC在太阳辐射下的光化学反应链，其速率受温度、辐射强度等因素的非线性调制；\PM 则受到一次排放与气态前驱物二次转化的双重贡献。汇项$D$对应干沉降与湿沉降过程。这些过程发生在每个站点局地，不涉及站点间的空间传输。
 
@@ -431,7 +431,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 
 
 \subsubsection{空间传输动力学模块（STD）}
-空间传输动力学（Spatial Transport Dynamics, STD）模块对应大气连续性方程左端的平流-扩散项$\nabla \cdot (\mathbf{u}C)$，继承并升级了PM$_{2.5}$-GNN的思想，利用图神经网络的消息传递与邻域聚合机制模拟污染物在风场驱动下的平流与扩散传输。
+空间传输动力学（Spatial Transport Dynamics, STD）模块对应对流-扩散方程（公式\eqref{eq:advection_diffusion}）中的平流项$-\mathbf{u} \cdot \nabla C$与扩散项$\nabla \cdot (K\nabla C)$，继承并升级了PM$_{2.5}$-GNN的思想，利用图神经网络的消息传递与邻域聚合机制模拟污染物在风场驱动下的平流与扩散传输。
 
 基于城市网络图$\mathcal{G}$，STD模块通过图卷积操作聚合邻居节点的信息：
 \begin{equation}
@@ -448,7 +448,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 
 
 \subsubsection{时间积累动力学模块（TAD）}
-时间积累动力学（Temporal Accumulation Dynamics, TAD）模块对应大气连续性方程左端的时间演化项$\frac{\partial C}{\partial t}$，利用门控循环单元（GRU）捕捉污染物浓度的长时序累积与衰减效应：
+时间积累动力学（Temporal Accumulation Dynamics, TAD）模块对应对流-扩散方程（公式\eqref{eq:advection_diffusion}）左端的时间演化项$\frac{\partial C}{\partial t}$，利用门控循环单元（GRU）捕捉污染物浓度的长时序累积与衰减效应：
 \begin{equation}
     \mathbf{H}_t^T = \text{GRUcell}(\mathbf{H}_t, \mathbf{H}_{t-1}^T)
 \end{equation}
@@ -475,7 +475,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 \label{eq:residual_pred}
 \end{equation}
 
-\noindent 这种残差形式与大气连续性方程中$\frac{\partial C}{\partial t}$的物理意义对应——浓度的变化通常是渐进的，残差预测有助于稳定长时序预测、减少非物理突变。
+\noindent 这种残差形式与对流-扩散方程中$\frac{\partial C}{\partial t}$的物理意义对应——浓度的变化通常是渐进的，残差预测有助于稳定长时序预测、减少非物理突变。
 
 此外，STD模块设置了独立的读出层，从$\mathbf{H}_t^S$中显式提取空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$（公式\eqref{eq:transport_contribution}），用于后续的DIC约束。这一设计使模型能够将浓度变化解耦为\cqt{传输引起的变化}与\cqt{局地源汇引起的变化}，从而对传输过程施加独立的物理约束。
 

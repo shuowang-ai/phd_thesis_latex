@@ -194,7 +194,7 @@ SPIN的推断流程由图结构构建与四阶段推断流水线两部分组成�
     \centering
     \includegraphics[width=1.0\linewidth]{figures/chap04_spin_arch.pdf}
     \caption{SPIN模型总体架构图}
-    \caption*{整体流程自左至右对应四个阶段：\textbf{阶段一}（动态节点掩码，图中未直接绘出）在训练期间随机遮蔽部分站点，为归纳式泛化提供数据增强基础；\textbf{阶段二}（图左侧TCN模块）利用时间卷积网络将每个节点的气象与排放时序编码为本地特征向量，生成初始浓度估计；\textbf{阶段三}（图中间双流图传播模块）在预先构建的扩散图$\mathcal{G}^{\mathcal{D}}$与平流图$\mathcal{G}^{\mathcal{A}}$上，分别通过扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$进行物理启发的空间信息传播，经门控融合后更新节点表示；\textbf{阶段四}（图右侧读出层与损失函数）由共享MLP读出层生成推断结果，并通过推断损失$\mathcal{L}_{\mathrm{infer}}$、初始化损失$\mathcal{L}_{\mathrm{init}}$和AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$三部分复合损失进行优化。}
+    \caption*{图中标注的物理方程源自第\ref{chap:methodology}章对流--扩散方程（公式\eqref{eq:advection_diffusion}），其扩散项与平流项分别指导了双流传播模块中扩散核与平流核的设计。整体流程自左至右对应四个阶段：\textbf{阶段一}（动态节点掩码，图中未直接绘出）在训练期间随机遮蔽部分站点，为归纳式泛化提供数据增强基础；\textbf{阶段二}（图左侧TCN模块）利用时间卷积网络将每个节点的气象与排放时序编码为本地特征向量，生成初始浓度估计；\textbf{阶段三}（图中间双流图传播模块）在预先构建的扩散图$\mathcal{G}^{\mathcal{D}}$与平流图$\mathcal{G}^{\mathcal{A}}$上，分别通过扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$进行物理启发的空间信息传播，经门控融合后更新节点表示；\textbf{阶段四}（图右侧读出层与损失函数）由共享MLP读出层生成推断结果，并通过推断损失$\mathcal{L}_{\mathrm{infer}}$、初始化损失$\mathcal{L}_{\mathrm{init}}$和AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$三部分复合损失进行优化。}
     \label{fig:model_architecture}
 \end{figure}
 
