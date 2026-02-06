@@ -152,7 +152,7 @@ DPEC设计了六种不同力度的污染控制策略，依据减排力度从弱�
 
 
 % ------------------------------------------------------------
-% 5.3 IGNN模型架构与验证
+% 5.4 IGNN模型架构与验证
 % ------------------------------------------------------------
 \section{IGNN模型架构与验证}
 \label{sec:ignn_model}
@@ -287,7 +287,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
     \end{tabular}
 \end{table}
 
-从表中可以看出，IGNN在所有指标上均取得最优性能。对于\PM，IGNN的IA达到0.79，MAE为29.64 $\mu$g m$^{-3}$，显著优于XGBoost（IA=0.69, MAE=48.79）和STGCN（IA=0.74, MAE=35.59）。对于\ozone，IGNN同样表现最优（IA=0.93, MAE=19.54）。值得注意的是，所有方法对\ozone 的模拟性能均优于\PM，这可能与\ozone 浓度的日变化规律更为规则有关。
+从表中可以看出，IGNN在几乎所有指标上取得最优或并列最优性能。对于\PM，IGNN的IA达到0.79，MAE为29.64 $\mu$g m$^{-3}$，显著优于XGBoost（IA=0.69, MAE=48.79）和STGCN（IA=0.74, MAE=35.59）。对于\ozone，IGNN同样表现最优（IA=0.93, MAE=19.54）。值得注意的是，所有方法对\ozone 的模拟性能均优于\PM，这可能与\ozone 浓度的日变化规律更为规则有关。
 
 图\ref{fig:ignn_scatter}展示了2019年北京站点IGNN模拟值与观测值的散点对比。
 
@@ -345,9 +345,9 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 将2025-2050年的未来气象与多策略排放数据输入已训练好的IGNN模型，得到了\cqt{2+26}城市未来空气质量的整体演变趋势。
 
-模拟结果（如图\ref{fig:future_average}和表\ref{tab:future_trends_bthsa}所示）揭示了一个核心且值得高度关注的现象：\textbf{\PM 与\ozone 的浓度变化呈现出显著的相反趋势}。在所有六种排放策略下，\cqt{2+26}城市的年平均\PM 浓度均表现出显著的下降趋势，年均变化率在$-0.14$至$-0.37$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这表明，即使在全球持续高碳排放的背景下，只要实施既定的或更强化的污染物控制政策，\PM 治理仍能取得积极成效。
+模拟结果（如图\ref{fig:future_average}和表\ref{tab:future_trends_bthsa}所示）揭示了一个核心且值得高度关注的现象：\textbf{\PM 与\ozone 的浓度变化呈现出显著的相反趋势}。在所有六种排放策略下，\cqt{2+26}城市的年平均\PM 浓度均表现出显著的下降趋势，年均变化（AAC，Annual Average Change）在$-0.14$至$-0.37$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这表明，即使在全球持续高碳排放的背景下，只要实施既定的或更强化的污染物控制政策，\PM 治理仍能取得积极成效。
 
-然而，与\PM 的下降形成鲜明对比的是，年平均\ozone 浓度在除基准情景外的所有策略下都呈现出显著的上升趋势，年均变化率在$+0.07$至$+0.22$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这一结果预示着，未来\ozone 污染可能会取代\PM，成为该区域面临的主要大气环境挑战。
+然而，与\PM 的下降形成鲜明对比的是，年平均\ozone 浓度在除基准情景外的所有策略下都呈现出显著的上升趋势，AAC在$+0.07$至$+0.22$ $\mu$g m$^{-3}$之间（$p < 0.05$）。这一结果预示着，未来\ozone 污染可能会取代\PM，成为该区域面临的主要大气环境挑战。
 
 \begin{figure}[htbp]
   \centering
@@ -360,7 +360,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 \begin{table}[htbp]
     \centering
     \caption{2025-2050年\cqt{2+26}城市模拟污染物浓度变化的线性拟合参数}
-    \caption*{斜率和年均变化（AAC）单位为$\mu$g m$^{-3}$ year$^{-1}$，截距单位为$\mu$g m$^{-3}$。斜率在$p < 0.05$水平显著的已加粗。六种策略按减排力度从弱到强排列。}
+    \caption*{斜率单位为$\mu$g m$^{-3}$ (10 year)$^{-1}$，AAC（年均变化）单位为$\mu$g m$^{-3}$ year$^{-1}$，截距单位为$\mu$g m$^{-3}$。斜率在$p < 0.05$水平显著的已加粗。六种策略按减排力度从弱到强排列。}
     \label{tab:future_trends_bthsa}
     \begin{tabular}{@{}lcccccc@{}}
         \toprule
@@ -444,20 +444,18 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 \begin{table}[htbp]
     \centering
     \caption{2025-2050年\cqt{2+26}城市重污染日变化的线性拟合参数}
-    \caption*{斜率单位为天/10年，AAC（年均变化）单位为天/年。斜率在$p < 0.05$水平显著的已加粗。}
+    \caption*{AAC（年均变化）单位为天/年。六种策略按减排力度从弱到强排列。}
     \label{tab:future_heavy_days}
-    \begin{tabular}{@{}lcc|cc@{}}
+    \begin{tabular}{@{}lc|c@{}}
         \toprule
-        & \multicolumn{2}{c}{\textbf{PM$_{2.5}$重污染日}} & \multicolumn{2}{c}{\textbf{O$_3$重污染日}} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-        \textbf{排放策略} & \textbf{斜率} & \textbf{AAC} & \textbf{斜率} & \textbf{AAC} \\
+        \textbf{排放策略} & \textbf{PM$_{2.5}$重污染日 AAC} & \textbf{O$_3$重污染日 AAC} \\
         \midrule
-        Baseline      & \textbf{$-1.08$} & $-0.54$ & \textbf{$-0.48$} & $-0.24$ \\
-        Current Goals & \textbf{$-1.32$} & $-0.66$ & \textbf{0.24} & 0.12 \\
-        NDC Goals     & \textbf{$-1.24$} & $-0.62$ & \textbf{0.08} & 0.04 \\
-        2D Goals      & \textbf{$-1.16$} & $-0.58$ & \textbf{1.52} & 0.76 \\
-        Neutral Goals & \textbf{$-0.96$} & $-0.48$ & \textbf{1.72} & 0.86 \\
-        1.5D Goals    & \textbf{$-0.64$} & $-0.32$ & \textbf{1.76} & 0.88 \\
+        Baseline      & $-0.54$ & $-0.24$ \\
+        Current Goals & $-0.66$ & $0.12$ \\
+        NDC Goals     & $-0.62$ & $0.04$ \\
+        2D Goals      & $-0.58$ & $0.76$ \\
+        Neutral Goals & $-0.48$ & $0.86$ \\
+        1.5D Goals    & $-0.32$ & $0.88$ \\
         \bottomrule
     \end{tabular}
 \end{table}
