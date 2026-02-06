@@ -122,7 +122,7 @@
     A_{ij} = H(d_\theta - d_{ij}) \cdot H(m_\theta - m_{ij})
 \label{eq:adjacency}
 \end{equation}
-\noindent 其中$H(x)$为Heaviside阶跃函数：
+\noindent 其中$d_\theta$和$m_\theta$分别为距离阈值和山脉高度阈值，$H(x)$为Heaviside阶跃函数：
 \begin{equation}
     H(x) = \begin{cases} 1, & x > 0 \\ 0, & x \leq 0 \end{cases}
 \label{eq:heaviside}
@@ -141,7 +141,7 @@
 \end{equation}
 \noindent 其中$h(\cdot)$为地形高程函数，$\lambda\rho_i + (1-\lambda)\rho_j$表示两城市连线上的插值点。该定义的物理含义是：只有当路径上存在显著高于两端城市的山脉时，$m_{ij}$才会取较大正值，从而阻断连边。
 
-阈值参数设置为$d_\theta = 300$km和$m_\theta = 1200$m（约为边界层平均高度）。图\ref{fig:multi-image}展示了基于公式\eqref{eq:adjacency}构建的两个研究区域的城市网络结构。
+本文设置$d_\theta = 300$km，$m_\theta = 1200$m（约为边界层平均高度）。图\ref{fig:multi-image}展示了基于公式\eqref{eq:adjacency}构建的两个研究区域的城市网络结构。
 
 \begin{figure}[htbp]
   \centering
@@ -184,10 +184,10 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 细颗粒物（\PM）具有显著的跨区域传输特性。研究表明，在季风气候条件下，污染物可在72小时内传输数百公里\citep{pongkiatkul2007assessment,wang2015long,hao2019transport}。\PM 的演化过程呈现典型的双重动力学特性：一方面，污染物沿风向从上游城市传输至下游城市；另一方面，在局地发生扩散累积。这种\cqt{传输-扩散}的双重动力学特性，要求预测模型必须具备捕捉长距离、有向时空依赖的能力。
 
-现有的时空图神经网络（如GC-LSTM\citep{qi2019hybrid}）通常基于地理距离构建无向图，假设节点间的影响是相互对称的。然而，大气中的平流输送（Advection）具有强烈的方向性：上游城市对下游城市的影响显著，反之则不然。针对这一问题，我们提出了PM$_{2.5}$-GNN\citep{wang2020pm2}模型，通过物理启发的图结构设计显式编码风场信息，实现对\PM 传输过程的精确建模。
+现有的时空图神经网络（如GC-LSTM\citep{qi2019hybrid}）通常基于地理距离构建无向图，假设节点间的影响是相互对称的。然而，大气中的平流输送（Advection）具有强烈的方向性：上游城市对下游城市的影响显著，反之则不然。针对这一问题，我们提出了PM$_{2.5}$-GNN\citep{wang2020pm2}模型，通过物理启发的图网络设计显式编码风场信息，实现对\PM 传输过程的精确建模。
 
 
-\subsection{图结构设计}
+\subsection{图网络设计}
 \label{subsec:pm25gnn_graph}
 
 为了显式建模风场驱动的传输过程，我们设计了包含节点属性、边属性和有向邻接矩阵的动态知识图谱。
@@ -198,12 +198,21 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 \end{equation}
 \noindent 式中$\hat{\mathbf{X}}_i^{t-1}$为上一时刻的\PM 浓度预测值（或观测值），$\mathbf{M}_i^t \in \mathbb{R}^{8}$为当前时刻的气象特征向量。
 
-（2）边属性与平流系数。对于边特征，我们创新性地引入了平流系数（Advection Coefficient），将风场对污染传输的影响显式编码到图结构中。如图\ref{fig:advection_coeff}所示，设源节点$j$指向目标节点$i$，源节点的风速为$|v|$，两节点间距离为$d$，源节点风向$\beta$与两节点连线方向$\gamma$的夹角为$\alpha = |\gamma - \beta|$，则平流系数$S$定义为：
+（2）边属性与平流系数。对于边特征，我们创新性地引入了平流系数（Advection Coefficient），将风场对污染传输的影响显式编码到图结构中。如图\ref{fig:advection_coeff}所示，设源节点$j$指向目标节点$i$，源节点的风速为$|v|$，两节点间距离为$d$，源节点风向$\beta$与两节点连线方向$\gamma$的夹角为$\alpha = |\gamma - \beta|$，则平流系数$e^{\mathcal{A}}$定义为：
 
 \begin{equation}
-    S_{j \to i} = \text{ReLU}\left(\frac{|v|}{d} \cos(\alpha)\right)
+    e_{j \to i}^{\mathcal{A}} = \text{ReLU}\left(\frac{|v|}{d} \cos(\alpha)\right)
 \label{eq:advection_coeff}
 \end{equation}
+
+\noindent 式中$|v|$为源节点$j$的风速，$d$为两节点间的地理距离，$\alpha = |\gamma - \beta|$为源节点风向$\beta$与两节点连线方向$\gamma$的夹角。ReLU函数确保仅当风从$j$吹向$i$时（即$\cos\alpha > 0$），平流系数才为正值，从而在物理上强制了传输的方向性约束。其物理含义是：传输强度与源节点风速成正比，与传输距离成反比，且仅在风向与连线方向一致时有效——模型由此理解\cqt{上风向影响下风向}的定向传输规律。
+
+平流系数$e_{j \to i}^{\mathcal{A}}$随后被作为边特征的核心分量，与源节点风速$|v|$、节点间距离$d$、源节点风向$\beta$及连线方向$\gamma$共同构成边属性向量：
+\begin{equation}
+    \mathfrak{E}_{j \to i}^t = [e_{|v|},\; e_{d},\; e_{\beta},\; e_{\gamma},\; e^{\mathcal{A}}] \in \mathbb{R}^{5}
+\label{eq:edge_attr_vector}
+\end{equation}
+\noindent 该向量在消息传递阶段作为输入，与源节点和目标节点的特征拼接后送入消息函数$\Psi$（详见第\ref{subsec:pm25gnn_model}节），使空间信息传播过程具备物理意义。表\ref{tab:pm25gnn_edge_attributes}列出了边属性中各分量的具体含义。
 
 \begin{figure}[htbp]
   \centering
@@ -213,24 +222,20 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
   \label{fig:advection_coeff}
 \end{figure}
 
-利用ReLU函数，我们确保了仅当风从$j$吹向$i$时（即$\cos\alpha > 0$），边权重才为正，从而在物理上强制了传输的方向性约束。这一设计使得模型能够理解\cqt{上风向影响下风向}的定向传输规律。公式的物理含义是：传输强度与源节点风速成正比，与传输距离成反比，且仅在风向与连线方向一致时有效。
-
-表\ref{tab:pm25gnn_edge_attributes}列出了边属性中包含的所有变量。除平流系数外，还包括原始的风速、距离、角度信息，为模型提供了冗余特征以增强学习能力。
-
 \begin{table}[htbp]
     \centering
-    \caption{边属性（$\mathbf{A}$）中包含的变量}
-    \caption*{边属性向量$\mathbf{A}_{j \to i} \in \mathbb{R}^{5}$包含5个特征，用于刻画从源节点$j$到目标节点$i$的传输特性。}
+    \caption{边属性（$\mathfrak{E}$）中包含的变量}
+    \caption*{边属性向量$\mathfrak{E}_{j \to i} \in \mathbb{R}^{5}$包含5个特征，用于刻画从源节点$j$到目标节点$i$的传输特性。}
     \label{tab:pm25gnn_edge_attributes}
     \begin{tabular}{@{}lllp{4.5cm}@{}}
         \toprule
         \textbf{变量名称} & \textbf{符号} & \textbf{单位} & \textbf{说明} \\
         \midrule
-        源节点风速 & $A_{|v|}$ & km/h & 驱动传输的动力 \\
-        节点间距离 & $A_{d}$ & km & 传输的空间尺度 \\
-        源节点风向 & $A_{\beta}$ & ($^{\circ}$) & 气象学风向定义 \\
-        连线方向 & $A_{\gamma}$ & ($^{\circ}$) & 从源节点指向目标节点 \\
-        平流系数 & $A_{S}$ & - & 公式\eqref{eq:advection_coeff}计算 \\
+        源节点风速 & $e_{|v|}$ & km/h & 驱动传输的动力 \\
+        节点间距离 & $e_{d}$ & km & 传输的空间尺度 \\
+        源节点风向 & $e_{\beta}$ & ($^{\circ}$) & 气象学风向定义 \\
+        连线方向 & $e_{\gamma}$ & ($^{\circ}$) & 从源节点指向目标节点 \\
+        平流系数 & $e^{\mathcal{A}}$ & - & 公式\eqref{eq:advection_coeff}计算 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -251,11 +256,11 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 节点$i$在时刻$t$的状态更新过程包含三个步骤：
 
-步骤1：消息生成。根据源节点$j$和目标节点$i$的状态，以及有向边属性$\mathbf{A}_{j \to i}^t$，计算从$j$到$i$的传输消息：
+步骤1：消息生成。根据源节点$j$和目标节点$i$的状态，以及有向边属性$\mathfrak{E}_{j \to i}^t$，计算从$j$到$i$的传输消息：
 \begin{equation}
-    e_{j \to i}^t = \Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{A}_{j \to i}^t])
+    e_{j \to i}^t = \Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathfrak{E}_{j \to i}^t])
 \end{equation}
-\noindent 式中$\Psi$为可学习的消息函数，由两层MLP实现。边属性$\mathbf{A}_{j \to i}^t$包含了平流系数等物理信息，使消息生成过程具有物理意义。
+\noindent 式中$\Psi$为可学习的消息函数，由两层MLP实现。边属性$\mathfrak{E}_{j \to i}^t = [e_{|v|},\, e_{d},\, e_{\beta},\, e_{\gamma},\, e^{\mathcal{A}}]$（各分量定义见公式\eqref{eq:edge_attr_vector}与表\ref{tab:pm25gnn_edge_attributes}），包含了源节点风速、节点间距离、风向、连线方向和平流系数等风场物理信息，使消息生成过程具有物理意义。
 
 步骤2：净通量聚合。与传统GNN仅聚合输入消息不同，我们计算每个节点的净通量——即输入流与输出流之差：
 \begin{equation}
@@ -292,7 +297,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 \caption*{\textbf{PM$_{2.5}$-GNN}：算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
-    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathbf{A}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
+    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathfrak{E}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \STATE 初始化所有节点的GRU隐状态 $\{h_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
@@ -301,7 +306,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
     \FOR{$t \leftarrow 1$ to $T$}
         \FOR{每个节点 $i \in \mathcal{V}$}
             \STATE $\boldsymbol{\xi}_i^t \leftarrow [\hat{\mathbf{X}}_i^{t-1}, \mathbf{M}_i^t]$ \COMMENT{构建节点输入特征}
-            \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{A}_{j\to i}^t]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathbf{A}_{i\to j}^t])))$ \COMMENT{净通量聚合}
+            \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathfrak{E}_{j\to i}^t]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathfrak{E}_{i\to j}^t])))$ \COMMENT{净通量聚合}
             \STATE $h_i^t \leftarrow \text{GRUcell}([\boldsymbol{\xi}_i^t, \zeta_i^t], h_i^{t-1})$ \COMMENT{时空状态更新}
             \STATE $\hat{\mathbf{X}}_i^t \leftarrow \Omega(h_i^t)$ \COMMENT{浓度预测}
         \ENDFOR
@@ -336,7 +341,7 @@ PM$_{2.5}$-GNN在KnowAir-DS数据集上的实验表明，相比于GC-LSTM等基�
 \section{PCDCNet：物理化学动力学约束模型}
 \label{sec:pcdcnet}
 
-为解决PM$_{2.5}$-GNN的上述局限，我们又提出了\textbf{PCDCNet（Physical-Chemical Dynamics and Constraints Network）}\citep{wang2025pcdcnet}。该模型定位为数值模式（如CMAQ）的\textbf{深度学习代理模型（Surrogate Model）}，在继承PM$_{2.5}$-GNN风场驱动图结构设计的基础上，进行了以下关键升级：
+为解决PM$_{2.5}$-GNN的上述局限，我们又提出了\textbf{PCDCNet（Physical-Chemical Dynamics and Constraints Network）}\citep{wang2025pcdcnet}。该模型定位为数值模式（如CMAQ）的\textbf{深度学习代理模型（Surrogate Model）}，在继承PM$_{2.5}$-GNN风场驱动图网络设计的基础上，进行了以下关键升级：
 
 \begin{itemize}
     \item 多污染物联合预测：同时预报\PM 与\ozone 浓度，并建模其协同效应；
@@ -718,7 +723,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 
 从表\ref{tab:pm25gnn_overall_performance}可以得出以下结论：
 
-（1）PM$_{2.5}$-GNN在所有三个数据集上均取得最优或接近最优的性能，验证了风场驱动图结构设计的有效性。相比于仅使用时序信息的LSTM/GRU，PM$_{2.5}$-GNN的RMSE降低约4-6\%；相比于使用无向图的GC-LSTM，RMSE降低约2-3\%。
+（1）PM$_{2.5}$-GNN在所有三个数据集上均取得最优或接近最优的性能，验证了风场驱动图网络设计的有效性。相比于仅使用时序信息的LSTM/GRU，PM$_{2.5}$-GNN的RMSE降低约4-6\%；相比于使用无向图的GC-LSTM，RMSE降低约2-3\%。
 
 （2）在采暖季（重污染高发期）场景下，PM$_{2.5}$-GNN的优势更为明显。CSI指标从GC-LSTM的50.13\%提升至51.35\%，POD从64.54\%提升至66.24\%。这表明风场驱动的有向图设计有助于捕捉重污染事件中的跨区域传输，提高预警准确率。
 
@@ -767,35 +772,29 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 \begin{table*}[htbp]
 \centering
 \caption{PCDCNet与基线模型在72小时预报任务中的性能对比}
-\caption*{报告的指标为所有时间步的平均RMSE和MAE（单位：$\mu$g/m$^3$）。对比方法涵盖机器学习基线、通用时序模型和空气质量专用模型。最优结果已加粗，次优结果已加下划线。}
+\caption*{BTHSA：京津冀及周边地区（Beijing-Tianjin-Hebei and Surrounding Areas）；YRD：长江三角洲地区（Yangtze River Delta）。报告的指标为所有时间步的平均RMSE和MAE（单位：$\mu$g/m$^3$）。对比方法涵盖机器学习基线、通用时序模型和空气质量专用模型。最优结果已加粗，次优结果已加下划线。}
 \label{tab:performance_vertical}
-\begin{tabular}{@{}llcccc@{}}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccccc@{}}
 \toprule
-\multirow{2}{*}{\textbf{区域}} & \multirow{2}{*}{模型} & \multicolumn{2}{c}{\textbf{RMSE} $\downarrow$} & \multicolumn{2}{c}{\textbf{MAE} $\downarrow$} \\
-\cmidrule(lr){3-4} \cmidrule(lr){5-6}
-& & \textbf{PM$_{2.5}$} & \textbf{O$_3$} & \textbf{PM$_{2.5}$} & \textbf{O$_3$} \\
+\multirow{3}{*}{\textbf{模型}} & \multicolumn{4}{c}{\textbf{BTHSA}} & \multicolumn{4}{c}{\textbf{YRD}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+& \multicolumn{2}{c}{\textbf{RMSE} $\downarrow$} & \multicolumn{2}{c}{\textbf{MAE} $\downarrow$} & \multicolumn{2}{c}{\textbf{RMSE} $\downarrow$} & \multicolumn{2}{c}{\textbf{MAE} $\downarrow$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+& \textbf{PM$_{2.5}$} & \textbf{O$_3$} & \textbf{PM$_{2.5}$} & \textbf{O$_3$} & \textbf{PM$_{2.5}$} & \textbf{O$_3$} & \textbf{PM$_{2.5}$} & \textbf{O$_3$} \\
 \midrule
-\multirow{8}{*}{BTHSA} & XGBoost & 35.47 & \underline{27.53} & 26.05 & \underline{20.68} \\
-& LightGBM & 35.48 & 27.97 & 26.07 & 21.05 \\
-& GC-LSTM & 32.95 & 35.12 & 23.09 & 26.82 \\
-& PM$_{2.5}$-GNN & 31.51 & 31.85 & 23.50 & 22.90 \\
-& iTransformer & \underline{31.17} & 29.90 & 20.72 & 22.58 \\
-& AirPhyNet & 50.49 & 68.04 & 40.26 & 51.53 \\
-& TimeXer & 31.51 & 30.07 & \underline{20.60} & 22.87 \\
-\cmidrule(lr){2-6}
-& \textbf{PCDCNet (本文)} & \textbf{24.13} & \textbf{22.45} & \textbf{15.46} & \textbf{16.73} \\
+XGBoost & 35.47 & \underline{27.53} & 26.05 & \underline{20.68} & 22.07 & \underline{27.71} & 16.64 & \underline{20.99} \\
+LightGBM & 35.48 & 27.97 & 26.07 & 21.05 & 22.06 & 28.07 & 16.74 & 21.33 \\
+GC-LSTM & 32.95 & 35.12 & 23.09 & 26.82 & 18.77 & 34.65 & 13.57 & 26.31 \\
+PM$_{2.5}$-GNN & 31.51 & 31.85 & 23.50 & 22.90 & 18.17 & 31.46 & 13.24 & 24.05 \\
+iTransformer & \underline{31.17} & 29.90 & 20.72 & 22.58 & 17.92 & 30.53 & \underline{12.86} & 23.28 \\
+AirPhyNet & 50.49 & 68.04 & 40.26 & 51.53 & 28.53 & 56.96 & 22.90 & 42.76 \\
+TimeXer & 31.51 & 30.07 & \underline{20.60} & 22.87 & \underline{17.89} & 30.47 & \underline{12.86} & 23.28 \\
 \midrule
-\multirow{8}{*}{YRD} & XGBoost & 22.07 & \underline{27.71} & 16.64 & \underline{20.99} \\
-& LightGBM & 22.06 & 28.07 & 16.74 & 21.33 \\
-& GC-LSTM & 18.77 & 34.65 & 13.57 & 26.31 \\
-& PM$_{2.5}$-GNN & 18.17 & 31.46 & 13.24 & 24.05 \\
-& iTransformer & 17.92 & 30.53 & \underline{12.86} & 23.28 \\
-& AirPhyNet & 28.53 & 56.96 & 22.90 & 42.76 \\
-& TimeXer & \underline{17.89} & 30.47 & \underline{12.86} & 23.28 \\
-\cmidrule(lr){2-6}
-& \textbf{PCDCNet (本文)} & \textbf{15.55} & \textbf{23.03} & \textbf{10.97} & \textbf{17.27} \\
+\textbf{PCDCNet (本文)} & \textbf{24.13} & \textbf{22.45} & \textbf{15.46} & \textbf{16.73} & \textbf{15.55} & \textbf{23.03} & \textbf{10.97} & \textbf{17.27} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table*}
 
 从表\ref{tab:performance_vertical}可以得出以下结论：
@@ -816,7 +815,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
   \centering
   \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_leadtime.png}
   \caption{不同预测时效下各模型的MAE变化曲线}
-  \caption*{左图为BTHSA区域的\PM 预测，右图为YRD区域的\ozone 预测。PCDCNet在所有时效上均保持最优性能，且误差随时效增长的速率最为平缓，表明DIC约束有效抑制了长时序预测中的误差累积。}
+  \caption*{横轴为预测时效（Forecast Lead Time，单位：小时），表示从当前时刻起向未来预测的时间跨度，范围为6--72小时；纵轴为平均绝对误差（MAE，单位：$\mu$g/m$^3$），数值越低表示预测精度越高。左图为BTHSA（京津冀及周边）区域的\PM 预测，右图为YRD（长三角）区域的\ozone 预测。随着预测时效的增加，所有模型的MAE均呈上升趋势，反映了长时序预测固有的误差累积效应。PCDCNet在所有时效上均保持最优性能，且误差增长速率最为平缓，表明DIC约束有效抑制了自回归预测中的误差累积。}
   \label{fig:leadtime}
 \end{figure}
 
@@ -916,9 +915,9 @@ NH$_3$的影响相对较小：移除NH$_3$后性能变化不大，可能是因�
 
 本章聚焦于大气污染的时空预测问题，完成了从单一物理传输建模到多过程物理化学耦合建模的跨越。通过PM$_{2.5}$-GNN和PCDCNet两个模型的递进式研究，系统探索了如何在深度学习框架中融合大气科学领域知识。主要贡献总结如下：
 
-（1）提出了基于风场驱动图网络的PM$_{2.5}$-GNN模型。通过在图神经网络中显式编码风场信息，设计了平流系数公式（公式\eqref{eq:advection_coeff}）和净通量聚合机制（公式\eqref{eq:message_agg}），有效解决了\PM 的跨区域定向传输预测难题。实验表明，PM$_{2.5}$-GNN相比GC-LSTM等基线模型，在72小时长时序预测和重污染事件预警方面具有显著优势，验证了风场驱动有向图设计的有效性。
+（1）\textbf{提出了基于风场驱动图网络的PM$_{2.5}$-GNN模型。}通过在图神经网络中显式编码风场信息，设计了平流系数公式（公式\eqref{eq:advection_coeff}）和净通量聚合机制（公式\eqref{eq:message_agg}），有效解决了\PM 的跨区域定向传输预测难题。实验表明，PM$_{2.5}$-GNN相比GC-LSTM等基线模型，在72小时长时序预测和重污染事件预警方面具有显著优势，验证了风场驱动有向图设计的有效性。
 
-（2）针对PM$_{2.5}$-GNN的局限性，提出了PCDCNet模型。作为数值模式CMAQ的深度学习代理模型，PCDCNet具备以下创新特征：
+（2）\textbf{针对PM$_{2.5}$-GNN的局限性，提出了PCDCNet模型。}作为数值模式CMAQ的深度学习代理模型，PCDCNet具备以下创新特征：
 
 \begin{itemize}
     \item 排放响应建模：将排放清单作为动态输入变量纳入模型框架，实现对排放变化的显式响应能力，为后续的情景模拟应用奠定基础；
@@ -926,12 +925,10 @@ NH$_3$的影响相对较小：移除NH$_3$后性能变化不大，可能是因�
     \item 领域知识约束（DIC）：将质量守恒原则嵌入损失函数，引导模型学习物理一致的传输模式，有效抑制长时序预测中的误差累积。
 \end{itemize}
 
-（3）验证了物理知识约束在深度学习中的有效性。系统的消融实验和约束效果分析表明：（a）在损失函数中引入质量守恒等物理约束，能显著提升模型的泛化能力和长时序稳定性；（b）排放数据对于\ozone 等二次污染物的预测至关重要；（c）DIC约束具有正则化效果，有助于缓解过拟合。
+\noindent 在京津冀和长三角区域的72小时多污染物预报任务中，PCDCNet相较现有最优方法，\PM 预测的RMSE降低13--23\%，\ozone 预测的RMSE降低17--19\%。从方法论角度，本章将第\ref{chap:methodology}章公式\eqref{eq:advection_diffusion}所描述的大气物理化学过程（平流、扩散、化学反应、排放、沉降）显式地映射到深度学习架构设计中，构建了\cqt{Embed$\to$LID$\to$STD$\to$TAD$\to$Readout}的完整建模框架。这种\cqt{观测空间$\leftrightarrow$隐空间$\leftrightarrow$观测空间}的表示学习范式，不仅约束了模型的输入输出映射，更重要的是约束了模型学习到的隐空间表示本身，使其具备物理意义与一致性。
 
-（4）构建并公开了KnowAir-DS系列数据集。KnowAir-DS-V1以城市为节点、3小时为时间分辨率，覆盖更大空间范围（184个城市），用于验证PM$_{2.5}$-GNN的区域传输建模能力；KnowAir-DS-V2以观测站点为节点、1小时为时间分辨率，空间精度更高，用于验证PCDCNet的精细化预报能力。尽管两个数据集的空间尺度和时间分辨率不同，PM$_{2.5}$-GNN和PCDCNet采用的核心方法论——物理启发的时空图神经网络——保持一致，体现了数据驱动方法在不同尺度间迁移的灵活性。
+（3）\textbf{验证了物理知识约束在深度学习中的有效性。}系统的消融实验和约束效果分析表明：（a）在损失函数中引入质量守恒等物理约束，能显著提升模型的泛化能力和长时序稳定性；（b）排放数据对于\ozone 等二次污染物的预测至关重要；（c）DIC约束具有正则化效果，有助于缓解过拟合。
 
-在京津冀和长三角区域的72小时多污染物预报任务中，PCDCNet相较现有最优方法，\PM 预测的RMSE降低\textbf{13-23\%}，\ozone 预测的RMSE降低\textbf{17-19\%}。这一性能提升验证了\cqt{物理启发数据驱动建模}范式的有效性。
+（4）\textbf{构建并公开了KnowAir-DS系列数据集。}KnowAir-DS-V1以城市为节点、3小时为时间分辨率，覆盖更大空间范围（184个城市），用于验证PM$_{2.5}$-GNN的区域传输建模能力；KnowAir-DS-V2以观测站点为节点、1小时为时间分辨率，空间精度更高，用于验证PCDCNet的精细化预报能力。尽管两个数据集的空间尺度和时间分辨率不同，PM$_{2.5}$-GNN和PCDCNet采用的核心方法论——物理启发的时空图神经网络——保持一致，体现了数据驱动方法在不同尺度间迁移的灵活性。
 
-从方法论角度，本章的核心贡献在于：将第\ref{chap:methodology}章公式\eqref{eq:advection_diffusion}所描述的大气物理化学过程（平流、扩散、化学反应、排放、沉降）显式地映射到深度学习架构设计中，构建了\cqt{Embed$\to$LID$\to$STD$\to$TAD$\to$Readout}的完整建模框架。这种\cqt{观测空间$\leftrightarrow$隐空间$\leftrightarrow$观测空间}的表示学习范式，不仅约束了模型的输入输出映射，更重要的是约束了模型学习到的隐空间表示本身，使其具备物理意义与一致性。
-
-PCDCNet的成功构建，不仅实现了高精度的实时预报，更为后续章节开展基于多源数据融合的\textbf{空间推断}（第\ref{chap:inference}章）和基于排放清单的\textbf{情景模拟}（第\ref{chap:simulation}章）奠定了坚实的建模基础。在第\ref{chap:deployment}章中，PCDCNet将作为核心预报引擎部署到KnowAir智能预报系统中实现业务化运行，并与\CMAQ、WRF-Chem、NAQPMS等数值模式进行直接对比评估，以验证其在真实业务场景中的实战表现。
+综上，PCDCNet的成功构建不仅实现了高精度的实时预报，更为后续章节开展基于多源数据融合的空间推断（第\ref{chap:inference}章）和基于排放清单的情景模拟（第\ref{chap:simulation}章）奠定了坚实的建模基础。在第\ref{chap:deployment}章中，PCDCNet将作为核心预报引擎部署到KnowAir智能预报系统中实现业务化运行，并与\CMAQ、WRF-Chem、NAQPMS等数值模式进行直接对比评估，以验证其在真实业务场景中的实战表现。
