@@ -39,18 +39,18 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap03_prediction_problem.pdf}
     \caption{大气污染时序预测问题示意图}
-    \caption*{输入：历史空气质量观测$\mathbf{X}^{-T'+1:0}$（浅蓝色背景）、气象场$\mathbf{M}^{-T'+1:T}$、排放数据$\mathbf{E}^{-T'+1:T}$；输出：未来$T$个时间步的\PM 与\ozone 浓度预测$\hat{\mathbf{X}}^{1:T}$（浅粉色背景）；模型：基于空间距离构建图结构$\mathcal{G}$，通过PM$_{2.5}$-GNN/PCDCNet建模节点间的时空相关性。}
+    \caption*{输入：历史空气质量观测$\mathbf{X}_{-T'+1:0}$（浅蓝色背景）、气象场$\mathbf{M}_{-T'+1:T}$、排放数据$\mathbf{E}_{-T'+1:T}$；输出：未来$T$个时间步的\PM 与\ozone 浓度预测$\hat{\mathbf{X}}_{1:T}$（浅粉色背景）；模型：基于空间距离构建图结构$\mathcal{G}$，通过PM$_{2.5}$-GNN/PCDCNet建模节点间的时空相关性。}
     \label{fig:prediction_problem}
 \end{figure}
 
-如图所示，大气污染时序预测问题的输入-输出结构如下：输入包括三类数据——历史空气质量观测序列$\mathbf{X}^{-T'+1:0}$（图中左侧浅蓝色背景区域，从$t=-T'+1$至$t=0$共$T'$个时间步）、气象场数据$\mathbf{M}$（包括风速风向、温度、湿度、边界层高度等）以及排放清单$\mathbf{E}$；输出为未来$T$个时间步的\PM 与\ozone 浓度预测序列$\hat{\mathbf{X}}^{1:T}$（图中右侧浅粉色背景区域，从$t=1$至$t=T$共$T$个时间步）。图中蓝色圆点代表监测站点/城市节点，节点间的连线表示基于空间距离构建的图结构。
+如图所示，大气污染时序预测问题的输入-输出结构如下：输入包括三类数据——历史空气质量观测序列$\mathbf{X}_{-T'+1:0}$（图中左侧浅蓝色背景区域，从$t=-T'+1$至$t=0$共$T'$个时间步）、气象场数据$\mathbf{M}$（包括风速风向、温度、湿度、边界层高度等）以及排放清单$\mathbf{E}$；输出为未来$T$个时间步的\PM 与\ozone 浓度预测序列$\hat{\mathbf{X}}_{1:T}$（图中右侧浅粉色背景区域，从$t=1$至$t=T$共$T$个时间步）。图中蓝色圆点代表监测站点/城市节点，节点间的连线表示基于空间距离构建的图结构。
 
 时间坐标定义。在空气质量预报问题中，我们将起报时刻（Forecast Initialization Time）定义为$t=0$，它是最后一个可获取空气质量观测数据的时间戳。以此为参照，$t \leq 0$表示历史时刻（$t=0, -1, -2, \ldots, -T'+1$共$T'$个时间步），$t>0$表示未来时刻（$t=1, 2, \ldots, T$共$T$个待预测时间步）。历史窗口$T'$用于捕捉污染物浓度的时序演化规律，预测窗口$T$决定了预报的时间范围（Lead Time），在此期间模型需要未来的气象预报和排放数据作为驱动输入。时间分辨率与$t$的具体对应关系详见第\ref{subsec:knowair_dataset}节的数据集描述。
 
 形式化地，设研究区域包含$N$个城市或监测站点，构成图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，其中$\mathcal{V}$为节点集合（$|\mathcal{V}|=N$），$\mathcal{E}$为边集合。预测问题可形式化表述为：
 
 \begin{equation}
-\hat{\mathbf{X}}^{1:T} = \mathcal{F}_\Theta\left(\mathbf{X}^{-T'+1:0}, \mathbf{M}^{-T'+1:T}, \mathbf{E}^{-T'+1:T}, \mathcal{G} \right)
+\hat{\mathbf{X}}_{1:T} = \mathcal{F}_\Theta\left(\mathbf{X}_{-T'+1:0}, \mathbf{M}_{-T'+1:T}, \mathbf{E}_{-T'+1:T}, \mathcal{G} \right)
 \label{eq:pred_problem}
 \end{equation}
 
@@ -292,11 +292,11 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 \caption*{\textbf{PM$_{2.5}$-GNN}：算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
-    \REQUIRE 初始观测值 $\mathbf{X}^{0}$，未来$T$步的节点属性 $\{\mathbf{M}^t\}_{t=1}^T$ 和边属性 $\{\mathbf{A}^t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
-    \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}^t\}_{t=1}^T$（推理）
+    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathbf{A}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
+    \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \STATE 初始化所有节点的GRU隐状态 $\{h_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
-    \STATE 初始化预测序列 $\hat{\mathbf{X}}^0 \leftarrow \mathbf{X}^0$
+    \STATE 初始化预测序列 $\hat{\mathbf{X}}_0 \leftarrow \mathbf{X}_0$
     
     \FOR{$t \leftarrow 1$ to $T$}
         \FOR{每个节点 $i \in \mathcal{V}$}
@@ -309,7 +309,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 
     \STATE $\mathcal{L} \leftarrow \frac{1}{T} \sum_{t=1}^{T}\frac{1}{N} \sum_{i=1}^{N}(\hat{\mathbf{X}}_i^t - \mathbf{X}_i^t)^{2}$ \COMMENT{MSE损失}
     \STATE $\Theta \leftarrow \Theta - \alpha \frac{\partial \mathcal{L}}{\partial \Theta}$
-    \STATE \RETURN $\Theta$（训练）\textbf{或} $\{\hat{\mathbf{X}}^t\}_{t=1}^T$（推理）
+    \STATE \RETURN $\Theta$（训练）\textbf{或} $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 \end{algorithmic}
 \end{algorithm}
 
@@ -349,15 +349,15 @@ PM$_{2.5}$-GNN在KnowAir-DS数据集上的实验表明，相比于GC-LSTM等基�
 \subsection{设计理念}
 \label{subsec:pcdcnet_design}
 
-传统的AI预测模型通常采用自回归形式$\hat{\mathbf{X}}^{t+1} = f(\mathbf{X}^{1:t}, \mathbf{M}^{1:t})$，仅依赖历史观测和气象数据。这种范式存在两个根本性问题：（1）无法利用未来气象预报信息，导致预报时效受限；（2）无法响应排放变化，无法支持情景模拟。
+传统的AI预测模型通常采用自回归形式$\hat{\mathbf{X}}_{t+1} = f(\mathbf{X}_{1:t}, \mathbf{M}_{1:t})$，仅依赖历史观测和气象数据。这种范式存在两个根本性问题：（1）无法利用未来气象预报信息，导致预报时效受限；（2）无法响应排放变化，无法支持情景模拟。
 
 PCDCNet旨在模拟数值模式（如CMAQ）的演化过程，其输入输出范式对齐了数值模式的设计：
 \begin{equation}
-    \hat{\mathbf{X}}^{t+1} = \mathcal{F}_\Theta\left(\mathbf{X}^t, \mathbf{M}^{t+1}, \mathbf{E}^{t+1} \right)
+    \hat{\mathbf{X}}_{t+1} = \mathcal{F}_\Theta\left(\mathbf{X}_t, \mathbf{M}_{t+1}, \mathbf{E}_{t+1} \right)
 \label{eq:pcdcnet_formulation}
 \end{equation}
 
-即利用当前的污染状态$\mathbf{X}^t$、未来的气象条件$\mathbf{M}^{t+1}$和未来的排放强度$\mathbf{E}^{t+1}$来推演下一时刻的浓度。这种设计使得模型具备了对排放变化的敏感性，从而支持：
+即利用当前的污染状态$\mathbf{X}_t$、未来的气象条件$\mathbf{M}_{t+1}$和未来的排放强度$\mathbf{E}_{t+1}$来推演下一时刻的浓度。这种设计使得模型具备了对排放变化的敏感性，从而支持：
 
 （1）排放情景模拟——给定不同排放路径（如减排30\%、50\%、70\%），预测空气质量的演变趋势（详见第\ref{chap:simulation}章）。
 
@@ -500,21 +500,21 @@ PCDCNet采用残差预测方式生成最终输出，即预测浓度的变化量�
 
 \textbf{空间质量守恒约束}。根据第\ref{chap:methodology}章的质量守恒方程（公式\eqref{eq:mass_conservation}），在不考虑化学源汇的情况下，通过扩散和平流传输的污染物在全局范围内应满足质量守恒。具体地，在任一时刻，每个节点通过传输过程\cqt{流出}的污染物总量应等于其邻居节点\cqt{流入}的总量：
 \begin{equation}
-    \sum_{v' \in \mathcal{N}(v)} \nabla \hat{\mathbf{X}}_{t, v \to v'}^S = 0, \quad \forall v \in \mathcal{V}
+    \sum_{v' \in \mathcal{N}(v)} \nabla \hat{X}_{v \to v'}^S = 0, \quad \forall v \in \mathcal{V}
 \label{eq:spatial_conservation}
 \end{equation}
-\noindent 式中$\nabla \hat{\mathbf{X}}_{t, v \to v'}^S$表示从节点$v$传输到邻居节点$v'$的污染物通量。该约束确保传输过程是\cqt{零和博弈}——一个节点的流出必然对应其他节点的流入，防止模型在传输建模中凭空\cqt{创造}或\cqt{消灭}污染物。
+\noindent 式中$\nabla \hat{X}_{v \to v'}^S$表示从节点$v$传输到邻居节点$v'$的污染物通量。该约束确保传输过程是\cqt{零和博弈}——一个节点的流出必然对应其他节点的流入，防止模型在传输建模中凭空\cqt{创造}或\cqt{消灭}污染物。
 
 \textbf{时间质量守恒约束}。在封闭系统中，全局污染物总量在时间上应保持稳定（不考虑排放和沉降）：
 \begin{equation}
-    \frac{d}{dt} \sum_{v \in \mathcal{V}} \nabla \hat{\mathbf{X}}_{t, v}^S = 0
+    \frac{d}{dt} \sum_{v \in \mathcal{V}} \nabla \hat{X}_{v}^S = 0
 \label{eq:temporal_conservation}
 \end{equation}
 该约束确保STD模块学习到的传输模式在时间维度上也满足守恒性，防止长时序预测中出现累积性的质量漂移。
 
 综合空间和时间两个维度的守恒约束，DIC损失函数定义为：
 \begin{equation}
-    \mathcal{L}_{\mathrm{DIC}} = \underbrace{\frac{1}{|\mathcal{V}|} \sum_{v} \left| \sum_{v' \in \mathcal{N}(v)} \nabla \hat{\mathbf{X}}_{t, v \to v'}^S \right|}_{\text{空间守恒项}} + \underbrace{\frac{1}{T} \sum_{t} \left| \frac{d \nabla \hat{\mathbf{X}}_t^S}{dt} \right|}_{\text{时间守恒项}}
+    \mathcal{L}_{\mathrm{DIC}} = \underbrace{\frac{1}{|\mathcal{V}|} \sum_{v} \left| \sum_{v' \in \mathcal{N}(v)} \nabla \hat{X}_{v \to v'}^S \right|}_{\text{空间守恒项}} + \underbrace{\frac{1}{T} \sum_{t} \left| \frac{d \nabla \hat{\mathbf{X}}_t^S}{dt} \right|}_{\text{时间守恒项}}
 \label{eq:dic_loss}
 \end{equation}
 \noindent 第一项惩罚每个节点的净传输通量偏离零的程度，确保空间守恒；第二项惩罚全局传输贡献随时间的变化率，确保时间守恒。实际计算中，时间导数通过差分近似：$\frac{d \nabla \hat{\mathbf{X}}_t^S}{dt} \approx \nabla \hat{\mathbf{X}}_t^S - \nabla \hat{\mathbf{X}}_{t-1}^S$。

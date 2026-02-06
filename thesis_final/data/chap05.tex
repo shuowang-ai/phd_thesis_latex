@@ -45,22 +45,22 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap05_simulation_problem.pdf}
     \caption{未来情景模拟问题示意图}
-    \caption*{输入：未来气象场$\mathbf{M}_{\text{future}}^{t-T'+1:t}$（CMIP6）和排放场$\mathbf{E}_{\text{future}}^{t-T'+1:t}$（DPEC）；输出：2025-2050年的\PM 和\ozone 浓度模拟$\hat{\mathbf{X}}_{\text{future}}^t$；模型：IGNN（$\mathcal{F}_\Theta$）通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）训练得到（图中上半部分，详见第\ref{subsec:train_infer_paradigm}节），学习排放-气象-浓度之间的响应关系后迁移至未来情景（图中下半部分）。}
+    \caption*{输入：未来气象场$\mathbf{M}^{\text{future}}_{t-T'+1:t}$（CMIP6）和排放场$\mathbf{E}^{\text{future}}_{t-T'+1:t}$（DPEC）；输出：2025-2050年的\PM 和\ozone 浓度模拟$\hat{\mathbf{X}}^{\text{future}}_t$；模型：IGNN（$\mathcal{F}_\Theta$）通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）训练得到（图中上半部分，详见第\ref{subsec:train_infer_paradigm}节），学习排放-气象-浓度之间的响应关系后迁移至未来情景（图中下半部分）。}
     \label{fig:simulation_problem}
 \end{figure}
 
 本章的时间维度与前两章存在本质区别：第\ref{chap:prediction}章关注小时-日尺度的短期预报（起报后72小时内），第\ref{chap:inference}章关注当前时刻的空间推断，而本章关注年-十年尺度的长期趋势模拟（2025-2050年）。
 
-形式化地，给定研究区域的图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$（式中$\mathcal{V}$为$N$个城市节点，$\mathcal{E}$为空间邻接边），未来时刻$t$之前$T'$个时间步的气象场$\mathbf{M}_{\text{future}}^{t-T'+1:t}$和排放数据$\mathbf{E}_{\text{future}}^{t-T'+1:t}$，目标是利用预训练的映射函数$\mathcal{F}_{\Theta^*}$模拟该时刻的污染物浓度场：
+形式化地，给定研究区域的图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$（式中$\mathcal{V}$为$N$个城市节点，$\mathcal{E}$为空间邻接边），未来时刻$t$之前$T'$个时间步的气象场$\mathbf{M}^{\text{future}}_{t-T'+1:t}$和排放数据$\mathbf{E}^{\text{future}}_{t-T'+1:t}$，目标是利用预训练的映射函数$\mathcal{F}_{\Theta^*}$模拟该时刻的污染物浓度场：
 \begin{equation}
-\hat{\mathbf{X}}_{\text{future}}^{t} = \mathcal{F}_{\Theta^*}\left(\mathbf{M}_{\text{future}}^{t-T'+1:t}, \mathbf{E}_{\text{future}}^{t-T'+1:t}, \mathcal{G}\right)
+\hat{\mathbf{X}}^{\text{future}}_{t} = \mathcal{F}_{\Theta^*}\left(\mathbf{M}^{\text{future}}_{t-T'+1:t}, \mathbf{E}^{\text{future}}_{t-T'+1:t}, \mathcal{G}\right)
 \label{eq:forward_simulation}
 \end{equation}
-\noindent 式中，$\mathbf{M}_{\text{future}}^t \in \mathbb{R}^{N \times D_M}$表示第$t$时刻的未来气象变量（CMIP6，包括温度、风速、辐射等），$\mathbf{E}_{\text{future}}^t \in \mathbb{R}^{N \times D_E}$表示第$t$时刻的未来排放数据（DPEC，包括\NOx、VOC、SO$_2$、\PM 一次排放等），$\hat{\mathbf{X}}_{\text{future}}^t \in \mathbb{R}^{N \times 2}$表示模拟的\PM 和\ozone 浓度，$\Theta^*$为通过历史数据预训练得到的固定模型参数。
+\noindent 式中，$\mathbf{M}^{\text{future}}_t \in \mathbb{R}^{N \times D_M}$表示第$t$时刻的未来气象变量（CMIP6，包括温度、风速、辐射等），$\mathbf{E}^{\text{future}}_t \in \mathbb{R}^{N \times D_E}$表示第$t$时刻的未来排放数据（DPEC，包括\NOx、VOC、SO$_2$、\PM 一次排放等），$\hat{\mathbf{X}}^{\text{future}}_t \in \mathbb{R}^{N \times 2}$表示模拟的\PM 和\ozone 浓度，$\Theta^*$为通过历史数据预训练得到的固定模型参数。
 
-与第\ref{chap:prediction}章的自回归预测范式不同，本章的模型输入不包含污染物浓度观测，仅依赖气象和排放驱动。具体而言，模型将一个长度为$T'$的时间窗口（从$t-T'+1$到$t$时刻）内的气象场$\mathbf{M}_{\text{future}}$和排放数据$\mathbf{E}_{\text{future}}$，映射为该窗口末端$t$时刻的污染物浓度$\hat{\mathbf{X}}_{\text{future}}^t$。由于每个时刻的模拟仅依赖当前窗口内的气象和排放输入，而不依赖前一时刻的模拟结果，因此避免了长期积分中的误差累积问题，同时使模型能够直接响应任意假设的排放情景，支撑\cqt{如果减排50\%结果如何}这类假设情景分析。
+与第\ref{chap:prediction}章的自回归预测范式不同，本章的模型输入不包含污染物浓度观测，仅依赖气象和排放驱动。具体而言，模型将一个长度为$T'$的时间窗口（从$t-T'+1$到$t$时刻）内的气象场$\mathbf{M}^{\text{future}}$和排放数据$\mathbf{E}^{\text{future}}$，映射为该窗口末端$t$时刻的污染物浓度$\hat{\mathbf{X}}^{\text{future}}_t$。由于每个时刻的模拟仅依赖当前窗口内的气象和排放输入，而不依赖前一时刻的模拟结果，因此避免了长期积分中的误差累积问题，同时使模型能够直接响应任意假设的排放情景，支撑\cqt{如果减排50\%结果如何}这类假设情景分析。
 
-如图\ref{fig:simulation_problem}所示，模型$\mathcal{F}_{\Theta^*}$通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）预训练得到，学习排放-气象-浓度之间的响应关系（详见第\ref{subsec:train_infer_paradigm}节）；在推理阶段，以未来气象$\mathbf{M}_{\text{future}}^{t-T'+1:t}$（CMIP6）和排放$\mathbf{E}_{\text{future}}^{t-T'+1:t}$（DPEC）为输入，模拟2025-2050年的空气质量$\hat{\mathbf{X}}_{\text{future}}^t$。
+如图\ref{fig:simulation_problem}所示，模型$\mathcal{F}_{\Theta^*}$通过历史数据（ERA5气象、MEIC排放、CNEMC观测，2014-2020年）预训练得到，学习排放-气象-浓度之间的响应关系（详见第\ref{subsec:train_infer_paradigm}节）；在推理阶段，以未来气象$\mathbf{M}^{\text{future}}_{t-T'+1:t}$（CMIP6）和排放$\mathbf{E}^{\text{future}}_{t-T'+1:t}$（DPEC）为输入，模拟2025-2050年的空气质量$\hat{\mathbf{X}}^{\text{future}}_t$。
 
 
 % ------------------------------------------------------------
@@ -165,11 +165,11 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
 如图\ref{fig:ignn_arch}所示，IGNN模型采用一对一映射的输入输出范式：
 
 \begin{equation}
-\hat{\mathbf{X}}^{t} = \mathcal{F}_{\text{IGNN}}\left(\mathbf{M}^{t-T'+1:t}, \mathbf{E}^{t-T'+1:t}\right)
+\hat{\mathbf{X}}_{t} = \mathcal{F}_{\text{IGNN}}\left(\mathbf{M}_{t-T'+1:t}, \mathbf{E}_{t-T'+1:t}\right)
 \label{eq:ignn_formulation}
 \end{equation}
 
-\noindent 式中$\mathbf{M}^{t-T'+1:t}$表示过去$T'$个时间步的气象信息（包含温度、风速、风向、降水、辐射、湿度、气压7个变量），$\mathbf{E}^{t-T'+1:t}$表示对应时段的排放数据（包含\PM、PM$_{10}$、SO$_2$、\NOx、VOC共5个物种）；输出$\hat{\mathbf{X}}^t \in \mathbb{R}^{N \times 2}$为时刻$t$的\PM 和\ozone 浓度。该设计避免了将历史污染物浓度作为输入所带来的误差累积问题\citep{qi2019hybrid}。
+\noindent 式中$\mathbf{M}_{t-T'+1:t}$表示过去$T'$个时间步的气象信息（包含温度、风速、风向、降水、辐射、湿度、气压7个变量），$\mathbf{E}_{t-T'+1:t}$表示对应时段的排放数据（包含\PM、PM$_{10}$、SO$_2$、\NOx、VOC共5个物种）；输出$\hat{\mathbf{X}}_t \in \mathbb{R}^{N \times 2}$为时刻$t$的\PM 和\ozone 浓度。该设计避免了将历史污染物浓度作为输入所带来的误差累积问题\citep{qi2019hybrid}。
 
 \begin{figure}[htbp]
   \centering
@@ -212,39 +212,39 @@ IGNN模型采用两阶段范式实现从历史学习到未来模拟的知识迁�
 
 训练阶段（$t \in \mathcal{T}_{\text{hist}}$）。训练阶段的目标是从历史数据中学习排放-气象-浓度之间的非线性响应关系。如图\ref{fig:simulation_problem}上半部分所示，模型的输入为长度$T'$的时间窗口内的历史驱动数据：
 \begin{itemize}
-    \item 气象驱动$\mathbf{M}_{\text{hist}}^{t-T'+1:t}$：来自ERA5再分析资料（2014-2020年），涵盖温度、风速、风向、降水、辐射、湿度、气压等7个变量；
-    \item 排放驱动$\mathbf{E}_{\text{hist}}^{t-T'+1:t}$：来自MEIC清单（2014-2020年），涵盖\PM、PM$_{10}$、SO$_2$、\NOx、VOC等5个物种的排放强度。
+    \item 气象驱动$\mathbf{M}^{\text{hist}}_{t-T'+1:t}$：来自ERA5再分析资料（2014-2020年），涵盖温度、风速、风向、降水、辐射、湿度、气压等7个变量；
+    \item 排放驱动$\mathbf{E}^{\text{hist}}_{t-T'+1:t}$：来自MEIC清单（2014-2020年），涵盖\PM、PM$_{10}$、SO$_2$、\NOx、VOC等5个物种的排放强度。
 \end{itemize}
 
-模型的监督信号$\mathbf{X}_{\text{hist}}^{t}$来自CNEMC国家监测站点的实测浓度数据。训练过程中，时间索引$t$遍历整个历史时段$\mathcal{T}_{\text{hist}}$（2014-2020年的每一个3小时时间步）。对于每个$t$，模型接收其前$T'$个时间步的气象和排放数据$(\mathbf{M}_{\text{hist}}^{t-T'+1:t}, \mathbf{E}_{\text{hist}}^{t-T'+1:t})$作为输入，经由图神经网络$\mathcal{F}_\Theta$处理后，输出该时刻的\PM 和\ozone 浓度预测$\hat{\mathbf{X}}_{\text{hist}}^t$，并与真实观测$\mathbf{X}_{\text{hist}}^t$计算损失进行梯度更新。
+模型的监督信号$\mathbf{X}^{\text{hist}}_{t}$来自CNEMC国家监测站点的实测浓度数据。训练过程中，时间索引$t$遍历整个历史时段$\mathcal{T}_{\text{hist}}$（2014-2020年的每一个3小时时间步）。对于每个$t$，模型接收其前$T'$个时间步的气象和排放数据$(\mathbf{M}^{\text{hist}}_{t-T'+1:t}, \mathbf{E}^{\text{hist}}_{t-T'+1:t})$作为输入，经由图神经网络$\mathcal{F}_\Theta$处理后，输出该时刻的\PM 和\ozone 浓度预测$\hat{\mathbf{X}}^{\text{hist}}_t$，并与真实观测$\mathbf{X}^{\text{hist}}_t$计算损失进行梯度更新。
 
 训练阶段的核心约束是：
 \begin{equation}
-\min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\hat{\mathbf{X}}_{\text{hist}}^t, \mathbf{X}_{\text{hist}}^t\right) = \min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\mathcal{F}_\Theta\left(\mathbf{M}_{\text{hist}}^{t-T'+1:t}, \mathbf{E}_{\text{hist}}^{t-T'+1:t}, \mathcal{G}\right), \mathbf{X}_{\text{hist}}^t\right)
+\min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\hat{\mathbf{X}}^{\text{hist}}_t, \mathbf{X}^{\text{hist}}_t\right) = \min_{\Theta} \sum_{t \in \mathcal{T}_{\text{hist}}} \mathcal{L}\left(\mathcal{F}_\Theta\left(\mathbf{M}^{\text{hist}}_{t-T'+1:t}, \mathbf{E}^{\text{hist}}_{t-T'+1:t}, \mathcal{G}\right), \mathbf{X}^{\text{hist}}_t\right)
 \label{eq:training_objective}
 \end{equation}
 \noindent 式中$\mathcal{T}_{\text{hist}}$为历史训练时段（2014-2020年），$\mathcal{L}$为均方误差损失函数，$\mathcal{G}$为图\ref{fig:simulation_problem}所示的城市网络结构。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，IGNN采用纯监督损失而未引入显式物理约束项，原因在于：（1）长期模拟的关键挑战是误差累积而非单步物理一致性，而非自回归架构已从根本上解决了这一问题；（2）模型通过大量历史数据隐式学习了公式\eqref{eq:advection_diffusion}所描述的物理响应关系；（3）城市级别的空间聚合平滑了局部物理约束的必要性。通过这种窗口到点的映射方式，模型学习到了在给定气象条件和排放强度下，大气系统如何响应并产生特定的污染物浓度。
 
 推理阶段（$t \in \mathcal{T}_{\text{future}}$）。推理阶段的目标是将训练好的模型迁移至未来情景，生成2025-2050年的空气质量模拟结果。如图\ref{fig:simulation_problem}下半部分所示，模型结构$\mathcal{F}$和参数$\Theta^*$保持固定（图中雪花图标表示参数冻结），仅将输入数据替换为未来情景驱动：
 \begin{itemize}
-    \item 气象驱动$\mathbf{M}_{\text{future}}^{t-T'+1:t}$：来自CMIP6气候模式的RCP8.5高排放情景输出（CAS FGOALS-f3-L模型，2025-2050年）；
-    \item 排放驱动$\mathbf{E}_{\text{future}}^{t-T'+1:t}$：来自DPEC模型的六种减排策略（从Baseline到1.5°C目标，2025-2050年）。
+    \item 气象驱动$\mathbf{M}^{\text{future}}_{t-T'+1:t}$：来自CMIP6气候模式的RCP8.5高排放情景输出（CAS FGOALS-f3-L模型，2025-2050年）；
+    \item 排放驱动$\mathbf{E}^{\text{future}}_{t-T'+1:t}$：来自DPEC模型的六种减排策略（从Baseline到1.5°C目标，2025-2050年）。
 \end{itemize}
 
-推理过程中，时间索引$t$遍历整个未来时段$\mathcal{T}_{\text{future}}$（2025-2050年的每一个3小时时间步）。对于每个$t$，模型独立计算该时刻的浓度输出$\hat{\mathbf{X}}_{\text{future}}^t$：
+推理过程中，时间索引$t$遍历整个未来时段$\mathcal{T}_{\text{future}}$（2025-2050年的每一个3小时时间步）。对于每个$t$，模型独立计算该时刻的浓度输出$\hat{\mathbf{X}}^{\text{future}}_t$：
 \begin{equation}
-\hat{\mathbf{X}}_{\text{future}}^t = \mathcal{F}_{\Theta^*}\left(\mathbf{M}_{\text{future}}^{t-T'+1:t}, \mathbf{E}_{\text{future}}^{t-T'+1:t}, \mathcal{G}\right), \quad t \in \mathcal{T}_{\text{future}}
+\hat{\mathbf{X}}^{\text{future}}_t = \mathcal{F}_{\Theta^*}\left(\mathbf{M}^{\text{future}}_{t-T'+1:t}, \mathbf{E}^{\text{future}}_{t-T'+1:t}, \mathcal{G}\right), \quad t \in \mathcal{T}_{\text{future}}
 \label{eq:inference}
 \end{equation}
 \noindent 式中$\Theta^*$为训练后的固定参数，$\mathcal{T}_{\text{future}}$为推理时段（2025-2050年）。
 
 这种训练-推理范式具有以下关键优势：
 
-（1）消除误差累积。如图\ref{fig:simulation_problem}所示，IGNN的每个时刻$t$的预测仅依赖当前窗口内的输入（$\mathbf{M}_{\text{hist/future}}^{t-T'+1:t}$和$\mathbf{E}_{\text{hist/future}}^{t-T'+1:t}$），而不依赖前一时刻的预测结果$\hat{\mathbf{X}}^{t-1}$。这意味着即使某一时刻的预测存在偏差，该偏差不会传递到后续时刻。在25年尺度的长期模拟中，这一特性至关重要——自回归模型的预测误差会随时间步指数级放大，而IGNN的误差始终保持在单步水平。
+（1）消除误差累积。如图\ref{fig:simulation_problem}所示，IGNN的每个时刻$t$的预测仅依赖当前窗口内的输入（$\mathbf{M}^{\text{hist/future}}_{t-T'+1:t}$和$\mathbf{E}^{\text{hist/future}}_{t-T'+1:t}$），而不依赖前一时刻的预测结果$\hat{\mathbf{X}}_{t-1}$。这意味着即使某一时刻的预测存在偏差，该偏差不会传递到后续时刻。在25年尺度的长期模拟中，这一特性至关重要——自回归模型的预测误差会随时间步指数级放大，而IGNN的误差始终保持在单步水平。
 
-（2）支撑假设情景分析。由于模型输入不包含历史浓度，仅依赖气象和排放驱动，因此可以直接响应\cqt{如果排放减少50\%结果如何}这类假设性问题。只需将$\mathbf{E}_{\text{future}}$替换为假设的排放情景，即可获得对应的浓度响应，这为政策评估提供了\cqt{数字沙盘}工具。
+（2）支撑假设情景分析。由于模型输入不包含历史浓度，仅依赖气象和排放驱动，因此可以直接响应\cqt{如果排放减少50\%结果如何}这类假设性问题。只需将$\mathbf{E}^{\text{future}}$替换为假设的排放情景，即可获得对应的浓度响应，这为政策评估提供了\cqt{数字沙盘}工具。
 
-（3）实现跨域迁移。训练阶段学习的排放-气象-浓度响应关系具有物理普适性（公式\ref{eq:advection_diffusion}所描述的平流-扩散-化学反应机制），因此可以迁移至未来情景。尽管未来的气象条件$\mathbf{M}_{\text{future}}$（CMIP6）和排放强度$\mathbf{E}_{\text{future}}$（DPEC）与历史数据$\mathbf{M}_{\text{hist}}$（ERA5）/$\mathbf{E}_{\text{hist}}$（MEIC）存在域偏移，但模型捕捉到的基本物理关系仍然适用。图\ref{fig:simulation_problem}中从训练到推理的迁移（Transfer箭头）正是基于这一物理普适性假设。
+（3）实现跨域迁移。训练阶段学习的排放-气象-浓度响应关系具有物理普适性（公式\ref{eq:advection_diffusion}所描述的平流-扩散-化学反应机制），因此可以迁移至未来情景。尽管未来的气象条件$\mathbf{M}^{\text{future}}$（CMIP6）和排放强度$\mathbf{E}^{\text{future}}$（DPEC）与历史数据$\mathbf{M}^{\text{hist}}$（ERA5）/$\mathbf{E}^{\text{hist}}$（MEIC）存在域偏移，但模型捕捉到的基本物理关系仍然适用。图\ref{fig:simulation_problem}中从训练到推理的迁移（Transfer箭头）正是基于这一物理普适性假设。
 
 
 \subsection{模型训练与验证}

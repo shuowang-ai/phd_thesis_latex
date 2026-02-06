@@ -3,13 +3,13 @@
 \begin{denotation}[3cm]
 
 % 1. 核心变量
-\item[\(\mathbf{X}^t, \hat{\mathbf{X}}^t\)] 时间 \(t\) 的空气质量观测值与预测值（单位：\(\mu\)g/m\(^3\)），$\mathbf{X} \in \mathbb{R}^{N \times D_X}$，包含 PM\(_{2.5}\)、PM\(_{10}\)、O\(_3\)、NO\(_2\) 等污染物。
-\item[\(\mathbf{M}^t, \mathbf{E}^t\)] 时间 \(t\) 的气象变量与排放变量集合。
+\item[\(\mathbf{X}_t, \hat{\mathbf{X}}_t\)] 时间 \(t\) 的空气质量观测值与预测值（单位：\(\mu\)g/m\(^3\)），$\mathbf{X} \in \mathbb{R}^{N \times D_X}$，包含 PM\(_{2.5}\)、PM\(_{10}\)、O\(_3\)、NO\(_2\) 等污染物。
+\item[\(\mathbf{M}_t, \mathbf{E}_t\)] 时间 \(t\) 的气象变量与排放变量集合。
     \begin{itemize}
-        \item \(\mathbf{M}^t\) 包含：气温 ($M_{\text{t2m}}$)、露点 ($M_{\text{d2m}}$)、边界层高度 ($M_{\text{blh}}$)、风速 ($M_{u}$, $M_{v}$) 等
-        \item \(\mathbf{E}^t\) 包含：NO\(_x\) ($E_{\text{NO}_x}$)、VOC ($E_{\text{VOC}}$)、SO\(_2\) ($E_{\text{SO}_2}$) 等
+        \item \(\mathbf{M}_t\) 包含：气温 ($M_{\text{t2m}}$)、露点 ($M_{\text{d2m}}$)、边界层高度 ($M_{\text{blh}}$)、风速 ($M_{u}$, $M_{v}$) 等
+        \item \(\mathbf{E}_t\) 包含：NO\(_x\) ($E_{\text{NO}_x}$)、VOC ($E_{\text{VOC}}$)、SO\(_2\) ($E_{\text{SO}_2}$) 等
     \end{itemize}
-\item[\(\mathbf{X}_F^t\)] 污染物浓度的连续空间场（Field），用于网格化推断与模拟任务。
+\item[\(\mathbf{X}^{F}_t\)] 污染物浓度的连续空间场（Field），用于网格化推断与模拟任务。
 \item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带有效性掩码 $\boldsymbol{\Omega}^{\text{AOD}} \in \{0,1\}^{N}$标记云遮挡区域。
 
 % 2. 图结构与时空参数
