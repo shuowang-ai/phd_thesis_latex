@@ -385,7 +385,7 @@ PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的
   \centering
   \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_arch.pdf}
   \caption{PCDCNet模型总体架构}
-  \caption*{模型输入为上一时刻污染物浓度$\mathbf{X}_{t-1}$、当前气象$\mathbf{M}_t$和排放$\mathbf{E}_t$，经嵌入层（Embed）映射为隐状态$\mathbf{H}_t$。三个核心动力学模块对应大气连续性方程$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u}C) = S - D$的不同物理过程：LID（局地交互动力学，MLP）输出$\mathbf{H}_t^R$，对应方程右端的源汇项$S-D$，建模本地化学反应与排放响应；STD（空间传输动力学，GNN消息传递）输出$\mathbf{H}_t^S$，对应平流-扩散项$\nabla \cdot (\mathbf{u}C)$，建模风驱空间传输；TAD（时间积累动力学，GRUcell）输出$\mathbf{H}_t^T$，对应时间演化项$\frac{\partial C}{\partial t}$，建模长时序累积效应。主路径通过读出层（Readout）生成浓度预测$\hat{\mathbf{X}}_t$；STD模块额外设置独立的读出层，显式提取空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$，与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC（领域知识约束）模块，通过质量守恒约束确保传输过程的物理一致性。图中左上角的浓度-时间曲线示意了残差预测$\Delta\mathbf{X}$的含义。}
+  \caption*{模型输入为上一时刻污染物浓度$\mathbf{X}_{t-1}$、当前气象$\mathbf{M}_t$和排放$\mathbf{E}_t$，经嵌入层（Embed）映射为隐状态$\mathbf{H}_t$。三个核心动力学模块以残差方式依次更新$\mathbf{H}_t$：LID（局地交互动力学，MLP）输出$\mathbf{H}_t^R$，建模本地化学反应与排放响应；STD（空间传输动力学，GNN消息传递）输出$\mathbf{H}_t^S$，建模风驱空间传输；TAD（时间积累动力学，GRUcell）输出$\mathbf{H}_t^T$，建模长时序累积效应。主路径通过读出层（Readout）生成浓度预测$\hat{\mathbf{X}}_t$。图中右上角标注的大气连续性方程及其箭头所指的坐标轴曲线，体现的是对STD模块的领域知识约束（DIC）：STD模块额外设置独立读出层，显式提取空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$，与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC模块，通过质量守恒约束确保空间传输过程的物理一致性。图中左上角的浓度-时间曲线示意了残差预测$\Delta\mathbf{X}$的含义。}
   \label{fig:overall_framework}
 \end{figure}
 
@@ -541,14 +541,7 @@ DIC约束的引入体现了\cqt{物理启发数据驱动建模}的核心思想�
 
 \subsubsection{训练策略}
 
-PCDCNet采用以下训练策略：
-\begin{itemize}
-    \item 优化器：Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{-4}$；
-    \item 学习率调度：采用ReduceLROnPlateau策略，当验证集MAE连续10个epoch不下降时，学习率衰减为原来的0.5倍；
-    \item 早停机制：当验证集MAE连续20个epoch不下降时，停止训练，防止过拟合；
-    \item 混合精度训练：使用FP16混合精度训练，在保持数值稳定性的同时提升计算效率；
-    \item 批量大小：32个样本/批次，每个样本包含完整的时间序列（历史+预测）。
-\end{itemize}
+PCDCNet采用Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{-4}$，学习率调度采用ReduceLROnPlateau策略（当验证集MAE连续10个epoch不下降时衰减为原来的0.5倍）。早停patience为20个epoch。训练使用FP16混合精度以提升计算效率，批大小为32，每个样本包含完整的历史与预测时间序列。
 
 算法\ref{alg:algorithm}给出了PCDCNet的完整训练与推理流程。
 

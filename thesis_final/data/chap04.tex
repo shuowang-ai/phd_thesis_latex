@@ -51,19 +51,19 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap04_inference_problem.pdf}
     \caption{大气污染空间推断问题示意图}
-    \caption*{输入：观测站点历史时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$（黑色圆点）、气象场$\mathbf{M}^{F}_{t-T'+1:t}$、排放场$\mathbf{E}^{F}_{t-T'+1:t}$、卫星AOD $\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$（斜线区域表示缺失）；输出：目标站点推断$\hat{\mathbf{X}}^{\text{target}}_{t}$（蓝色曲线）及网格推断$\hat{\mathbf{X}}^{F}_t$（红色热力图）；模型：基于扩散-平流双图机制构建图结构$\mathcal{G}$，通过$\mathcal{F}_\Theta$（SPIN）建模节点间的时空相关性。}
+    \caption*{输入：观测站点$\mathcal{V}_{\text{obs}}$的历史时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$、排放场$\mathbf{E}^{F}_{t-T'+1:t}$、卫星AOD $\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$；输出：目标站点$\mathcal{V}_{\text{target}}$的浓度推断$\hat{\mathbf{X}}^{\text{target}}_{t}$及全域网格化推断$\hat{\mathbf{X}}^{F}_t$；模型：基于扩散--平流双图机制构建图结构$\mathcal{G}$，通过SPIN实现从有观测区域向无观测区域的空间推断。图中黑色实心圆点为观测站点，空心圆点为待推断的目标站点，蓝色曲线为目标站点的推断浓度时序，红色热力图为全域网格化推断结果，斜线阴影区域表示卫星AOD因云层遮挡而缺失的区域，虚线圆圈示意图神经网络的多跳感受野——目标节点通过消息传递逐层聚合感受野内观测节点的信息。}
     \label{fig:inference_problem}
 \end{figure}
 
 如图所示，空间推断问题的输入-输出结构如下：输入包括四类数据——观测站点的历史时序数据$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$（图中黑色圆点表示的观测节点）、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$（包括风速风向、温度、湿度、边界层高度等）、排放场$\mathbf{E}^{F}_{t-T'+1:t}$以及卫星遥感AOD数据$\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$（图中斜线区域表示缺失）；输出包括未观测站点的\PM 浓度时序推断（图中蓝色曲线）及全域网格化\PM 空间分布$\hat{\mathbf{X}}^{F}_t$（图中红色热力图）。
 
-与第\ref{chap:prediction}章的\emph{时间维度预测}不同，本章聚焦于\emph{空间维度推断}。类似于第\ref{chap:prediction}章，模型同样采用历史时间窗口作为输入：给定任意时刻$t$之前$T'$个时间步（$t-T'+1, \ldots, t$）观测站点的历史数据，推断该时刻$t$未观测位置的浓度值。时间窗口的引入使模型能够捕捉污染物的时序演化特征，从而提升空间推断的准确性。这种设计使得模型能够同时服务于历史重建（用于暴露评估）和实时监测（用于填补监测盲区）两类应用场景。
+与第\ref{chap:prediction}章的\textbf{时间维度预测}不同，本章聚焦于\textbf{空间维度推断}。类似于第\ref{chap:prediction}章，模型同样采用历史时间窗口作为输入：给定任意时刻$t$之前$T'$个时间步（$t-T'+1, \ldots, t$）观测站点的历史数据，推断该时刻$t$未观测位置的浓度值。时间窗口的引入使模型能够捕捉污染物的时序演化特征，从而提升空间推断的准确性。这种设计使得模型能够同时服务于历史重建（用于暴露评估）和实时监测（用于填补监测盲区）两类应用场景。
 
 该问题包含两个层次化的子任务：
 
-（1）站点推断（Station Inference）。推断保留测试集（Held-out）中未观测站点的时序数据，用于评估模型的插值泛化能力。这一任务模拟的场景是：当新建一个监测站点时，如何基于周边已有站点的观测数据估算其污染水平。
+（1）\textbf{站点推断（Station Inference）}。推断保留测试集（Held-out）中未观测站点的时序数据，用于评估模型的插值泛化能力。这一任务模拟的场景是：当新建一个监测站点时，如何基于周边已有站点的观测数据估算其污染水平。
 
-（2）网格推断（Grid Inference）。对区域内所有$0.25^{\circ}$网格点进行推断，生成连续的高分辨率污染场$\hat{\mathbf{X}}^{F}_t$，以消除监测盲区。这一任务的应用场景包括：生成空间连续的污染暴露评估图、识别缺乏监测的污染热点、支撑精细化的区域联防联控决策。
+（2）\textbf{网格推断（Grid Inference）}。对区域内所有$0.25^{\circ}$网格点进行推断，生成连续的高分辨率污染场$\hat{\mathbf{X}}^{F}_t$，以消除监测盲区。这一任务的应用场景包括：生成空间连续的污染暴露评估图、识别缺乏监测的污染热点、支撑精细化的区域联防联控决策。
 
 形式化地，定义图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，式中$\mathcal{V}$为所有空间位置（站点或网格）的集合，$\mathcal{E}$为边集合。我们将节点动态划分为观测节点集$\mathcal{V}_{\text{obs}}$和目标推断节点集$\mathcal{V}_{\text{target}}$。给定观测节点过去$T'$个时间步的历史污染数据$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$，以及全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$和排放场$\mathbf{E}^{F}_{t-T'+1:t}$，目标是学习映射$\mathcal{F}$以推断时刻$t$目标节点的浓度：
 \begin{equation}
@@ -102,7 +102,7 @@
     \centering
     \includegraphics[width=0.90\textwidth]{figures/chap04_study_area.pdf}
     \caption{京津冀及周边地区研究区域与任务设置}
-    \caption*{(a) 区域内的\cqt{2+26}城市分布；(b) 基于地理邻近性（$<$200 km）构建的空间图结构；(c) 152个地面监测站点的稀疏分布；(d) 用于网格化推断的$0.25^{\circ}$标准网格，其中绝大多数网格缺乏地面观测。}
+    \caption*{(a) 区域内的\cqt{2+26}城市分布；(b) 基于地理邻近性（$<$200 km）构建的站点级空间图结构，节点为监测站点，连边表示地理距离阈值内的空间邻接关系，展示了图神经网络的消息传递路径；(c) 152个地面监测站点的稀疏分布；(d) 用于网格化推断的$0.25^{\circ}$标准网格，图结构的构建方式与(b)相同，但由于网格节点稠密、连边数量庞大，此处仅展示网格节点而未绘制连边，具体的图构建与消息传递机制可参见图\ref{fig:inference_problem}的示意。}
     \label{fig:study_area}
 \end{figure}
 
@@ -184,16 +184,76 @@
 \section{数据融合与推断流程}
 \label{sec:spin_model}
 
-针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的数据融合与推断流程。该模型遵循第\ref{subsec:paradigm}节提出的\cqt{物理启发的数据驱动建模}范式，将大气流体动力学中的扩散与平流机制显式地映射为图神经网络中的传播算子。SPIN与第\ref{chap:prediction}章的PCDCNet形成互补关系：PCDCNet通过LID--STD--TAD三模块解耦时间维度的化学反应、空间传输和累积过程，用于预测已知站点的未来状态；而SPIN通过扩散--平流双核解耦空间维度的各向同性与各向异性传输过程，用于推断未知位置的当前状态。
+针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的设计思路与数据融合流程。该模型的关键不在于单一网络架构的创新，而在于如何将多源异构数据通过物理合理的方式融合到统一的推断框架中。具体而言，SPIN需要融合四类信息：（1）\textbf{地面观测数据}——提供稀疏但精确的\cqt{锚点}浓度值；（2）\textbf{气象与排放数据}——为每个空间位置（包括无观测区域）提供本地物理环境背景；（3）\textbf{图结构与物理传播机制}——将扩散与平流的大气传输规律编码为节点间的信息传递路径，实现从有观测区域向无观测区域的物理合理外推；（4）\textbf{卫星遥感AOD数据}——提供覆盖面广但存在非随机缺失的空间结构约束。这四类数据在精度、覆盖率和可靠性上各有优劣，SPIN的核心设计思想是让它们在推断流程中各司其职、互为补充。
 
-如图~\ref{fig:model_architecture}所示，SPIN的推断流程分为四个阶段。其中阶段一至三构成站点推断与网格化推断共享的统一流水线，两者使用相同的训练策略、模型架构和图核，仅节点粒度不同：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，通过物理启发的双图传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）。阶段四在网格化推断中额外引入AOD梯度约束，是两类任务的主要差异所在（第\ref{subsec:stage4_constraints}节）。
+该模型遵循第\ref{subsec:paradigm}节提出的\cqt{物理启发的数据驱动建模}范式，与第\ref{chap:prediction}章的PCDCNet形成互补关系：PCDCNet通过LID--STD--TAD三模块解耦时间维度的化学反应、空间传输和累积过程，用于预测已知站点的未来状态；而SPIN通过扩散--平流双核解耦空间维度的各向同性与各向异性传输过程，用于推断未知位置的当前状态。
+
+SPIN的推断流程由图结构构建与四阶段推断流水线两部分组成。在进入推断流水线之前，首先需要构建两类物理图结构——基于地理邻近性的扩散图$\mathcal{G}^{\mathcal{D}}$和基于实时风场的平流图$\mathcal{G}^{\mathcal{A}}$——作为图神经网络空间传播的基础拓扑（第\ref{subsec:spin_graph}节，对应图~\ref{fig:study_area}(b)(d)所展示的图结构）。在此基础上，如图~\ref{fig:model_architecture}所示，推断流水线分为四个阶段，其中阶段一至三构成站点推断与网格化推断共享的统一流水线，两者使用相同的训练策略、模型架构和图核，仅节点粒度不同：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，利用预先构建的扩散图与平流图，通过物理启发的双流传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）。阶段四在网格化推断中额外引入AOD梯度约束，是两类任务的主要差异所在（第\ref{subsec:stage4_constraints}节）。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1.0\linewidth]{figures/chap04_spin_arch.pdf}
     \caption{SPIN模型总体架构图}
-    \caption*{模型首先利用TCN编码本地时序动态（左侧）；随后通过物理启发的图网络进行空间传播（中间），该网络由显式的\cqt{扩散核}（模拟各向同性扩散）和\cqt{平流核}（模拟风场驱动的各向异性输送）构成；最后通过共享的读出层生成推断结果（右侧）。}
+    \caption*{整体流程自左至右对应四个阶段：\textbf{阶段一}（动态节点掩码，图中未直接绘出）在训练期间随机遮蔽部分站点，为归纳式泛化提供数据增强基础；\textbf{阶段二}（图左侧TCN模块）利用时间卷积网络将每个节点的气象与排放时序编码为本地特征向量，生成初始浓度估计；\textbf{阶段三}（图中间双流图传播模块）在预先构建的扩散图$\mathcal{G}^{\mathcal{D}}$与平流图$\mathcal{G}^{\mathcal{A}}$上，分别通过扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$进行物理启发的空间信息传播，经门控融合后更新节点表示；\textbf{阶段四}（图右侧读出层与损失函数）由共享MLP读出层生成推断结果，并通过推断损失$\mathcal{L}_{\mathrm{infer}}$、初始化损失$\mathcal{L}_{\mathrm{init}}$和AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$三部分复合损失进行优化。}
     \label{fig:model_architecture}
+\end{figure}
+
+
+\subsection{图结构构建}
+\label{subsec:spin_graph}
+
+在进入推断流水线之前，需要为图神经网络构建空间传播的基础拓扑。图结构定义了节点（监测站点或网格像素）之间的空间邻接关系，决定了后续阶段三中信息传递的路径与强度。如图~\ref{fig:study_area}(b)所示，以站点推断为例，每个监测站点构成图中的一个节点，地理距离阈值内的站点对之间建立连边，连边权重反映站点间的空间关联强度；图~\ref{fig:study_area}(d)的网格推断采用完全相同的图构建规则，但由于网格节点远比站点稠密、连边数量庞大，故仅展示了节点分布（图结构的消息传递示意可参见图~\ref{fig:inference_problem}）。
+
+本研究构建两类具有不同物理意义的图结构，分别对应大气污染物传输的两种基本机制——各向同性扩散与各向异性平流，从而在图神经网络中显式建模对流--扩散方程（公式\ref{eq:advection_diffusion}）的物理过程。
+
+
+\subsubsection{扩散图}
+
+扩散图（Geospatial Diffusion Graph, $\mathcal{G}^{\mathcal{D}}$）基于地理学第一定律\cqt{相近事物更相关}（Tobler's First Law of Geography）构建，建模污染物在浓度梯度驱动下产生的各向同性随机运动。邻接矩阵$A^{\mathcal{D}}$基于节点间的测地距离定义：
+\begin{equation}
+    A_{ij}^{\mathcal{D}} = \begin{cases}
+        \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right), & \text{if } d_{ij} < d_{\text{th}} \\
+        0, & \text{otherwise}
+    \end{cases}
+\label{eq:diffusion_adjacency}
+\end{equation}
+\noindent 式中$d_{ij}$为节点$i$和$j$之间的测地距离，$\sigma$为距离衰减系数（默认50 km），$d_{\text{th}}$为截断阈值（默认200 km）。
+
+对$A^{\mathcal{D}}$进行对称归一化，构造扩散算子$\tilde{A}^{\mathcal{D}}$：
+\begin{equation}
+    \tilde{A}^{\mathcal{D}} = \mathbf{D}^{-\frac{1}{2}} A^{\mathcal{D}} \mathbf{D}^{-\frac{1}{2}}
+\label{eq:diffusion_normalized}
+\end{equation}
+\noindent 式中$\mathbf{D}$是$A^{\mathcal{D}}$的度矩阵。该对称归一化对应于图拉普拉斯算子的平滑作用\citep{kipf2017semi}，使得节点能够聚合来自所有方向邻居的信息，模拟了公式（\ref{eq:advection_diffusion}）中扩散项$K_h\left(\frac{\partial^2 C}{\partial x^2} + \frac{\partial^2 C}{\partial y^2}\right)$所描述的大气湍流导致的浓度均一化过程。扩散图为静态图，在模型整个生命周期内保持不变。
+
+
+\subsubsection{平流图}
+
+传统的空间图往往只考虑距离，隐含了各向同性假设。然而在大气环境中，风场主导的平流输送具有强烈的各向异性——上游节点对下游节点的影响远大于反向影响，对应公式（\ref{eq:advection_diffusion}）中的平流项$-\left(u\frac{\partial C}{\partial x} + v\frac{\partial C}{\partial y}\right)$。
+
+为此，本研究构建了平流图（Advection Graph, $\mathcal{G}^{\mathcal{A}}$），这是一个随风场实时更新的动态有向图，其边权重取决于风速向量在节点连线上的投影。如图~\ref{fig:kernels}(a)所示，从节点$j$到节点$i$的平流权重定义为：
+\begin{equation}
+    A_{ij}^{\mathcal{A}} = \begin{cases}
+        \max\left( \frac{|\mathbf{u}_j|}{d_{ij}} \cdot \cos(\alpha_{ji}), 0 \right) \cdot \exp\left(-\frac{d_{ij}}{L}\right), & \text{if } d_{ij} < d_{\text{th}} \\
+        0, & \text{otherwise}
+    \end{cases}
+\label{eq:advection_adjacency}
+\end{equation}
+\noindent 式中$|\mathbf{u}_j|$是源节点$j$处的风速大小，$\alpha_{ji}$是风向向量$\mathbf{u}_j$与边向量$\mathbf{e}_{ji}$（从$j$指向$i$）之间的夹角，$L$为特征传输长度尺度（默认100 km）。$\max(\cdot, 0)$函数确保了权重的非负性和方向性：只有当风从$j$吹向$i$（即$\cos(\alpha_{ji}) > 0$）时，边才存在。这一设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN中的平流系数（公式\eqref{eq:advection_coeff}）异曲同工，都显式编码了\cqt{上游影响下游}的定向传输机制。
+
+归一化采用行归一化（出度归一化）：
+\begin{equation}
+\tilde{A}^{\mathcal{A}} = \mathbf{D}_{\text{out}}^{-1} A^{\mathcal{A}}
+\label{eq:advection_normalized}
+\end{equation}
+\noindent 式中$D_{\text{out},ii} = \sum_j A_{ij}^{\mathcal{A}}$。行归一化确保每个节点的出流总和为1，符合质量守恒的物理约束——这与第\ref{chap:prediction}章\ref{subsec:pcdcnet_training}节讨论的DIC约束在理念上一致。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/chap04_physics_kernels.pdf}
+    \caption{物理核与AOD约束机制示意图}
+    \caption*{(a) 平流核（Advection Kernel）：通过计算风速向量在节点连线方向上的投影，构建有向图结构，显式建模污染物的定向输送。(b) 网格图上的梯度约束（Gradient on Grid Graph）：该机制用于网格化推断任务的损失函数$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。左图为模型预测浓度场在网格图上沿边$(i,j)$的空间梯度$\nabla_u(\mathbf{X}_{ij})$，右图为对应的卫星AOD场梯度，其中斜线阴影区域表示AOD因云层遮挡而缺失、掩码$\boldsymbol{\Omega}^{\text{AOD}}=0$的网格节点——损失函数仅在两端点均有有效AOD观测的边上计算，从而避免对缺失区域的错误约束。}
+    \label{fig:kernels}
 \end{figure}
 
 
@@ -202,15 +262,14 @@
 
 本阶段为站点推断和网格化推断提供统一的训练基础。为了使模型具备对任意未观测节点（无论是监测站点还是网格像素）的推断能力，采用了动态节点掩码（Dynamic Node Masking）策略\citep{wu2021inductive}。与传统的直推式（Transductive）方法不同，本策略不依赖固定的图结构，而是通过模拟数据缺失场景，强迫模型学习通用的时空插值规律。
 
-在每一轮训练迭代中，从所有已知观测数据的站点集合$\mathcal{V}_{\text{obs}}$中，随机采样一个子集（例如50\%）作为\cqt{掩码目标节点（Masked Target Nodes）}，记为$\mathcal{V}_{\text{mask}}$。
-归纳式训练的核心思想是：在每个训练批次中，随机将监测站点划分为观测节点和目标节点：
+记所有拥有真实观测数据的监测站点全集为$\mathcal{V}_{\text{stations}}$（即图~\ref{fig:study_area}(a)(c)中展示的152个国家级监测站点）。归纳式训练的核心思想是：在每个训练批次$(b)$中，将$\mathcal{V}_{\text{stations}}$随机划分为两个互补子集——观测节点集$\mathcal{V}_{\text{obs}}^{(b)}$和目标节点集$\mathcal{V}_{\text{target}}^{(b)}$：
 \begin{equation}
 \mathcal{V}_{\text{obs}}^{(b)} = \text{RandomSample}(\mathcal{V}_{\text{stations}}, 1 - r_{\text{mask}}), \quad \mathcal{V}_{\text{target}}^{(b)} = \mathcal{V}_{\text{stations}} \setminus \mathcal{V}_{\text{obs}}^{(b)}
 \label{eq:inductive_sampling}
 \end{equation}
-\noindent 式中$r_{\text{mask}}$为目标节点比例（如30\%、50\%），$(b)$表示第$b$个批次。
+\noindent 式中$r_{\text{mask}}$为目标节点比例（如30\%、50\%），$(b)$表示第$b$个批次。$\mathcal{V}_{\text{obs}}^{(b)}$中的节点扮演问题定义（公式\ref{eq:infer_problem}）中$\mathcal{V}_{\text{obs}}$的角色（图~\ref{fig:inference_problem}中黑色实心圆点），模型可获取其完整的历史污染数据；$\mathcal{V}_{\text{target}}^{(b)}$中的节点扮演$\mathcal{V}_{\text{target}}$的角色（图~\ref{fig:inference_problem}中空心圆点），其历史污染数据被遮蔽，模型需要对其进行推断。该划分过程对应算法\ref{alg:spin}第3--4行。
 
-在训练过程中，模型被切断了获取这些$\mathcal{V}_{\text{mask}}$节点历史污染物数据的路径，仅能获取：（1）$\mathcal{V}_{\text{mask}}$节点本地的气象与排放特征；（2）剩余未被掩码节点（$\mathcal{V}_{\text{obs}} \setminus \mathcal{V}_{\text{mask}}$）传播过来的时空上下文信息。这种机制模拟了真实的推断场景——即推断无历史数据的盲点。更重要的是，由于每个批次的掩码是随机生成的，模型在训练过程中会\cqt{见到}同一站点作为观测节点和目标节点的不同角色。这种随机性有效防止了模型过拟合于特定站点的ID特征，迫使模型学习\cqt{基于环境背景和邻域关系进行推断}的通用物理规律。
+在训练过程中，$\mathcal{V}_{\text{target}}^{(b)}$中的节点仅能获取：（1）本地的气象与排放特征；（2）$\mathcal{V}_{\text{obs}}^{(b)}$节点经图传播传递过来的时空上下文信息。这种机制模拟了真实的推断场景——即推断无历史数据的盲点。更重要的是，由于每个批次的划分是随机生成的，模型在训练过程中会\cqt{见到}同一站点在不同批次中分别扮演观测节点和目标节点的角色。这种随机性有效防止了模型过拟合于特定站点的ID特征，迫使模型学习\cqt{基于环境背景和邻域关系进行推断}的通用物理规律。
 
 
 \subsection{阶段二：本地物理特征编码}
@@ -255,68 +314,12 @@ h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d+1}
 \subsection{阶段三：物理启发的双图空间传播}
 \label{subsec:stage3_propagation}
 
-本阶段同样服务于站点推断和网格化推断，两者共享相同的扩散核与平流核。经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段通过物理启发的图传播机制，将观测节点的污染信息沿物理合理的路径传递至目标节点。
-
-大气污染物的时空演变遵循第\ref{chap:methodology}章公式（\ref{eq:advection_diffusion}）所描述的对流--扩散方程。为了在图神经网络中显式建模这一过程，我们摒弃了单一的图结构，转而构建了一组解耦的物理图核函数。
-
-
-\subsubsection{地理空间图与扩散核}
-
-（1）地理空间图（Geospatial Graph, $\mathcal{G}^{\mathcal{D}}$）。基于地理学第一定律\cqt{相近事物更相关}（Tobler's First Law of Geography），我们首先构建基础的地理空间图。邻接矩阵$A^{\mathcal{D}}$基于节点间的测地距离定义：
-\begin{equation}
-    A_{ij}^{\mathcal{D}} = \begin{cases} 
-        \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right), & \text{if } d_{ij} < d_{\text{th}} \\ 
-        0, & \text{otherwise} 
-    \end{cases}
-\label{eq:diffusion_adjacency}
-\end{equation}
-\noindent 式中$d_{ij}$为节点$i$和$j$之间的测地距离，$\sigma$为距离衰减系数（默认50 km），$d_{\text{th}}$为截断阈值（默认200 km）。
-
-（2）扩散核（Diffusion Kernel, $\tilde{A}^{\mathcal{D}}$）。扩散过程是指污染物在浓度梯度驱动下产生的各向同性（Isotropic）随机运动，对应公式（\ref{eq:advection_diffusion}）中的扩散项$K_h\left(\frac{\partial^2 C}{\partial x^2} + \frac{\partial^2 C}{\partial y^2}\right)$。在图信号处理中，这一过程对应于图拉普拉斯算子的平滑作用\citep{kipf2017semi}。我们通过对$A^{\mathcal{D}}$进行对称归一化来构造扩散算子：
-\begin{equation}
-    \tilde{A}^{\mathcal{D}} = \mathbf{D}^{-\frac{1}{2}} A^{\mathcal{D}} \mathbf{D}^{-\frac{1}{2}}
-\label{eq:diffusion_normalized}
-\end{equation}
-\noindent 式中$\mathbf{D}$是$A^{\mathcal{D}}$的度矩阵。
-
-在GNN的消息传递中，$\tilde{A}^{\mathcal{D}}$使得节点能够聚合来自所有方向邻居的信息，模拟了大气湍流导致的污染物浓度均一化过程。这种对称归一化的设计确保了扩散过程是双向的、各向同性的——符合公式（\ref{eq:advection_diffusion}）中扩散项的物理特性。
-
-
-\subsubsection{平流核与各向异性传输}
-
-传统的GNN往往只考虑距离，隐含了各向同性的假设。然而，在大气环境中，风场主导的平流输送具有强烈的各向异性（Anisotropic）——上游节点对下游节点的影响远大于反向影响，对应公式（\ref{eq:advection_diffusion}）中的平流项$-\left(u\frac{\partial C}{\partial x} + v\frac{\partial C}{\partial y}\right)$。
-
-为了建模这一关键物理过程，我们设计了平流图（Advection Graph, $\mathcal{G}^{\mathcal{A}}$）。这是一个动态的有向图，其边权重取决于风速向量在节点连线上的投影。如图~\ref{fig:kernels}(a)所示，从节点$j$到节点$i$的平流权重定义为：
-\begin{equation}
-    A_{ij}^{\mathcal{A}} = \begin{cases} 
-        \max\left( \frac{|\mathbf{u}_j|}{d_{ij}} \cdot \cos(\alpha_{ji}), 0 \right) \cdot \exp\left(-\frac{d_{ij}}{L}\right), & \text{if } d_{ij} < d_{\text{th}} \\
-        0, & \text{otherwise}
-    \end{cases}
-\label{eq:advection_adjacency}
-\end{equation}
-\noindent 式中$|\mathbf{u}_j|$是源节点$j$处的风速大小，$\alpha_{ji}$是风向向量$\mathbf{u}_j$与边向量$\mathbf{e}_{ji}$（从$j$指向$i$）之间的夹角，$L$为特征传输长度尺度（默认100 km）。
-
-$\max(\cdot, 0)$函数确保了权重的非负性和方向性：只有当风从$j$吹向$i$（即$\cos(\alpha_{ji}) > 0$）时，边才存在。这一设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN中的平流系数（公式\eqref{eq:advection_coeff}）异曲同工，都显式编码了\cqt{上游影响下游}的定向传输机制。
-
-归一化采用行归一化（出度归一化）：
-\begin{equation}
-\tilde{A}^{\mathcal{A}} = \mathbf{D}_{\text{out}}^{-1} A^{\mathcal{A}}
-\label{eq:advection_normalized}
-\end{equation}
-\noindent 式中$D_{\text{out},ii} = \sum_j A_{ij}^{\mathcal{A}}$。行归一化确保每个节点的出流总和为1，符合质量守恒的物理约束——这与第\ref{chap:prediction}章\ref{subsec:pcdcnet_training}节讨论的DIC约束在理念上一致。
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\textwidth]{figures/chap04_physics_kernels.pdf}
-    \caption{物理核与AOD约束机制示意图}
-    \caption*{(a) 平流核（Advection Kernel）：通过计算风速向量在节点连线方向上的投影，构建有向图结构，显式建模污染物的定向输送。(b) AOD梯度损失：利用卫星AOD的空间梯度约束预测场，仅在有效观测区域（阴影部分）计算损失，以应对云层遮挡。}
-    \label{fig:kernels}
-\end{figure}
+经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段利用第\ref{subsec:spin_graph}节构建的扩散图$\mathcal{G}^{\mathcal{D}}$和平流图$\mathcal{G}^{\mathcal{A}}$，通过物理启发的双流传播机制，将观测节点的污染信息沿物理合理的路径传递至目标节点。该传播机制同样服务于站点推断和网格化推断，两者共享相同的图结构与传播参数。
 
 
 \subsubsection{双流传播层}
 
-基于上述两个物理核，我们设计了双流时空图神经网络层。对于节点$v$的特征表示$h_v$，双图传播的更新规则为：
+基于第\ref{subsec:spin_graph}节定义的扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$，我们设计了双流时空图神经网络层。对于节点$v$的特征表示$h_v$，双图传播的更新规则为：
 
 扩散传播（各向同性，无方向性）：
 \begin{equation}
@@ -340,17 +343,17 @@ g_v = \sigma\left(W_g [m_v^{\mathcal{D}}, m_v^{\mathcal{A}}] + b_g\right)
 m_v = g_v \odot m_v^{\mathcal{D}} + (1 - g_v) \odot m_v^{\mathcal{A}}
 \label{eq:gate_fusion}
 \end{equation}
-\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$W_g \in \mathbb{R}^{d \times 2d}$为门控权重。
+\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$W_g \in \mathbb{R}^{d \times 2d}$为门控权重。具体而言，$g_v \in \mathbb{R}^{d}$为门控权重向量（对应算法\ref{alg:spin}第15行的$\mathbf{G}$），其每个分量取值于$[0,1]$，逐维度控制扩散消息与平流消息的混合比例；$m_v \in \mathbb{R}^{d}$为融合后的空间消息（对应算法\ref{alg:spin}第16行的$\Delta\mathbf{H}$），综合了来自两类图结构的邻域信息，随后通过残差连接注入节点表示。
 
 门控机制的物理意义在于：在静风条件下，扩散过程主导污染物的空间分布，模型应侧重扩散核（$g_v \to 1$）；在强风条件下，平流输送成为主导机制，模型应侧重平流核（$g_v \to 0$）。这种自适应的权重分配使得模型能够根据局地气象条件动态调整传播策略。
 
-节点特征通过残差连接更新：
+融合消息$m_v$通过残差连接更新节点特征（对应算法\ref{alg:spin}第17行）：
 \begin{equation}
 h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \label{eq:residual_update}
 \end{equation}
 
-残差连接确保了信息的有效传递和梯度的稳定流动，同时允许模型在必要时\cqt{跳过}某些传播层，直接利用初始特征。
+\noindent 残差连接确保了信息的有效传递和梯度的稳定流动，同时允许模型在必要时\cqt{跳过}某些传播层，直接利用初始特征。经过$L$层传播后，每个节点的最终表示$h_v^{(L)}$已融合了TCN提取的本地物理特征（阶段二）与GNN从邻域聚合的外部污染信息（阶段三），随后送入阶段四的读出层生成浓度推断。
 
 
 
@@ -362,11 +365,13 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \subsubsection{读出层}
 
-经过$L$层物理启发的空间传播后，由于目标节点本身没有任何历史观测数据，无法采用自回归方式。因此设计了一个节点共享的读出层（Readout Layer），由多层感知机构成，直接将高维潜在特征映射为污染物浓度：
+经过$L$层物理启发的空间传播后，由于目标节点本身没有任何历史观测数据，无法采用自回归方式。因此设计了一个节点共享的读出层（Readout Layer），由多层感知机构成，直接将高维潜在特征映射为标量的\PM 浓度推断值（对应算法\ref{alg:spin}第21行及图\ref{fig:model_architecture}右侧）：
 \begin{equation}
     \hat{X}_v = W_{\text{out}} h_v^{(L)} + b_{\text{out}}
 \label{eq:decoder_stage4}
 \end{equation}
+
+\noindent 式中$h_v^{(L)} \in \mathbb{R}^{d}$为节点$v$经过阶段三传播后的最终潜在表示，$W_{\text{out}} \in \mathbb{R}^{1 \times d}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
 
 共享参数的设计使得模型学习到的是一个通用的\cqt{特征到浓度}映射函数，而非针对特定站点的过拟合表示，确保了模型能够完全基于物理环境特征来填补数据盲区，实现真正的归纳式推断。
 
@@ -377,7 +382,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \mathcal{L} = \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}
 \label{eq:total_loss_chap3}
 \end{equation}
-\noindent 式中$\lambda_1$和$\lambda_2$为平衡系数。
+\noindent 式中$\lambda_1$和$\lambda_2$为平衡系数。三项损失各司其职：$\mathcal{L}_{\mathrm{infer}}$为主损失，约束经图传播后目标节点的最终推断精度；$\mathcal{L}_{\mathrm{init}}$为辅助损失，约束TCN编码器在图传播之前即能给出合理的本地初始估计；$\mathcal{L}_{\mathrm{AOD}}$为空间结构约束，仅在网格化推断中启用，利用卫星AOD的空间梯度引导预测场的形态。下面分别介绍各项的技术设计。
 
 
 \subsubsection{推断损失（\LossInfer）}
@@ -398,9 +403,9 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \mathcal{L}_{\mathrm{init}} = \frac{1}{|\mathcal{V}_{\text{obs}}|} \sum_{v \in \mathcal{V}_{\text{obs}}} |\hat{X}_v^{\text{init}} - X_v|
 \label{eq:init_loss}
 \end{equation}
-\noindent 式中$\hat{X}_v^{\text{init}} = \text{MLP}(\mathbf{h}_v^{(0)})$。
+\noindent 式中$\hat{X}_v^{\text{init}} = \text{MLP}(\mathbf{h}_v^{(0)})$为节点$v$在阶段二（第\ref{subsec:stage2_encoding}节）中由TCN编码得到的潜在表示$\mathbf{h}_v^{(0)}$经一个独立的MLP映射后产生的标量浓度估计值，代表了\textbf{仅基于本地气象与排放信息、尚未经过任何图传播}的初始浓度判断。换言之，$\hat{X}_v^{\text{init}}$是阶段二的直接输出，而$\hat{X}_v$（公式\ref{eq:decoder_stage4}）是经阶段三图传播后的最终输出，两者分别由$\mathcal{L}_{\mathrm{init}}$和$\mathcal{L}_{\mathrm{infer}}$约束。
 
-这一约束迫使模型在没有任何邻居信息的情况下，仅凭本地的气象条件和排放强度，也能利用物理规律给出一个基准预测值（Baseline Estimate）。这为后续的图传播提供了稳健的起始状态，同时防止模型在图传播过程中\cqt{遗忘}观测信息，确保预测场在观测点处与真实值一致。
+该损失的设计动机在于：在推断阶段，目标节点$\mathcal{V}_{\text{target}}$没有历史观测数据，其初始表示$\mathbf{h}_v^{(0)}$完全来自本地气象与排放特征（公式\ref{eq:target_init}）。如果TCN的编码缺乏物理意义，目标节点的初始估计将毫无信息量，后续的图传播将难以有效修正。因此，$\mathcal{L}_{\mathrm{init}}$通过在观测节点上施加监督，迫使TCN在没有任何邻居信息的情况下，仅凭本地条件就能给出一个尽可能接近真实值的基准估计。这样，目标节点即使缺乏观测数据，其基于相同TCN编码的初始估计也具有物理合理性，为后续的图传播提供了稳健的起始状态。
 
 从物理角度理解，$\mathcal{L}_{\mathrm{init}}$迫使TCN学习\cqt{局地生成（Local Production）}的映射关系——即在排放强度高、边界层低、静风的条件下，本地污染水平应该较高。这一关系是公式（\ref{eq:advection_diffusion}）中源项$S$和化学反应项$R$的数据驱动近似。
 
@@ -448,31 +453,33 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \ENSURE 优化后的参数$\Theta$（训练），推断结果$\{\hat{\mathbf{X}}\}$（推理）
 
     \FOR{每个样本$D_k = (\mathbf{X}, \mathbf{M}, \mathbf{E}, \mathbf{X}^{\text{AOD}}) \in \mathcal{D}$}
-        \STATE \textbf{阶段1：动态节点掩码}
-        \STATE 随机采样掩码节点集$\mathcal{V}_{\text{mask}} \subset \mathcal{V}_{\text{obs}}$，比例为$r_{\text{mask}}$
-        \STATE 构造观测节点集$\mathcal{V}_{\text{remain}} = \mathcal{V}_{\text{obs}} \setminus \mathcal{V}_{\text{mask}}$
+        \STATE \textbf{阶段1：动态节点掩码（第\ref{subsec:stage1_masking}节）}
+        \STATE $\mathcal{V}_{\text{target}}^{(b)} \leftarrow \text{RandomSample}(\mathcal{V}_{\text{stations}},\; r_{\text{mask}})$ \COMMENT{随机采样目标节点}
+        \STATE $\mathcal{V}_{\text{obs}}^{(b)} \leftarrow \mathcal{V}_{\text{stations}} \setminus \mathcal{V}_{\text{target}}^{(b)}$ \COMMENT{剩余为观测节点}
 
-        \STATE \textbf{阶段2：时序特征编码（TCN）}
-        \FOR{每个节点$i \in \mathcal{V}$}
-            \STATE $\mathbf{H}_i^{(0)} \leftarrow \text{TCN}([\mathbf{M}_i, \mathbf{E}_i])$
+        \STATE \textbf{阶段2：时序特征编码（第\ref{subsec:stage2_encoding}节）}
+        \FOR{每个节点$v \in \mathcal{V}$}
+            \STATE $\mathbf{h}_v^{\text{temp}} \leftarrow \text{TCN}([\mathbf{M}_v, \mathbf{E}_v])$ \COMMENT{本地时序编码}
         \ENDFOR
+        \STATE $\mathbf{h}_v^{(0)} \leftarrow [\mathbf{h}_v^{\text{temp}}, X_v]$（$v \in \mathcal{V}_{\text{obs}}^{(b)}$）；$\mathbf{h}_v^{(0)} \leftarrow [\mathbf{h}_v^{\text{temp}}, 0]$（$v \in \mathcal{V}_{\text{target}}^{(b)}$） \COMMENT{差异化初始化}
 
-        \STATE \textbf{阶段3：物理启发的图传播}
+        \STATE \textbf{阶段3：物理启发的图传播（第\ref{subsec:stage3_propagation}节）}
         \STATE 根据当前时刻风场更新平流图$\tilde{\mathbf{A}}^{\mathcal{A}}$
         \FOR{$l \leftarrow 1$ to $L$}
-            \STATE $\mathbf{H}^{\mathcal{D}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{D}} \mathbf{W}^{\mathcal{D}} \mathbf{H}^{(l-1)}$ \COMMENT{扩散消息}
-            \STATE $\mathbf{H}^{\mathcal{A}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{A}} \mathbf{W}^{\mathcal{A}} \mathbf{H}^{(l-1)}$ \COMMENT{平流消息}
-            \STATE $\mathbf{G} \leftarrow \sigma(\mathbf{W}_g [\mathbf{H}^{\mathcal{D}}, \mathbf{H}^{\mathcal{A}}])$ \COMMENT{门控权重}
-            \STATE $\Delta\mathbf{H} \leftarrow \mathbf{G} \odot \mathbf{H}^{\mathcal{D}} + (1-\mathbf{G}) \odot \mathbf{H}^{\mathcal{A}}$ \COMMENT{融合}
-            \STATE $\mathbf{H}^{(l)} \leftarrow \text{ReLU}(\mathbf{H}^{(l-1)} + \Delta\mathbf{H})$ \COMMENT{残差更新}
+            \STATE $\mathbf{H}^{\mathcal{D}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{D}} \mathbf{W}^{\mathcal{D}} \mathbf{H}^{(l-1)}$ \COMMENT{扩散消息（公式\ref{eq:diffusion_message}）}
+            \STATE $\mathbf{H}^{\mathcal{A}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{A}} \mathbf{W}^{\mathcal{A}} \mathbf{H}^{(l-1)}$ \COMMENT{平流消息（公式\ref{eq:advection_message}）}
+            \STATE $\mathbf{G} \leftarrow \sigma(\mathbf{W}_g [\mathbf{H}^{\mathcal{D}}, \mathbf{H}^{\mathcal{A}}])$ \COMMENT{门控权重$g_v$（公式\ref{eq:gate_weight}）}
+            \STATE $\Delta\mathbf{H} \leftarrow \mathbf{G} \odot \mathbf{H}^{\mathcal{D}} + (1-\mathbf{G}) \odot \mathbf{H}^{\mathcal{A}}$ \COMMENT{融合消息$m_v$（公式\ref{eq:gate_fusion}）}
+            \STATE $\mathbf{H}^{(l)} \leftarrow \text{ReLU}(\mathbf{H}^{(l-1)} + \Delta\mathbf{H})$ \COMMENT{残差更新（公式\ref{eq:residual_update}）}
         \ENDFOR
 
-        \STATE \textbf{阶段4：读出与损失计算}
-        \STATE $\hat{\mathbf{X}} \leftarrow \mathbf{W}_{\text{out}} \mathbf{H}^{(L)} + \mathbf{b}_{\text{out}}$
-        \STATE $\mathcal{L}_{\mathrm{infer}} \leftarrow \sum_{i \in \mathcal{V}_{\text{mask}}} |\hat{X}_i - X_i|$
-        \STATE $\mathcal{L}_{\mathrm{init}} \leftarrow \sum_{i \in \mathcal{V}_{\text{obs}}} |\hat{X}_i^{\text{init}} - X_i|$
-        \STATE $\mathcal{L}_{\mathrm{AOD}} \leftarrow \sum_{(i,j) \in \mathcal{E}} |\nabla_{ij}(\hat{\mathbf{X}}) - \nabla_{ij}(\mathbf{X}^{\text{AOD}})| \cdot \Omega_{ij}^{\text{AOD}}$
-        \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}$
+        \STATE \textbf{阶段4：读出与损失计算（第\ref{subsec:stage4_constraints}节）}
+        \STATE $\hat{\mathbf{X}} \leftarrow \mathbf{W}_{\text{out}} \mathbf{H}^{(L)} + \mathbf{b}_{\text{out}}$ \COMMENT{读出层$\hat{X}_v$（公式\ref{eq:decoder_stage4}）}
+        \STATE $\hat{\mathbf{X}}^{\text{init}} \leftarrow \text{MLP}(\mathbf{H}^{(0)})$ \COMMENT{初始估计$\hat{X}_v^{\text{init}}$}
+        \STATE $\mathcal{L}_{\mathrm{infer}} \leftarrow \frac{1}{|\mathcal{V}_{\text{target}}^{(b)}|}\sum_{v \in \mathcal{V}_{\text{target}}^{(b)}} |\hat{X}_v - X_v|$ \COMMENT{公式\ref{eq:infer_loss}}
+        \STATE $\mathcal{L}_{\mathrm{init}} \leftarrow \frac{1}{|\mathcal{V}_{\text{obs}}^{(b)}|}\sum_{v \in \mathcal{V}_{\text{obs}}^{(b)}} |\hat{X}_v^{\text{init}} - X_v|$ \COMMENT{公式\ref{eq:init_loss}}
+        \STATE $\mathcal{L}_{\mathrm{AOD}} \leftarrow \sum_{(i,j) \in \mathcal{E}} |\nabla_{ij}(\hat{\mathbf{X}}) - \nabla_{ij}(\mathbf{X}^{\text{AOD}})| \cdot \Omega_{ij}^{\text{AOD}}$ \COMMENT{公式\ref{eq:aod_loss}}
+        \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}$ \COMMENT{公式\ref{eq:total_loss_chap3}}
     \ENDFOR
 
     \STATE $\Theta \leftarrow \Theta - \alpha \nabla_{\Theta} \mathcal{L}$
@@ -603,7 +610,9 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \subsection{网格化推断分析}
 \label{subsec:grid_inference}
 
-本章的最终目标是生成连续的网格化污染地图。图~\ref{fig:grid_inference}通过四个典型案例，深入剖析了SPIN如何利用物理核与AOD梯度损失来处理卫星数据的缺陷。需要强调的是，在本框架中，AOD不作为推理时的直接输入特征，而是作为训练时的空间梯度约束。因此，图中的AOD面板作为外部参考，用于验证模型是否成功内化了污染的空间结构模式。
+本章的最终目标是生成连续的网格化污染地图。如第\ref{sec:infer_problem}节所定义，网格推断将研究区域离散为$0.25^{\circ} \times 0.25^{\circ}$的规则网格（如图~\ref{fig:study_area}(d)所示），所有网格像素构成目标节点集$\mathcal{V}_{\text{target}}$，所有152个监测站点构成观测节点集$\mathcal{V}_{\text{obs}}$。网格推断与站点推断共享相同的模型架构与物理图核（阶段一至三，第\ref{sec:spin_model}节），其归纳式训练策略使模型能够直接泛化至训练中从未出现过的网格节点——每个网格节点的初始表示由本地气象与排放特征经TCN编码生成（阶段二），随后通过扩散图与平流图从周围观测站点聚合污染信息（阶段三）。两类任务的主要差异在于阶段四：网格推断在训练时额外启用AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}），利用卫星观测的空间梯度约束预测场的形态。需要强调的是，AOD仅作为训练时的空间结构约束，而非推理时的直接输入特征，因此模型在推理阶段不依赖卫星数据的可用性。
+
+图~\ref{fig:grid_inference}通过四个典型案例，深入剖析了上述机制的实际效果——SPIN如何利用物理核与AOD梯度损失来应对卫星数据的各类缺陷。图中的AOD面板作为外部参考，用于验证模型是否成功内化了污染的空间结构模式。
 
 \begin{figure}[htbp]
     \centering
