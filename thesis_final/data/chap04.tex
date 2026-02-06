@@ -6,7 +6,7 @@
 \chapter{基于多源数据融合的大气污染空间推断}
 \label{chap:inference}
 
-上一章解决了已知监测站点的时间预测问题，本章则聚焦于更具挑战性的空间推断问题——如何基于稀疏的地面监测和多源遥感数据，重建全域高分辨率的污染物浓度场。本章提出SPIN模型，通过物理引导的归纳式图神经网络实现对无监测区域的精确推断。
+上一章解决了已知监测站点的时间预测问题，本章则聚焦于更具挑战性的空间推断问题——如何基于稀疏的地面监测和多源遥感数据，重建全域高分辨率的污染物浓度场。本章提出SPIN模型，通过物理启发的归纳式图神经网络实现对无监测区域的精确推断。
 
 % ------------------------------------------------------------
 % 4.1 引言
@@ -34,7 +34,7 @@
 
 阶段二：本地物理特征编码。利用时间卷积网络从各节点的气象和排放时间序列中提取物理特征，为包括无观测节点在内的所有位置提供基于本地环境条件的初始浓度估计。
 
-阶段三：物理引导的双图空间传播。设计扩散核与平流核分别建模各向同性扩散和各向异性平流过程，显式解耦公式（\ref{eq:advection_diffusion}）中的扩散项与平流项，通过图传播将观测节点的信息传递至无观测区域。站点推断与网格推断使用相同的图核。
+阶段三：物理启发的双图空间传播。设计扩散核与平流核分别建模各向同性扩散和各向异性平流过程，显式解耦公式（\ref{eq:advection_diffusion}）中的扩散项与平流项，通过图传播将观测节点的信息传递至无观测区域。站点推断与网格推断使用相同的图核。
 
 阶段四：多层级约束与AOD融合（网格化推断独有）。在站点推断中，损失函数仅包含推断损失和初始化损失；在网格化推断中，额外引入掩码AOD梯度损失，创新性地将卫星数据作为空间结构约束而非强制输入，在AOD可用时提取其空间分布信息，在AOD缺失时自动回退至物理驱动模式，实现全天候推断。
 
@@ -184,15 +184,15 @@
 \section{数据融合与推断流程}
 \label{sec:spin_model}
 
-针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的数据融合与推断流程。该模型遵循第\ref{subsec:paradigm}节提出的\cqt{物理约束的数据驱动建模}范式，将大气流体动力学中的扩散与平流机制显式地映射为图神经网络中的传播算子。SPIN与第\ref{chap:prediction}章的PCDCNet形成互补关系：PCDCNet通过LID--STD--TAD三模块解耦时间维度的化学反应、空间传输和累积过程，用于预测已知站点的未来状态；而SPIN通过扩散--平流双核解耦空间维度的各向同性与各向异性传输过程，用于推断未知位置的当前状态。
+针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的数据融合与推断流程。该模型遵循第\ref{subsec:paradigm}节提出的\cqt{物理启发的数据驱动建模}范式，将大气流体动力学中的扩散与平流机制显式地映射为图神经网络中的传播算子。SPIN与第\ref{chap:prediction}章的PCDCNet形成互补关系：PCDCNet通过LID--STD--TAD三模块解耦时间维度的化学反应、空间传输和累积过程，用于预测已知站点的未来状态；而SPIN通过扩散--平流双核解耦空间维度的各向同性与各向异性传输过程，用于推断未知位置的当前状态。
 
-如图~\ref{fig:model_architecture}所示，SPIN的推断流程分为四个阶段。其中阶段一至三构成站点推断与网格化推断共享的统一流水线，两者使用相同的训练策略、模型架构和图核，仅节点粒度不同：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，通过物理引导的双图传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）。阶段四在网格化推断中额外引入AOD梯度约束，是两类任务的主要差异所在（第\ref{subsec:stage4_constraints}节）。
+如图~\ref{fig:model_architecture}所示，SPIN的推断流程分为四个阶段。其中阶段一至三构成站点推断与网格化推断共享的统一流水线，两者使用相同的训练策略、模型架构和图核，仅节点粒度不同：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，通过物理启发的双图传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）。阶段四在网格化推断中额外引入AOD梯度约束，是两类任务的主要差异所在（第\ref{subsec:stage4_constraints}节）。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1.0\linewidth]{figures/chap04_spin_arch.pdf}
     \caption{SPIN模型总体架构图}
-    \caption*{模型首先利用TCN编码本地时序动态（左侧）；随后通过物理引导的图网络进行空间传播（中间），该网络由显式的\cqt{扩散核}（模拟各向同性扩散）和\cqt{平流核}（模拟风场驱动的各向异性输送）构成；最后通过共享的读出层生成推断结果（右侧）。}
+    \caption*{模型首先利用TCN编码本地时序动态（左侧）；随后通过物理启发的图网络进行空间传播（中间），该网络由显式的\cqt{扩散核}（模拟各向同性扩散）和\cqt{平流核}（模拟风场驱动的各向异性输送）构成；最后通过共享的读出层生成推断结果（右侧）。}
     \label{fig:model_architecture}
 \end{figure}
 
@@ -252,10 +252,10 @@ h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d+1}
 这种差异化的初始化策略体现了归纳式学习的核心思想：观测节点携带真实的污染信息，而目标节点仅携带环境背景信息，后者需要通过图传播从前者\cqt{借用}污染信息。
 
 
-\subsection{阶段三：物理引导的双图空间传播}
+\subsection{阶段三：物理启发的双图空间传播}
 \label{subsec:stage3_propagation}
 
-本阶段同样服务于站点推断和网格化推断，两者共享相同的扩散核与平流核。经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段通过物理引导的图传播机制，将观测节点的污染信息沿物理合理的路径传递至目标节点。
+本阶段同样服务于站点推断和网格化推断，两者共享相同的扩散核与平流核。经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段通过物理启发的图传播机制，将观测节点的污染信息沿物理合理的路径传递至目标节点。
 
 大气污染物的时空演变遵循第\ref{chap:methodology}章公式（\ref{eq:advection_diffusion}）所描述的对流--扩散方程。为了在图神经网络中显式建模这一过程，我们摒弃了单一的图结构，转而构建了一组解耦的物理图核函数。
 
@@ -362,7 +362,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 \subsubsection{读出层}
 
-经过$L$层物理引导的空间传播后，由于目标节点本身没有任何历史观测数据，无法采用自回归方式。因此设计了一个节点共享的读出层（Readout Layer），由多层感知机构成，直接将高维潜在特征映射为污染物浓度：
+经过$L$层物理启发的空间传播后，由于目标节点本身没有任何历史观测数据，无法采用自回归方式。因此设计了一个节点共享的读出层（Readout Layer），由多层感知机构成，直接将高维潜在特征映射为污染物浓度：
 \begin{equation}
     \hat{X}_v = W_{\text{out}} h_v^{(L)} + b_{\text{out}}
 \label{eq:decoder_stage4}
@@ -457,7 +457,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
             \STATE $\mathbf{H}_i^{(0)} \leftarrow \text{TCN}([\mathbf{M}_i, \mathbf{E}_i])$
         \ENDFOR
 
-        \STATE \textbf{阶段3：物理引导的图传播}
+        \STATE \textbf{阶段3：物理启发的图传播}
         \STATE 根据当前时刻风场更新平流图$\tilde{\mathbf{A}}^{\mathcal{A}}$
         \FOR{$l \leftarrow 1$ to $L$}
             \STATE $\mathbf{H}^{\mathcal{D}} \leftarrow \tilde{\mathbf{A}}^{\mathcal{D}} \mathbf{W}^{\mathcal{D}} \mathbf{H}^{(l-1)}$ \COMMENT{扩散消息}
@@ -531,7 +531,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \begin{table}[htbp]
 \centering
 \caption{未观测站点（30\% Hold-out）的推断性能对比}
-\caption*{评价指标为MAE（$\mu$g/m$^3$），对比方法涵盖特征工程类（XGBoost、MLP）、时序类（LSTM、GRU）、时空图网络类（STGCN、IGNNK）以及本文提出的物理引导类方法SPIN。}
+\caption*{评价指标为MAE（$\mu$g/m$^3$），对比方法涵盖特征工程类（XGBoost、MLP）、时序类（LSTM、GRU）、时空图网络类（STGCN、IGNNK）以及本文提出的物理启发类方法SPIN。}
 \label{table:performance_comparison}
 \resizebox{0.9\textwidth}{!}{%
 \begin{tabular}{@{}ll|c|c|c@{}}
@@ -544,7 +544,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
  & GRU & 22.79 & 34.17 & 15.00 \\ \midrule
 \multirow{2}{*}{时空图网络类} & STGCN & 17.84 & 23.43 & 11.23 \\
  & IGNNK & 12.73 & 16.29 & 8.53 \\ \midrule
-\textbf{物理引导类} & \textbf{SPIN}（本文） & \textbf{9.52} & \textbf{15.09} & \textbf{7.65} \\ \bottomrule
+\textbf{物理启发类} & \textbf{SPIN}（本文） & \textbf{9.52} & \textbf{15.09} & \textbf{7.65} \\ \bottomrule
 \end{tabular}%
 }
 \end{table}
@@ -595,7 +595,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \includegraphics[width=\textwidth]{figures/chap04_station_edge.png}\\[0.35em]
     \includegraphics[width=\textwidth]{figures/chap04_station_zhangjiakou.png}
     \caption{边缘稀疏区域的物理保真性}
-    \caption*{下图（张家口人民公园站）展示了在极度缺乏上游信息时，物理引导机制确保了模型输出合理的背景趋势，而非随机噪声或幻觉值。}
+    \caption*{下图（张家口人民公园站）展示了在极度缺乏上游信息时，物理启发机制确保了模型输出合理的背景趋势，而非随机噪声或幻觉值。}
     \label{fig:sparse_neighbors}
 \end{figure}
 
@@ -647,9 +647,9 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \section{本章小结}
 \label{sec:infer_summary}
 
-针对区域大气污染监测中的两个核心问题——稀疏监测网络下的空间泛化推断（问题一）和非随机缺失遥感数据的有效融合（问题二），本章提出了基于物理引导的归纳式图推断网络（SPIN），通过四阶段数据融合与推断流程（第\ref{sec:spin_model}节）系统性地加以解决。阶段一至三构成两个问题共享的统一推断流水线，站点推断与网格化推断使用相同的训练策略、模型架构和图核，仅节点粒度不同；阶段四在网格化推断中额外引入AOD梯度约束。主要贡献总结如下：
+针对区域大气污染监测中的两个核心问题——稀疏监测网络下的空间泛化推断（问题一）和非随机缺失遥感数据的有效融合（问题二），本章提出了基于物理启发的归纳式图推断网络（SPIN），通过四阶段数据融合与推断流程（第\ref{sec:spin_model}节）系统性地加以解决。阶段一至三构成两个问题共享的统一推断流水线，站点推断与网格化推断使用相同的训练策略、模型架构和图核，仅节点粒度不同；阶段四在网格化推断中额外引入AOD梯度约束。主要贡献总结如下：
 
-（1）构建了物理嵌入的双流图网络架构。通过显式设计扩散核与平流核，模型成功解耦了浓度梯度驱动的各向同性扩散（公式\eqref{eq:diffusion_normalized}）与风场驱动的各向异性平流输送（公式\eqref{eq:advection_adjacency}）两类物理过程，分别对应公式（\ref{eq:advection_diffusion}）中的扩散项与平流项。平流核根据实时风场动态调整边权重，显式编码\cqt{上游影响下游}的定向传输规律；扩散核模拟浓度梯度驱动的均一化过程，在数据稀疏区域起到\cqt{保守滤波}作用。这种设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN和PCDCNet的物理约束思想一脉相承。
+（1）构建了物理嵌入的双流图网络架构。通过显式设计扩散核与平流核，模型成功解耦了浓度梯度驱动的各向同性扩散（公式\eqref{eq:diffusion_normalized}）与风场驱动的各向异性平流输送（公式\eqref{eq:advection_adjacency}）两类物理过程，分别对应公式（\ref{eq:advection_diffusion}）中的扩散项与平流项。平流核根据实时风场动态调整边权重，显式编码\cqt{上游影响下游}的定向传输规律；扩散核模拟浓度梯度驱动的均一化过程，在数据稀疏区域起到\cqt{保守滤波}作用。这种设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN和PCDCNet的物理启发思想一脉相承。
 
 （2）实现了归纳式时空推断能力。通过动态掩码训练策略（公式\eqref{eq:inductive_sampling}），模型摆脱了对固定图结构的依赖，具备了对任意空间位置进行\cqt{虚拟传感}的能力。实验证明，该模型在未观测站点上的推断精度显著优于现有最优方法（MAE降低25.2\%），特别是在冬季复杂气象条件下表现出极强的鲁棒性。
 
@@ -657,4 +657,4 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 本章的研究成果为构建低成本、全覆盖的智能环境感知网络提供了新的技术路径。SPIN有效地充当了\cqt{虚拟传感器}的角色，为未受监控的郊区和农村地区提供可靠的空气质量估计，这对于识别隐藏的污染热点、评估环境公平性问题具有重要价值。同时，本章构建的高分辨率污染场也为后续第\ref{chap:simulation}章开展精细化的情景模拟奠定了空间数据基础。
 
-从方法论角度，本章的核心贡献在于：将第\ref{subsec:paradigm}节提出的\cqt{物理约束数据驱动建模}范式从时间维度（预测）扩展到空间维度（推断）。通过在图神经网络中显式嵌入扩散--平流双重物理机制，并采用归纳式学习策略，模型实现了从\cqt{监测什么推断什么}的直推式范式向\cqt{学习物理规律、推断任意位置}的归纳式范式的跨越。这一方法为区域尺度的空气质量评估与健康暴露研究提供了新的技术途径。
+从方法论角度，本章的核心贡献在于：将第\ref{subsec:paradigm}节提出的\cqt{物理启发数据驱动建模}范式从时间维度（预测）扩展到空间维度（推断）。通过在图神经网络中显式嵌入扩散--平流双重物理机制，并采用归纳式学习策略，模型实现了从\cqt{监测什么推断什么}的直推式范式向\cqt{学习物理规律、推断任意位置}的归纳式范式的跨越。这一方法为区域尺度的空气质量评估与健康暴露研究提供了新的技术途径。
