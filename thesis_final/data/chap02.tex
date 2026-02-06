@@ -40,12 +40,12 @@
 
 然而，公式\eqref{eq:spectral_conv}中的全特征分解计算复杂度为$O(N^3)$，难以应用于大规模图。为此，ChebNet\citep{defferrard2016convolutional}采用切比雪夫多项式近似滤波器$g_\theta(\boldsymbol{\Lambda})$，将复杂度降至$O(|\mathcal{E}|)$（$|\mathcal{E}|$为边数）：
 \begin{equation}
-\mathbf{y} = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{\mathbf{L}}) \mathbf{x}
+\mathbf{y} = \sum_{k=0}^{K_c-1} \theta_k T_k(\tilde{\mathbf{L}}) \mathbf{x}
 \label{eq:chebynet}
 \end{equation}
-\noindent 式中$\theta_k$为可学习的多项式系数，$T_k(\cdot)$为$k$阶切比雪夫多项式，$\tilde{\mathbf{L}} = 2\mathbf{L}/\lambda_{\max} - \mathbf{I}$为归一化拉普拉斯矩阵，$K$控制滤波器的阶数（即感受野大小）。
+\noindent 式中$\theta_k$为可学习的多项式系数，$T_k(\cdot)$为$k$阶切比雪夫多项式，$\tilde{\mathbf{L}} = 2\mathbf{L}/\lambda_{\max} - \mathbf{I}$为归一化拉普拉斯矩阵，$K_c$控制滤波器的阶数（即感受野大小）。
 
-图卷积网络（Graph Convolutional Network, GCN）\citep{kipf2017semi}进一步将ChebNet简化为一阶形式（取$K=1$），并引入归一化技巧以稳定训练：
+图卷积网络（Graph Convolutional Network, GCN）\citep{kipf2017semi}进一步将ChebNet简化为一阶形式（取$K_c=1$），并引入归一化技巧以稳定训练：
 \begin{equation}
 \mathbf{H}^{(l+1)} = \sigma\left(\tilde{\mathbf{D}}^{-\frac{1}{2}} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-\frac{1}{2}} \mathbf{H}^{(l)} \mathbf{W}^{(l)}\right)
 \label{eq:gcn}
@@ -80,7 +80,7 @@
 
 典型的STGNN架构包含交替堆叠的空间模块与时间模块。空间模块采用上述GCN（公式\eqref{eq:gcn}）或MPNN（公式\eqref{eq:message_passing}）捕捉节点间的空间依赖；时间模块沿时间轴捕捉序列依赖，常用膨胀卷积（Dilated Convolution）：
 \begin{equation}
-\mathbf{Y}_t = \sum_{s=0}^{K-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
+\mathbf{Y}_t = \sum_{s=0}^{K_c-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
 \end{equation}
 \noindent 式中$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为卷积核权重，$d$为膨胀因子。膨胀因子$d$通常按指数递增设置，即$d \in \{1, 2, 4, \ldots, 2^{L-1}\}$，使得$L$层TCN以线性参数量获得$\mathcal{O}(2^L)$的感受野。

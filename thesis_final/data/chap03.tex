@@ -286,9 +286,9 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 
 最后，通过输出层预测\PM 浓度：
 \begin{equation}
-    \hat{\mathbf{X}}_i^t = \Omega(h_i^t)
+    \hat{\mathbf{X}}_i^t = \text{Readout}(h_i^t)
 \end{equation}
-\noindent 式中$\Omega$为单层MLP。
+\noindent 式中$\text{Readout}$为单层MLP。
 
 算法\ref{alg:pm25_gnn}给出了PM$_{2.5}$-GNN的完整训练与推理流程。
 
@@ -297,7 +297,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 \caption*{\textbf{PM$_{2.5}$-GNN}：算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
-    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathbf{f}^{\,\mathcal{E}}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
+    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathbf{f}^{\,\mathcal{E}}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\eta$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \STATE 初始化所有节点的GRU隐状态 $\{h_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
@@ -308,12 +308,12 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
             \STATE $\boldsymbol{\xi}_i^t \leftarrow [\hat{\mathbf{X}}_i^{t-1}, \mathbf{M}_i^t]$ \COMMENT{构建节点输入特征}
             \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{f}^{\,\mathcal{E},\,t}_{j\to i}]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathbf{f}^{\,\mathcal{E},\,t}_{i\to j}])))$ \COMMENT{净通量聚合}
             \STATE $h_i^t \leftarrow \text{GRUcell}([\boldsymbol{\xi}_i^t, \zeta_i^t], h_i^{t-1})$ \COMMENT{时空状态更新}
-            \STATE $\hat{\mathbf{X}}_i^t \leftarrow \Omega(h_i^t)$ \COMMENT{浓度预测}
+            \STATE $\hat{\mathbf{X}}_i^t \leftarrow \text{Readout}(h_i^t)$ \COMMENT{浓度预测}
         \ENDFOR
     \ENDFOR
 
     \STATE $\mathcal{L} \leftarrow \frac{1}{T} \sum_{t=1}^{T}\frac{1}{N} \sum_{i=1}^{N}(\hat{\mathbf{X}}_i^t - \mathbf{X}_i^t)^{2}$ \COMMENT{MSE损失}
-    \STATE $\Theta \leftarrow \Theta - \alpha \frac{\partial \mathcal{L}}{\partial \Theta}$
+    \STATE $\Theta \leftarrow \Theta - \eta \frac{\partial \mathcal{L}}{\partial \Theta}$
     \STATE \RETURN $\Theta$（训练）\textbf{或} $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 \end{algorithmic}
 \end{algorithm}
@@ -407,7 +407,7 @@ TAD（Temporal Accumulation Dynamics）：对应方程左端的时间演化项$\
     \mathbf{H}_t = \text{Linear}([\hat{\mathbf{X}}_{t-1}, \mathbf{M}_t, \mathbf{E}_t])
 \end{equation}
 
-\noindent 式中$[\cdot, \cdot, \cdot]$表示特征拼接，$\text{Linear}$为线性投影层。这一步骤将维度不同的污染物、气象、排放数据统一投影到$d$维隐空间中，为后续的动力学建模提供统一的特征表示。
+\noindent 式中$[\cdot, \cdot, \cdot]$表示特征拼接，$\text{Linear}$为线性投影层。这一步骤将维度不同的污染物、气象、排放数据统一投影到$d_h$维隐空间中，为后续的动力学建模提供统一的特征表示。
 
 在训练阶段，当$t < 1$（历史编码阶段）时，$\hat{\mathbf{X}}_{t-1}$使用真实观测值$\mathbf{X}_{t-1}$；当$t \geq 1$（预测阶段）时，使用上一时刻的预测值。这种设计使模型能够在训练时学习真实的\cqt{状态-演化}映射，在推理时进行自回归预测。
 
@@ -550,7 +550,7 @@ PCDCNet采用Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{
 \caption*{\textbf{PCDCNet}：算法包含历史编码和预测两个阶段。每个时间步依次执行：嵌入层融合多源数据、LID模块处理局地化学反应、STD模块处理空间传输、TAD模块处理时间累积、残差预测生成浓度。训练时同时优化预测损失和DIC约束损失。}
 \label{alg:algorithm}
 \begin{algorithmic}[1]
-    \REQUIRE 训练数据集 $\mathcal{D} = \{D_n\}_{n=1}^N$，初始化参数 $\Theta$，学习率 $\alpha$，DIC权重 $\lambda$
+    \REQUIRE 训练数据集 $\mathcal{D} = \{D_n\}_{n=1}^N$，初始化参数 $\Theta$，学习率 $\eta$，DIC权重 $\lambda$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \FOR{每个样本 $D_k = (\mathbf{X}, \mathbf{M}, \mathbf{E}) \in \mathcal{D}$}
@@ -576,7 +576,7 @@ PCDCNet采用Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{
     \ENDFOR
 
     \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{Pred}} + \lambda \mathcal{L}_{\mathrm{DIC}}$
-    \STATE $\Theta \leftarrow \Theta - \alpha \frac{\partial \mathcal{L}}{\partial \Theta}$
+    \STATE $\Theta \leftarrow \Theta - \eta \frac{\partial \mathcal{L}}{\partial \Theta}$
     \STATE \RETURN $\Theta$（训练）\textbf{或} $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 \end{algorithmic}
 \end{algorithm}
@@ -672,7 +672,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 \end{tabular}
 \end{table}
 
-（4）实现细节。模型基于PyTorch实现，图计算使用PyTorch Geometric（PyG）库\citep{fey2019fast}。训练在NVIDIA RTX 4070 SUPER GPU上进行。主要超参数设置：隐层维度$d=32$，历史窗口$T'=24$（72小时），预测窗口$T=24$（72小时），学习率$10^{-4}$，批大小32，训练轮数100，早停patience为10。优化器使用Adam，学习率调度使用ReduceLROnPlateau。
+（4）实现细节。模型基于PyTorch实现，图计算使用PyTorch Geometric（PyG）库\citep{fey2019fast}。训练在NVIDIA RTX 4070 SUPER GPU上进行。主要超参数设置：隐层维度$d_h=32$，历史窗口$T'=24$（72小时），预测窗口$T=24$（72小时），学习率$10^{-4}$，批大小32，训练轮数100，早停patience为10。优化器使用Adam，学习率调度使用ReduceLROnPlateau。
 
 
 \subsection{PM$_{2.5}$-GNN实验结果}
@@ -854,17 +854,17 @@ SO$_2$对\PM 预测贡献显著：移除SO$_2$后\PM MAE上升约5\%，这是因
 
 NH$_3$的影响相对较小：移除NH$_3$后性能变化不大，可能是因为在当前模型分辨率下，氨盐生成的非线性过程难以被充分捕捉。
 
-（3）隐层维度敏感性分析。评估不同隐层维度$d$对模型性能和计算效率的影响。图\ref{fig:ablation_sensitivity}左图展示了隐层维度为16、32、64时的性能对比。
+（3）隐层维度敏感性分析。评估不同隐层维度$d_h$对模型性能和计算效率的影响。图\ref{fig:ablation_sensitivity}左图展示了隐层维度为16、32、64时的性能对比。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\linewidth]{figures/chap03_ablation.png}
   \caption{参数敏感性与核心模块消融分析}
-  \caption*{左图：隐层维度敏感性分析，$d=32$取得最优性能，在模型容量与泛化能力之间达到平衡；右图：核心模块消融实验结果，分别移除LID、STD、TAD模块后的MAE变化，移除TAD影响最大。}
+  \caption*{左图：隐层维度敏感性分析，$d_h=32$取得最优性能，在模型容量与泛化能力之间达到平衡；右图：核心模块消融实验结果，分别移除LID、STD、TAD模块后的MAE变化，移除TAD影响最大。}
   \label{fig:ablation_sensitivity}
 \end{figure}
 
-结果表明：$d=16$时模型容量不足，欠拟合导致性能下降；$d=64$时参数量增加但性能未见提升，存在轻微过拟合风险；$d=32$在模型容量与泛化能力之间达到最优平衡。
+结果表明：$d_h=16$时模型容量不足，欠拟合导致性能下降；$d_h=64$时参数量增加但性能未见提升，存在轻微过拟合风险；$d=32$在模型容量与泛化能力之间达到最优平衡。
 
 
 % DIC物理约束损失效果分析

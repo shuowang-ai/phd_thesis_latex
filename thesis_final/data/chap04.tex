@@ -212,12 +212,12 @@ SPIN的推断流程由图结构构建与四阶段推断流水线两部分组成�
 扩散图（Geospatial Diffusion Graph, $\mathcal{G}^{\mathcal{D}}$）基于地理学第一定律\cqt{相近事物更相关}（Tobler's First Law of Geography）构建，建模污染物在浓度梯度驱动下产生的各向同性随机运动。邻接矩阵$A^{\mathcal{D}}$基于节点间的测地距离定义：
 \begin{equation}
     A_{ij}^{\mathcal{D}} = \begin{cases}
-        \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right), & \text{if } d_{ij} < d_{\text{th}} \\
+        \exp\left(-\frac{d_{ij}^2}{2\sigma_d^2}\right), & \text{if } d_{ij} < d_{\text{th}} \\
         0, & \text{otherwise}
     \end{cases}
 \label{eq:diffusion_adjacency}
 \end{equation}
-\noindent 式中$d_{ij}$为节点$i$和$j$之间的测地距离，$\sigma$为距离衰减系数（默认50 km），$d_{\text{th}}$为截断阈值（默认200 km）。
+\noindent 式中$d_{ij}$为节点$i$和$j$之间的测地距离，$\sigma_d$为距离衰减系数（默认50 km），$d_{\text{th}}$为截断阈值（默认200 km）。
 
 对$A^{\mathcal{D}}$进行对称归一化，构造扩散算子$\tilde{A}^{\mathcal{D}}$：
 \begin{equation}
@@ -234,12 +234,12 @@ SPIN的推断流程由图结构构建与四阶段推断流水线两部分组成�
 为此，本研究构建了平流图（Advection Graph, $\mathcal{G}^{\mathcal{A}}$），这是一个随风场实时更新的动态有向图，其边权重取决于风速向量在节点连线上的投影。如图~\ref{fig:kernels}(a)所示，从节点$j$到节点$i$的平流权重定义为：
 \begin{equation}
     A_{ij}^{\mathcal{A}} = \begin{cases}
-        \max\left( \frac{|\mathbf{u}_j|}{d_{ij}} \cdot \cos(\alpha_{ji}), 0 \right) \cdot \exp\left(-\frac{d_{ij}}{L}\right), & \text{if } d_{ij} < d_{\text{th}} \\
+        \max\left( \frac{|\mathbf{u}_j|}{d_{ij}} \cdot \cos(\alpha_{ji}), 0 \right) \cdot \exp\left(-\frac{d_{ij}}{L_s}\right), & \text{if } d_{ij} < d_{\text{th}} \\
         0, & \text{otherwise}
     \end{cases}
 \label{eq:advection_adjacency}
 \end{equation}
-\noindent 式中$|\mathbf{u}_j|$是源节点$j$处的风速大小，$\alpha_{ji}$是风向向量$\mathbf{u}_j$与边向量$\mathbf{e}_{ji}$（从$j$指向$i$）之间的夹角，$L$为特征传输长度尺度（默认100 km）。$\max(\cdot, 0)$函数确保了权重的非负性和方向性：只有当风从$j$吹向$i$（即$\cos(\alpha_{ji}) > 0$）时，边才存在。这一设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN中的平流系数（公式\eqref{eq:advection_coeff}）异曲同工，都显式编码了\cqt{上游影响下游}的定向传输机制。
+\noindent 式中$|\mathbf{u}_j|$是源节点$j$处的风速大小，$\alpha_{ji}$是风向向量$\mathbf{u}_j$与边向量$\mathbf{e}_{ji}$（从$j$指向$i$）之间的夹角，$L_s$为特征传输长度尺度（默认100 km）。$\max(\cdot, 0)$函数确保了权重的非负性和方向性：只有当风从$j$吹向$i$（即$\cos(\alpha_{ji}) > 0$）时，边才存在。这一设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN中的平流系数（公式\eqref{eq:advection_coeff}）异曲同工，都显式编码了\cqt{上游影响下游}的定向传输机制。
 
 归一化采用行归一化（出度归一化）：
 \begin{equation}
@@ -299,12 +299,12 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 
 对于观测节点$v \in \mathcal{V}_{\text{obs}}$，将观测值$X_v$与时序表征拼接：
 \begin{equation}
-h_v^{(0)} = [h_v^{\text{temp}}, X_v] \in \mathbb{R}^{d+1}
+h_v^{(0)} = [h_v^{\text{temp}}, X_v] \in \mathbb{R}^{d_h+1}
 \label{eq:obs_init}
 \end{equation}
 \noindent 对于目标节点$v \in \mathcal{V}_{\text{target}}$，仅使用时序表征作为初始化：
 \begin{equation}
-h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d+1}
+h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
 \label{eq:target_init}
 \end{equation}
 
@@ -332,7 +332,7 @@ m_v^{\mathcal{D}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{D}} \cd
 m_v^{\mathcal{A}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{A}} \cdot W^{\mathcal{A}} h_u^{(l)}
 \label{eq:advection_message}
 \end{equation}
-\noindent 式中$W^{\mathcal{D}}, W^{\mathcal{A}} \in \mathbb{R}^{d \times d}$为可学习的权重矩阵，$l$为层索引。
+\noindent 式中$W^{\mathcal{D}}, W^{\mathcal{A}} \in \mathbb{R}^{d_h \times d_h}$为可学习的权重矩阵，$l$为层索引。
 
 两类消息通过门控机制融合，允许模型自适应平衡扩散和平流的相对贡献：
 \begin{equation}
@@ -343,7 +343,7 @@ g_v = \sigma\left(W_g [m_v^{\mathcal{D}}, m_v^{\mathcal{A}}] + b_g\right)
 m_v = g_v \odot m_v^{\mathcal{D}} + (1 - g_v) \odot m_v^{\mathcal{A}}
 \label{eq:gate_fusion}
 \end{equation}
-\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$W_g \in \mathbb{R}^{d \times 2d}$为门控权重。具体而言，$g_v \in \mathbb{R}^{d}$为门控权重向量（对应算法\ref{alg:spin}第15行的$\mathbf{G}$），其每个分量取值于$[0,1]$，逐维度控制扩散消息与平流消息的混合比例；$m_v \in \mathbb{R}^{d}$为融合后的空间消息（对应算法\ref{alg:spin}第16行的$\Delta\mathbf{H}$），综合了来自两类图结构的邻域信息，随后通过残差连接注入节点表示。
+\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$W_g \in \mathbb{R}^{d_h \times 2d_h}$为门控权重。具体而言，$g_v \in \mathbb{R}^{d_h}$为门控权重向量（对应算法\ref{alg:spin}第15行的$\mathbf{G}$），其每个分量取值于$[0,1]$，逐维度控制扩散消息与平流消息的混合比例；$m_v \in \mathbb{R}^{d_h}$为融合后的空间消息（对应算法\ref{alg:spin}第16行的$\Delta\mathbf{H}$），综合了来自两类图结构的邻域信息，随后通过残差连接注入节点表示。
 
 门控机制的物理意义在于：在静风条件下，扩散过程主导污染物的空间分布，模型应侧重扩散核（$g_v \to 1$）；在强风条件下，平流输送成为主导机制，模型应侧重平流核（$g_v \to 0$）。这种自适应的权重分配使得模型能够根据局地气象条件动态调整传播策略。
 
@@ -371,7 +371,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \label{eq:decoder_stage4}
 \end{equation}
 
-\noindent 式中$h_v^{(L)} \in \mathbb{R}^{d}$为节点$v$经过阶段三传播后的最终潜在表示，$W_{\text{out}} \in \mathbb{R}^{1 \times d}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
+\noindent 式中$h_v^{(L)} \in \mathbb{R}^{d_h}$为节点$v$经过阶段三传播后的最终潜在表示，$W_{\text{out}} \in \mathbb{R}^{1 \times d_h}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
 
 共享参数的设计使得模型学习到的是一个通用的\cqt{特征到浓度}映射函数，而非针对特定站点的过拟合表示，确保了模型能够完全基于物理环境特征来填补数据盲区，实现真正的归纳式推断。
 
@@ -449,7 +449,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 \caption*{\textbf{SPIN}：算法对应第\ref{sec:spin_model}节所述的四阶段数据融合与推断流程——阶段一：动态节点掩码（第\ref{subsec:stage1_masking}节），阶段二：TCN时序编码（第\ref{subsec:stage2_encoding}节），阶段三：双图传播（第\ref{subsec:stage3_propagation}节），阶段四：复合损失优化（第\ref{subsec:stage4_constraints}节）。}
 \label{alg:spin}
 \begin{algorithmic}[1]
-    \REQUIRE 训练数据集$\mathcal{D}$，初始化参数$\Theta$，学习率$\alpha$，掩码比例$r_{\text{mask}}$
+    \REQUIRE 训练数据集$\mathcal{D}$，初始化参数$\Theta$，学习率$\eta$，掩码比例$r_{\text{mask}}$
     \ENSURE 优化后的参数$\Theta$（训练），推断结果$\{\hat{\mathbf{X}}\}$（推理）
 
     \FOR{每个样本$D_k = (\mathbf{X}, \mathbf{M}, \mathbf{E}, \mathbf{X}^{\text{AOD}}) \in \mathcal{D}$}
@@ -482,7 +482,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
         \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}$ \COMMENT{公式\ref{eq:total_loss_chap3}}
     \ENDFOR
 
-    \STATE $\Theta \leftarrow \Theta - \alpha \nabla_{\Theta} \mathcal{L}$
+    \STATE $\Theta \leftarrow \Theta - \eta \nabla_{\Theta} \mathcal{L}$
     \RETURN $\Theta$（训练）\textbf{或} $\{\hat{\mathbf{X}}\}$（推理）
 \end{algorithmic}
 \end{algorithm}
@@ -527,7 +527,7 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
     \item 时空图神经网络模型：STGCN\citep{yu2018spatio}、IGNNK\citep{wu2021inductive}，代表当前最先进的空间插值方法。
 \end{itemize}
 
-（4）实现细节。TCN采用4层膨胀卷积，膨胀因子为$[1, 2, 4, 8]$，卷积核大小为3。双图GNN采用2层消息传递。隐藏维度$d = 64$。优化器为Adam，初始学习率$10^{-3}$，采用余弦退火调度。批大小32，训练200个epoch，早停patience为20。损失权重$\lambda_1 = 0.5$，$\lambda_2 = 0.1$（基于验证集调优）。实验在NVIDIA A100 GPU上进行，单次训练约4小时。
+（4）实现细节。TCN采用4层膨胀卷积，膨胀因子为$[1, 2, 4, 8]$，卷积核大小为3。双图GNN采用2层消息传递。隐藏维度$d_h = 64$。优化器为Adam，初始学习率$10^{-3}$，采用余弦退火调度。批大小32，训练200个epoch，早停patience为20。损失权重$\lambda_1 = 0.5$，$\lambda_2 = 0.1$（基于验证集调优）。实验在NVIDIA A100 GPU上进行，单次训练约4小时。
 
 
 \subsection{推断精度评估}

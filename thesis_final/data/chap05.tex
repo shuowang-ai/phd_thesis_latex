@@ -189,11 +189,11 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
 \noindent 式中$L = I_{N} - D^{-1/2}AD^{-1/2} = U\Lambda U^{T}$为归一化图拉普拉斯矩阵。为降低计算复杂度，采用切比雪夫多项式近似\citep{kipf2017semi}：
 
 \begin{equation}
-\mathcal{G}_{\theta}(L) = \sum_{k=0}^{K-1}\theta_{k}T_{k}(\tilde{L})
+\mathcal{G}_{\theta}(L) = \sum_{k=0}^{K_c-1}\theta_{k}T_{k}(\tilde{L})
 \label{eq:chebyshev}
 \end{equation}
 
-\noindent 式中$\tilde{L} = \frac{2}{\lambda_{\max}}L - I_{N}$，$K$为切比雪夫多项式的阶数。通过这种方式，第$k$阶邻域的气象和排放信息被有效聚合。
+\noindent 式中$\tilde{L} = \frac{2}{\lambda_{\max}}L - I_{N}$，$K_c$为切比雪夫多项式的阶数。通过这种方式，第$k$阶邻域的气象和排放信息被有效聚合。
 
 时间卷积：采用膨胀卷积从气象和排放时间序列中提取时间特征。完整的前向传播过程可表述为：
 
