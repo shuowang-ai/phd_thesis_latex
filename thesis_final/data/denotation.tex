@@ -13,7 +13,7 @@
 \item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带有效性掩码 $\boldsymbol{\Omega}^{\text{AOD}} \in \{0,1\}^{N}$标记云遮挡区域。
 
 % 2. 图结构与时空参数
-\item[\(\mathcal{G}_t = (\mathcal{V}, \mathcal{E}_t)\)] 动态图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}_t\) 为基于风场或距离构建的边集。
+\item[\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)] 图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}\) 为基于风场或距离构建的边集。
 \item[\(\mathbf{A}, \tilde{\mathbf{A}}\)] 图邻接矩阵与归一化后的邻接矩阵。
 \item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$与归一化拉普拉斯矩阵。
 \item[\(K\)] 大气扩散系数，用于对流-扩散方程的扩散项。
@@ -28,9 +28,9 @@
 \item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。
 \item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集。
 \item[\(\nabla\)] 空间梯度算子，用于扩散/平流约束。
-\item[\(\mathcal{L}_{\mathrm{total}}\)] 总损失函数，由监督损失与物理约束损失组成。
+\item[\(\mathcal{L}\)] 总损失函数，由监督损失与物理约束损失组成。
 \item[\(\mathcal{L}_{\mathrm{Pred}}, \mathcal{L}_{\mathrm{DIC}}\)] 预测损失与领域一致性约束损失（第\ref{chap:prediction}章）。
-\item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失与AOD梯度约束损失（第\ref{chap:inference}章）。
+\item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{init}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失、初始场约束损失与AOD梯度约束损失（第\ref{chap:inference}章）。
 
 % 4. 缩略语
 \item[AOD] Aerosol Optical Depth (气溶胶光学厚度)。
