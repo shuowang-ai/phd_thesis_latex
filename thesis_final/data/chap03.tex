@@ -209,7 +209,7 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 平流系数$e_{j \to i}^{\mathcal{A}}$随后被作为边特征的核心分量，与源节点风速$|v|$、节点间距离$d$、源节点风向$\beta$及连线方向$\gamma$共同构成边属性向量：
 \begin{equation}
-    \mathfrak{E}_{j \to i}^t = [e_{|v|},\; e_{d},\; e_{\beta},\; e_{\gamma},\; e^{\mathcal{A}}] \in \mathbb{R}^{5}
+    \mathbf{f}^{\,\mathcal{E},\,t}_{j \to i} = [e_{|v|},\; e_{d},\; e_{\beta},\; e_{\gamma},\; e^{\mathcal{A}}] \in \mathbb{R}^{5}
 \label{eq:edge_attr_vector}
 \end{equation}
 \noindent 该向量在消息传递阶段作为输入，与源节点和目标节点的特征拼接后送入消息函数$\Psi$（详见第\ref{subsec:pm25gnn_model}节），使空间信息传播过程具备物理意义。表\ref{tab:pm25gnn_edge_attributes}列出了边属性中各分量的具体含义。
@@ -224,8 +224,8 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 \begin{table}[htbp]
     \centering
-    \caption{边属性（$\mathfrak{E}$）中包含的变量}
-    \caption*{边属性向量$\mathfrak{E}_{j \to i} \in \mathbb{R}^{5}$包含5个特征，用于刻画从源节点$j$到目标节点$i$的传输特性。}
+    \caption{边属性（$\mathbf{f}^{\,\mathcal{E}}$）中包含的变量}
+    \caption*{边属性向量$\mathbf{f}^{\,\mathcal{E}}_{j \to i} \in \mathbb{R}^{5}$包含5个特征，用于刻画从源节点$j$到目标节点$i$的传输特性。}
     \label{tab:pm25gnn_edge_attributes}
     \begin{tabular}{@{}lllp{4.5cm}@{}}
         \toprule
@@ -256,11 +256,11 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 节点$i$在时刻$t$的状态更新过程包含三个步骤：
 
-步骤1：消息生成。根据源节点$j$和目标节点$i$的状态，以及有向边属性$\mathfrak{E}_{j \to i}^t$，计算从$j$到$i$的传输消息：
+步骤1：消息生成。根据源节点$j$和目标节点$i$的状态，以及有向边属性$\mathbf{f}^{\,\mathcal{E},\,t}_{j \to i}$，计算从$j$到$i$的传输消息：
 \begin{equation}
-    e_{j \to i}^t = \Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathfrak{E}_{j \to i}^t])
+    e_{j \to i}^t = \Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{f}^{\,\mathcal{E},\,t}_{j \to i}])
 \end{equation}
-\noindent 式中$\Psi$为可学习的消息函数，由两层MLP实现。边属性$\mathfrak{E}_{j \to i}^t = [e_{|v|},\, e_{d},\, e_{\beta},\, e_{\gamma},\, e^{\mathcal{A}}]$（各分量定义见公式\eqref{eq:edge_attr_vector}与表\ref{tab:pm25gnn_edge_attributes}），包含了源节点风速、节点间距离、风向、连线方向和平流系数等风场物理信息，使消息生成过程具有物理意义。
+\noindent 式中$\Psi$为可学习的消息函数，由两层MLP实现。边属性$\mathbf{f}^{\,\mathcal{E},\,t}_{j \to i} = [e_{|v|},\, e_{d},\, e_{\beta},\, e_{\gamma},\, e^{\mathcal{A}}]$（各分量定义见公式\eqref{eq:edge_attr_vector}与表\ref{tab:pm25gnn_edge_attributes}），包含了源节点风速、节点间距离、风向、连线方向和平流系数等风场物理信息，使消息生成过程具有物理意义。
 
 步骤2：净通量聚合。与传统GNN仅聚合输入消息不同，我们计算每个节点的净通量——即输入流与输出流之差：
 \begin{equation}
@@ -297,7 +297,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 \caption*{\textbf{PM$_{2.5}$-GNN}：算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
-    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathfrak{E}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
+    \REQUIRE 初始观测值 $\mathbf{X}_{0}$，未来$T$步的节点属性 $\{\mathbf{M}_t\}_{t=1}^T$ 和边属性 $\{\mathbf{f}^{\,\mathcal{E}}_t\}_{t=1}^T$，图结构 $\mathcal{G}=(\mathcal{V}, \mathcal{E})$，已初始化参数 $\Theta$，学习率 $\alpha$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \STATE 初始化所有节点的GRU隐状态 $\{h_i^0\}_{i \in \mathcal{V}} \leftarrow \mathbf{0}$
@@ -306,7 +306,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
     \FOR{$t \leftarrow 1$ to $T$}
         \FOR{每个节点 $i \in \mathcal{V}$}
             \STATE $\boldsymbol{\xi}_i^t \leftarrow [\hat{\mathbf{X}}_i^{t-1}, \mathbf{M}_i^t]$ \COMMENT{构建节点输入特征}
-            \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathfrak{E}_{j\to i}^t]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathfrak{E}_{i\to j}^t])))$ \COMMENT{净通量聚合}
+            \STATE $\zeta_i^t \leftarrow \Phi(\sum_{j\in \mathcal{N}(i)}(\Psi([\boldsymbol{\xi}_j^t, \boldsymbol{\xi}_i^t, \mathbf{f}^{\,\mathcal{E},\,t}_{j\to i}]) - \Psi([\boldsymbol{\xi}_i^t, \boldsymbol{\xi}_j^t, \mathbf{f}^{\,\mathcal{E},\,t}_{i\to j}])))$ \COMMENT{净通量聚合}
             \STATE $h_i^t \leftarrow \text{GRUcell}([\boldsymbol{\xi}_i^t, \zeta_i^t], h_i^{t-1})$ \COMMENT{时空状态更新}
             \STATE $\hat{\mathbf{X}}_i^t \leftarrow \Omega(h_i^t)$ \COMMENT{浓度预测}
         \ENDFOR
@@ -826,15 +826,7 @@ TimeXer & 31.51 & 30.07 & \underline{20.60} & 22.87 & \underline{17.89} & 30.47 
 
 为验证各模块和设计选择的贡献，我们设计了系统的消融实验。
 
-（1）核心模块消融。分别移除LID、STD、TAD模块，评估其对预测性能的影响。图\ref{fig:ablation}展示了消融实验结果。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/chap03_ablation.png}
-  \caption{PCDCNet消融实验结果}
-  \caption*{左图为\PM 预测性能，右图为\ozone 预测性能。w/o Emission表示移除排放数据输入；w/o DIC表示移除领域知识约束；w/o LID/STD/TAD分别表示移除对应的动力学模块。移除任何模块均导致性能下降。}
-  \label{fig:ablation}
-\end{figure}
+（1）核心模块消融。分别移除LID、STD、TAD模块，评估其对预测性能的影响。图\ref{fig:ablation_sensitivity}右图展示了消融实验结果。
 
 消融实验的关键发现包括：
 
@@ -867,8 +859,8 @@ NH$_3$的影响相对较小：移除NH$_3$后性能变化不大，可能是因�
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\linewidth]{figures/chap03_ablation.png}
-  \caption{参数敏感性分析}
-  \caption*{左图：隐层维度敏感性分析，$d=32$取得最优性能，在模型容量与泛化能力之间达到平衡；右图：核心模块消融实验结果。}
+  \caption{参数敏感性与核心模块消融分析}
+  \caption*{左图：隐层维度敏感性分析，$d=32$取得最优性能，在模型容量与泛化能力之间达到平衡；右图：核心模块消融实验结果，分别移除LID、STD、TAD模块后的MAE变化，移除TAD影响最大。}
   \label{fig:ablation_sensitivity}
 \end{figure}
 

@@ -83,7 +83,7 @@
 \mathbf{Y}_t = \sum_{s=0}^{K-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
 \end{equation}
-\noindent 式中$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为卷积核权重，$d$为膨胀因子。
+\noindent 式中$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为卷积核权重，$d$为膨胀因子。膨胀因子$d$通常按指数递增设置，即$d \in \{1, 2, 4, \ldots, 2^{L-1}\}$，使得$L$层TCN以线性参数量获得$\mathcal{O}(2^L)$的感受野。
 
 综上，完整的STGNN通过空间模块（公式\eqref{eq:gcn}或\eqref{eq:message_passing}）与时间模块（公式\eqref{eq:tcn}）的交替堆叠，实现时空联合建模。这与大气污染系统的物理特性高度吻合——空间上相邻节点通过传输相互影响，时间上当前状态依赖历史演化。
 
