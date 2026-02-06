@@ -72,9 +72,9 @@
 
 空气质量数据来源于中国国家环境监测总站（CNEMC）\footnote{\url{https://www.cnemc.cn/}}。研究覆盖两个重点区域：
 
-\textbf{京津冀及周边地区（BTHSA）}：涵盖\cqt{2+26}城市群，共152个国控监测站点，面积约430,000 km$^2$。该区域冬季重污染频发，是检验模型极端情景预测能力的理想场所。
+京津冀及周边地区（BTHSA）：涵盖\cqt{2+26}城市群，共152个国控监测站点，面积约430,000 km$^2$。该区域冬季重污染频发，是检验模型极端情景预测能力的理想场所。
 
-\textbf{长江三角洲地区（YRD）}：涵盖上海、江苏、浙江等省市，共约175个站点，面积约270,000 km$^2$。该区域\ozone 污染问题突出，是检验多污染物协同预测能力的典型区域。
+长江三角洲地区（YRD）：涵盖上海、江苏、浙江等省市，共约175个站点，面积约270,000 km$^2$。该区域\ozone 污染问题突出，是检验多污染物协同预测能力的典型区域。
 
 监测变量包括\PM 和\ozone 等六种常规污染物，时间分辨率为1小时（2016-2023年）。数据经质量控制处理：异常值（\PM $>$1000 $\mu$g/m$^3$）标记为缺失，短期缺失（$<$6小时）线性插值，长期缺失采用历史同期均值填补。
 
@@ -83,9 +83,9 @@
 
 气象数据服务于对流-扩散方程中的平流项和扩散项建模。采用两个互补数据源：
 
-\textbf{离线训练}：ERA5再分析数据集\citep{hersbach2020era5}，空间分辨率0.25°×0.25°。
+离线训练：ERA5再分析数据集\citep{hersbach2020era5}，空间分辨率0.25°×0.25°。
 
-\textbf{在线部署}：GFS预报产品，每日更新4次，提供未来15天气象预报。
+在线部署：GFS预报产品，每日更新4次，提供未来15天气象预报。
 
 选取的变量包括：风速分量（$M_u$, $M_v$）用于平流传输建模，边界层高度（$M_{\text{blh}}$）用于垂直扩散表征，温度、湿度、降水、辐射等用于化学反应和沉降过程建模。这些变量与第\ref{chap:methodology}章表\ref{tab:pde_gnn_mapping}中的物理过程一一对应。
 
@@ -161,7 +161,7 @@
 
 基于上述多源数据，我们构建并公开发布了\textbf{KnowAir-DS}系列数据集\citep{wang2020pm2}：
 
-\textbf{KnowAir-DS-V1}（2015-2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于PM$_{2.5}$-GNN评估。图\ref{fig:knowair_v1_study_area}展示了KnowAir-DS-V1的研究区域及基于公式\eqref{eq:adjacency}构建的城市网络图结构。
+KnowAir-DS-V1（2015-2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于PM$_{2.5}$-GNN评估。图\ref{fig:knowair_v1_study_area}展示了KnowAir-DS-V1的研究区域及基于公式\eqref{eq:adjacency}构建的城市网络图结构。
 
 \begin{figure}[htbp]
   \centering
@@ -171,7 +171,7 @@
   \label{fig:knowair_v1_study_area}
 \end{figure}
 
-\textbf{KnowAir-DS-V2}（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016-2019）、验证集（2020-2021）、测试集（2022-2023）。
+KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016-2019）、验证集（2020-2021）、测试集（2022-2023）。
 
 两版本虽空间尺度不同，但均基于第\ref{chap:methodology}章的物理约束时空图神经网络范式，核心组件（平流系数、消息传递、物理约束）具有跨尺度迁移性。
 
@@ -339,10 +339,10 @@ PM$_{2.5}$-GNN在KnowAir-DS数据集上的实验表明，相比于GC-LSTM等基�
 为解决PM$_{2.5}$-GNN的上述局限，我们又提出了\textbf{PCDCNet（Physical-Chemical Dynamics and Constraints Network）}\citep{wang2025pcdcnet}。该模型定位为数值模式（如CMAQ）的\textbf{深度学习代理模型（Surrogate Model）}，在继承PM$_{2.5}$-GNN风场驱动图结构设计的基础上，进行了以下关键升级：
 
 \begin{itemize}
-    \item \textbf{多污染物联合预测}：同时预报\PM 与\ozone 浓度，并建模其协同效应；
-    \item \textbf{排放响应建模}：融合排放清单作为动态输入，实现对排放变化的显式响应；
-    \item \textbf{物理化学动力学建模}：设计LID--STD--TAD三模块架构，分别建模局地化学反应、空间传输和时间累积过程；
-    \item \textbf{领域知识约束}：引入DIC约束，将质量守恒嵌入训练目标。
+    \item 多污染物联合预测：同时预报\PM 与\ozone 浓度，并建模其协同效应；
+    \item 排放响应建模：融合排放清单作为动态输入，实现对排放变化的显式响应；
+    \item 物理化学动力学建模：设计LID--STD--TAD三模块架构，分别建模局地化学反应、空间传输和时间累积过程；
+    \item 领域知识约束：引入DIC约束，将质量守恒嵌入训练目标。
 \end{itemize}
 
 
@@ -380,17 +380,19 @@ PCDCNet遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的
   \centering
   \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_arch.pdf}
   \caption{PCDCNet模型总体架构}
-  \caption*{模型输入为上一时刻污染物浓度$\mathbf{X}_{t-1}$、当前气象$\mathbf{M}_t$和排放$\mathbf{E}_t$，经嵌入层映射为隐状态$\mathbf{H}_t$。三个核心动力学模块依次处理：LID（局地交互动力学）输出$\mathbf{H}_t^R$建模本地化学反应与排放响应；STD（空间传输动力学）输出$\mathbf{H}_t^S$建模风驱平流与扩散传输；TAD（时间积累动力学）输出$\mathbf{H}_t^T$建模长时序累积与沉降效应。最终通过残差预测$\Delta\hat{\mathbf{X}}_t$生成浓度输出$\hat{\mathbf{X}}_t = \hat{\mathbf{X}}_{t-1} + \Delta\hat{\mathbf{X}}_t$，并引入DIC约束确保物理一致性。}
+  \caption*{模型输入为上一时刻污染物浓度$\mathbf{X}_{t-1}$、当前气象$\mathbf{M}_t$和排放$\mathbf{E}_t$，经嵌入层（Embed）映射为隐状态$\mathbf{H}_t$。三个核心动力学模块对应大气连续性方程$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u}C) = S - D$的不同物理过程：LID（局地交互动力学，MLP）输出$\mathbf{H}_t^R$，对应方程右端的源汇项$S-D$，建模本地化学反应与排放响应；STD（空间传输动力学，GNN消息传递）输出$\mathbf{H}_t^S$，对应平流-扩散项$\nabla \cdot (\mathbf{u}C)$，建模风驱空间传输；TAD（时间积累动力学，GRUcell）输出$\mathbf{H}_t^T$，对应时间演化项$\frac{\partial C}{\partial t}$，建模长时序累积效应。主路径通过读出层（Readout）生成浓度预测$\hat{\mathbf{X}}_t$；STD模块额外设置独立的读出层，显式提取空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$，与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC（领域知识约束）模块，通过质量守恒约束确保传输过程的物理一致性。图中左上角的浓度-时间曲线示意了残差预测$\Delta\mathbf{X}$的含义。}
   \label{fig:overall_framework}
 \end{figure}
 
-LID（Local Interaction Dynamics）：建模发生在局地的化学反应和排放生成过程，对应公式\eqref{eq:advection_diffusion}中的化学反应项$R$和排放源项$S$；
+如图\ref{fig:overall_framework}右上角所示，大气连续性方程$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u}C) = S - D$描述了浓度场$C$的时空演化，三个动力学模块分别对应该方程的不同物理项：
 
-STD（Spatial Transport Dynamics）：建模污染物的空间传输过程，对应公式\eqref{eq:advection_diffusion}中的平流项和扩散项；
+LID（Local Interaction Dynamics）：对应方程右端的源汇项$S - D$，建模发生在局地的排放源$S$（一次排放与光化学生成）和沉降汇$D$（干/湿沉降），这些过程不涉及站点间的空间传输；
 
-TAD（Temporal Accumulation Dynamics）：建模污染物的时间累积与沉降过程，对应公式\eqref{eq:advection_diffusion}中的沉降项$D$和浓度随时间的累积。
+STD（Spatial Transport Dynamics）：对应方程左端的平流-扩散项$\nabla \cdot (\mathbf{u}C)$，通过图神经网络的消息传递与邻域聚合机制建模污染物在风场驱动下的空间传输过程；
 
-这种\cqt{过程解耦+联合建模}的设计使得每个模块具有明确的物理对应，既保留了深度学习的灵活拟合能力，又增强了模型的可解释性。
+TAD（Temporal Accumulation Dynamics）：对应方程左端的时间演化项$\frac{\partial C}{\partial t}$，通过GRU的门控记忆机制捕捉污染物浓度的长时序累积与衰减规律。
+
+此外，如图\ref{fig:overall_framework}所示，STD模块设置了独立的读出层（Readout），将隐状态$\mathbf{H}_t^S$显式映射为空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$。该分支与上一时刻的$\nabla\hat{\mathbf{X}}_{t-1}^S$共同送入DIC（领域知识约束）模块，通过质量守恒原则约束传输过程的物理一致性（详见\ref{subsec:pcdcnet_training}节）。这种\cqt{过程解耦+联合建模}的设计使得每个模块具有明确的物理对应，既保留了深度学习的灵活拟合能力，又增强了模型的可解释性。
 
 
 \subsubsection{嵌入层：多源数据融合}
@@ -406,9 +408,9 @@ TAD（Temporal Accumulation Dynamics）：建模污染物的时间累积与沉�
 
 
 \subsubsection{局地交互动力学模块（LID）}
-局地交互动力学（Local Interaction Dynamics, LID）模块主要模拟发生在网格或站点内部的光化学反应与排放生成过程。
+局地交互动力学（Local Interaction Dynamics, LID）模块对应大气连续性方程右端的源汇项$S - D$，模拟发生在网格或站点内部的排放生成（$S$）与化学转化过程。
 
-在大气化学中，\ozone 的生成依赖于\NOx 和VOC在太阳辐射下的光化学反应链，其速率受温度、辐射强度等因素的非线性调制。\PM 的浓度则受到一次排放（直接排放的颗粒物）和二次生成（气态前驱物转化）的双重贡献。这些过程发生在每个站点局地，不涉及站点间的空间传输。
+在大气化学中，源项$S$包括一次排放（直接排放的颗粒物）和二次生成——\ozone 的生成依赖于\NOx 和VOC在太阳辐射下的光化学反应链，其速率受温度、辐射强度等因素的非线性调制；\PM 则受到一次排放与气态前驱物二次转化的双重贡献。汇项$D$对应干沉降与湿沉降过程。这些过程发生在每个站点局地，不涉及站点间的空间传输。
 
 LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 \begin{equation}
@@ -424,7 +426,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 
 
 \subsubsection{空间传输动力学模块（STD）}
-空间传输动力学（Spatial Transport Dynamics, STD）模块继承并升级了PM$_{2.5}$-GNN的思想，利用图神经网络模拟污染物的平流与扩散传输。
+空间传输动力学（Spatial Transport Dynamics, STD）模块对应大气连续性方程左端的平流-扩散项$\nabla \cdot (\mathbf{u}C)$，继承并升级了PM$_{2.5}$-GNN的思想，利用图神经网络的消息传递与邻域聚合机制模拟污染物在风场驱动下的平流与扩散传输。
 
 基于城市网络图$\mathcal{G}$，STD模块通过图卷积操作聚合邻居节点的信息：
 \begin{equation}
@@ -441,7 +443,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 
 
 \subsubsection{时间积累动力学模块（TAD）}
-时间积累动力学（Temporal Accumulation Dynamics, TAD）模块利用门控循环单元（GRU）捕捉污染物的长时序累积与沉降（Deposition）效应：
+时间积累动力学（Temporal Accumulation Dynamics, TAD）模块对应大气连续性方程左端的时间演化项$\frac{\partial C}{\partial t}$，利用门控循环单元（GRU）捕捉污染物浓度的长时序累积与衰减效应：
 \begin{equation}
     \mathbf{H}_t^T = \text{GRUcell}(\mathbf{H}_t, \mathbf{H}_{t-1}^T)
 \end{equation}
@@ -459,7 +461,7 @@ LID模块通过多层感知机（MLP）学习这种复杂的非线性响应：
 
 
 \subsubsection{读出层与残差预测}
-PCDCNet采用残差预测方式生成最终输出，即预测浓度的变化量而非绝对值：
+如图\ref{fig:overall_framework}所示，PCDCNet设置了两条读出路径。主读出层采用残差预测方式生成浓度输出，即预测浓度的变化量$\Delta\hat{\mathbf{X}}_t$而非绝对值：
 \begin{equation}
     \Delta \hat{\mathbf{X}}_t = \text{Linear}(\mathbf{H}_t)
 \end{equation}
@@ -468,7 +470,9 @@ PCDCNet采用残差预测方式生成最终输出，即预测浓度的变化量�
 \label{eq:residual_pred}
 \end{equation}
 
-这种设计符合大气污染演化的物理特性——浓度的变化通常是渐进的，残差形式有助于：（1）稳定长时序预测，避免绝对值预测中的漂移问题；（2）使模型聚焦于学习\cqt{变化量}，与公式\eqref{eq:advection_diffusion}中$\partial C / \partial t$的物理意义对应；（3）天然保持预测的时序连续性，减少非物理突变。
+\noindent 这种残差形式与大气连续性方程中$\frac{\partial C}{\partial t}$的物理意义对应——浓度的变化通常是渐进的，残差预测有助于稳定长时序预测、减少非物理突变。
+
+此外，STD模块设置了独立的读出层，从$\mathbf{H}_t^S$中显式提取空间传输贡献$\nabla\hat{\mathbf{X}}_t^S$（公式\eqref{eq:transport_contribution}），用于后续的DIC约束。这一设计使模型能够将浓度变化解耦为\cqt{传输引起的变化}与\cqt{局地源汇引起的变化}，从而对传输过程施加独立的物理约束。
 
 
 \subsection{损失函数与训练策略}
@@ -489,23 +493,23 @@ PCDCNet采用残差预测方式生成最终输出，即预测浓度的变化量�
 
 \subsubsection{领域知识约束（DIC）}
 
-为了防止纯数据驱动模型产生违反物理规律的预测（如质量不守恒、负浓度、非物理突变等），我们设计了领域知识约束损失$\mathcal{L}_{\mathrm{DIC}}$。该约束基于大气污染物的质量守恒原则，包含空间守恒和时间守恒两个维度。
+如图\ref{fig:overall_framework}右上角的DIC模块所示，领域知识约束直接源于大气连续性方程$\frac{\partial C}{\partial t} + \nabla \cdot (\mathbf{u}C) = S - D$的质量守恒含义：在不考虑源汇项$S-D$的条件下，仅由空间传输$\nabla \cdot (\mathbf{u}C)$引起的浓度变化应满足全局守恒——从一个节点流出的污染物必然流入另一个节点，不会凭空产生或消失。
 
-首先，从STD模块中显式提取空间传输贡献：
+为此，我们通过STD模块的独立读出层，从隐状态$\mathbf{H}_t^S$中显式提取空间传输贡献：
 \begin{equation}
     \nabla \hat{\mathbf{X}}_t^S = \text{Linear}(\mathbf{H}_t^S)
 \label{eq:transport_contribution}
 \end{equation}
-\noindent 式中$\mathbf{H}_t^S$为STD模块的输出，$\nabla \hat{\mathbf{X}}_t^S$表示由空间传输过程引起的浓度变化量。这一设计使得模型能够区分\cqt{传输引起的变化}与\cqt{化学反应引起的变化}，从而实现对传输过程的精细约束。
+\noindent 式中$\nabla \hat{\mathbf{X}}_t^S$仅编码由平流-扩散项$\nabla \cdot (\mathbf{u}C)$引起的浓度变化，而LID模块学习到的源汇项$S-D$贡献已通过$\mathbf{H}_t^R$独立表示。正是这种过程解耦，使得我们能够单独对传输过程施加质量守恒约束，而不影响LID模块对排放与化学反应的自由拟合。基于$\nabla \hat{\mathbf{X}}_t^S$，DIC约束包含空间守恒和时间守恒两个维度。
 
-\textbf{空间质量守恒约束}。根据第\ref{chap:methodology}章的质量守恒方程（公式\eqref{eq:mass_conservation}），在不考虑化学源汇的情况下，通过扩散和平流传输的污染物在全局范围内应满足质量守恒。具体地，在任一时刻，每个节点通过传输过程\cqt{流出}的污染物总量应等于其邻居节点\cqt{流入}的总量：
+空间质量守恒约束。根据第\ref{chap:methodology}章的质量守恒方程（公式\eqref{eq:mass_conservation}），在不考虑化学源汇的情况下，通过扩散和平流传输的污染物在全局范围内应满足质量守恒。具体地，在任一时刻，每个节点通过传输过程\cqt{流出}的污染物总量应等于其邻居节点\cqt{流入}的总量：
 \begin{equation}
     \sum_{v' \in \mathcal{N}(v)} \nabla \hat{X}_{v \to v'}^S = 0, \quad \forall v \in \mathcal{V}
 \label{eq:spatial_conservation}
 \end{equation}
 \noindent 式中$\nabla \hat{X}_{v \to v'}^S$表示从节点$v$传输到邻居节点$v'$的污染物通量。该约束确保传输过程是\cqt{零和博弈}——一个节点的流出必然对应其他节点的流入，防止模型在传输建模中凭空\cqt{创造}或\cqt{消灭}污染物。
 
-\textbf{时间质量守恒约束}。在封闭系统中，全局污染物总量在时间上应保持稳定（不考虑排放和沉降）：
+时间质量守恒约束。在封闭系统中，全局污染物总量在时间上应保持稳定（不考虑排放和沉降）：
 \begin{equation}
     \frac{d}{dt} \sum_{v \in \mathcal{V}} \nabla \hat{X}_{v}^S = 0
 \label{eq:temporal_conservation}
@@ -534,11 +538,11 @@ DIC约束的引入体现了\cqt{物理约束数据驱动建模}的核心思想�
 
 PCDCNet采用以下训练策略：
 \begin{itemize}
-    \item \textbf{优化器}：Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{-4}$；
-    \item \textbf{学习率调度}：采用ReduceLROnPlateau策略，当验证集MAE连续10个epoch不下降时，学习率衰减为原来的0.5倍；
-    \item \textbf{早停机制}：当验证集MAE连续20个epoch不下降时，停止训练，防止过拟合；
-    \item \textbf{混合精度训练}：使用FP16混合精度训练，在保持数值稳定性的同时提升计算效率；
-    \item \textbf{批量大小}：32个样本/批次，每个样本包含完整的时间序列（历史+预测）。
+    \item 优化器：Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{-4}$；
+    \item 学习率调度：采用ReduceLROnPlateau策略，当验证集MAE连续10个epoch不下降时，学习率衰减为原来的0.5倍；
+    \item 早停机制：当验证集MAE连续20个epoch不下降时，停止训练，防止过拟合；
+    \item 混合精度训练：使用FP16混合精度训练，在保持数值稳定性的同时提升计算效率；
+    \item 批量大小：32个样本/批次，每个样本包含完整的时间序列（历史+预测）。
 \end{itemize}
 
 算法\ref{alg:algorithm}给出了PCDCNet的完整训练与推理流程。
@@ -594,15 +598,15 @@ PCDCNet采用以下训练策略：
 
 （1）数据集划分。本章实验使用两个数据集：
 
-\textbf{KnowAir-DS-V1}（2015-2018）：用于评估PM$_{2.5}$-GNN的\PM 单指标预测能力。数据按时间划分为三个子数据集，用于评估不同场景下的模型性能：
+KnowAir-DS-V1（2015-2018）：用于评估PM$_{2.5}$-GNN的\PM 单指标预测能力。数据按时间划分为三个子数据集，用于评估不同场景下的模型性能：
 
 \begin{itemize}
-    \item \textbf{全年评估（Dataset 1）}：训练集2015/1/1--2016/12/31，验证集2017年，测试集2018年，评估模型在一般场景下的预测能力；
-    \item \textbf{采暖季评估（Dataset 2）}：仅使用11月至次年2月的数据，评估模型在重污染高发期的预测能力；
-    \item \textbf{滚动预测（Dataset 3）}：训练集2016/9/1--2016/11/30，验证集2016/12，测试集2017/1，模拟在线系统的滚动预测场景。
+    \item 全年评估（Dataset 1）：训练集2015/1/1--2016/12/31，验证集2017年，测试集2018年，评估模型在一般场景下的预测能力；
+    \item 采暖季评估（Dataset 2）：仅使用11月至次年2月的数据，评估模型在重污染高发期的预测能力；
+    \item 滚动预测（Dataset 3）：训练集2016/9/1--2016/11/30，验证集2016/12，测试集2017/1，模拟在线系统的滚动预测场景。
 \end{itemize}
 
-\textbf{KnowAir-DS-V2}（2016-2023）：用于评估PCDCNet的多污染物预测能力。训练集2016-2019年，验证集2020-2021年，测试集2022-2023年。表\ref{tab:pm25gnn_dataset_split}汇总了数据集划分方案。
+KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。训练集2016-2019年，验证集2020-2021年，测试集2022-2023年。表\ref{tab:pm25gnn_dataset_split}汇总了数据集划分方案。
 
 \begin{table}[htbp]
     \centering
@@ -625,11 +629,11 @@ PCDCNet采用以下训练策略：
 （2）评价指标。采用以下指标评估模型性能\citep{evaluation}：
 
 \begin{itemize}
-    \item \textbf{RMSE}（均方根误差）：$\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$，对大误差敏感；
-    \item \textbf{MAE}（平均绝对误差）：$\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$，反映平均预测偏差；
-    \item \textbf{CSI}（临界成功指数）：$\text{CSI} = \frac{\text{hits}}{\text{hits} + \text{misses} + \text{false alarms}}$，综合评估预警能力；
-    \item \textbf{POD}（命中率）：$\text{POD} = \frac{\text{hits}}{\text{hits} + \text{misses}}$，反映污染事件的捕捉能力；
-    \item \textbf{FAR}（虚警率）：$\text{FAR} = \frac{\text{false alarms}}{\text{hits} + \text{false alarms}}$，反映误报情况。
+    \item RMSE（均方根误差）：$\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$，对大误差敏感；
+    \item MAE（平均绝对误差）：$\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$，反映平均预测偏差；
+    \item CSI（临界成功指数）：$\text{CSI} = \frac{\text{hits}}{\text{hits} + \text{misses} + \text{false alarms}}$，综合评估预警能力；
+    \item POD（命中率）：$\text{POD} = \frac{\text{hits}}{\text{hits} + \text{misses}}$，反映污染事件的捕捉能力；
+    \item FAR（虚警率）：$\text{FAR} = \frac{\text{false alarms}}{\text{hits} + \text{false alarms}}$，反映误报情况。
 \end{itemize}
 
 其中，CSI、POD、FAR的计算以75 $\mu$g/m$^3$为阈值（中国《环境空气质量标准》良好等级分界点\citep{evaluation}），将预测和观测二值化为\cqt{污染/非污染}后统计。
@@ -637,10 +641,10 @@ PCDCNet采用以下训练策略：
 （3）基线方法。将模型与以下方法进行对比：
 
 \begin{itemize}
-    \item \textbf{机器学习基线}：MLP、XGBoost\citep{chen2016xgboost}、LightGBM\citep{ke2017lightgbm}；
-    \item \textbf{通用时序模型}：LSTM\citep{hochreiter1997long}、GRU\citep{cho2014learning}、iTransformer\citep{liuitransformer}、TimeXer\citep{wang2024timexer}；
-    \item \textbf{空气质量专用模型}：GC-LSTM\citep{qi2019hybrid}、AirPhyNet\citep{hettigeairphynet}；
-    \item \textbf{消融变体}：nodesFC-GRU（用全连接层替代GNN的消融模型，用于验证图结构的必要性）。
+    \item 机器学习基线：MLP、XGBoost\citep{chen2016xgboost}、LightGBM\citep{ke2017lightgbm}；
+    \item 通用时序模型：LSTM\citep{hochreiter1997long}、GRU\citep{cho2014learning}、iTransformer\citep{liuitransformer}、TimeXer\citep{wang2024timexer}；
+    \item 空气质量专用模型：GC-LSTM\citep{qi2019hybrid}、AirPhyNet\citep{hettigeairphynet}；
+    \item 消融变体：nodesFC-GRU（用全连接层替代GNN的消融模型，用于验证图结构的必要性）。
 \end{itemize}
 
 表\ref{tab:methods_comparison_vertical}对比了各模型的原生能力特征。可以看到，PCDCNet是唯一同时具备时序建模、多变量预测、外源变量融合、空间建模和物理约束的方法，与数值模式CMAQ的能力对齐。
@@ -804,7 +808,7 @@ PCDCNet采用以下训练策略：
 
 （4）AirPhyNet性能较差的原因分析。AirPhyNet虽然引入了基于Neural ODE的物理约束，但其设计假设较强（仅使用风场和历史浓度），缺乏排放输入和多气象变量融合。在本文的多污染物、长时序预测任务中，AirPhyNet出现了严重的误差发散问题（\PM RMSE达50.49，\ozone RMSE达68.04）。
 
-\textbf{（5）XGBoost在\ozone 预测上的相对优势}。XGBoost在\ozone 预测上取得次优性能，这是因为它直接利用了排放数据和未来气象预报作为输入（表\ref{tab:methods_comparison_vertical}中的Exog能力）。然而，由于缺乏时序建模和空间建模能力，其\PM 预测性能较差。
+（5）XGBoost在\ozone 预测上的相对优势。XGBoost在\ozone 预测上取得次优性能，这是因为它直接利用了排放数据和未来气象预报作为输入（表\ref{tab:methods_comparison_vertical}中的Exog能力）。然而，由于缺乏时序建模和空间建模能力，其\PM 预测性能较差。
 
 图\ref{fig:leadtime}展示了不同预测时效下PCDCNet与基线模型的性能对比。
 
@@ -842,11 +846,11 @@ PCDCNet采用以下训练策略：
 
 消融实验的关键发现包括：
 
-\textbf{排放数据对\ozone 预测至关重要}：移除排放输入（w/o Emission）后，\ozone 的MAE上升约\textbf{15\%}，而\PM 的影响相对较小（上升约5\%）。这验证了排放清单对于捕捉二次污染物（\ozone）生成的关键作用——\ozone 的生成强烈依赖于前驱物\NOx 和VOC的排放量，而\PM 中有相当比例是一次排放，对排放变化的响应相对直接。
+排放数据对\ozone 预测至关重要：移除排放输入（w/o Emission）后，\ozone 的MAE上升约\textbf{15\%}，而\PM 的影响相对较小（上升约5\%）。这验证了排放清单对于捕捉二次污染物（\ozone）生成的关键作用——\ozone 的生成强烈依赖于前驱物\NOx 和VOC的排放量，而\PM 中有相当比例是一次排放，对排放变化的响应相对直接。
 
-\textbf{DIC约束提升长时序稳定性}：移除DIC约束（w/o DIC）后，模型在短时效（$<$24小时）的性能变化不大，但在72小时预测末期的误差显著增大。这证明物理约束的主要作用是抑制长时序预测中的误差累积，确保预测结果的物理合理性。
+DIC约束提升长时序稳定性：移除DIC约束（w/o DIC）后，模型在短时效（$<$24小时）的性能变化不大，但在72小时预测末期的误差显著增大。这证明物理约束的主要作用是抑制长时序预测中的误差累积，确保预测结果的物理合理性。
 
-\textbf{三个动力学模块缺一不可}：LID、STD、TAD分别对应化学生成、空间传输、时间累积三类物理过程，移除任一模块都会导致性能下降。其中，移除TAD模块的影响最大（\PM MAE上升约10\%），表明时序累积建模对于捕捉污染物浓度的演化趋势至关重要。
+三个动力学模块缺一不可：LID、STD、TAD分别对应化学生成、空间传输、时间累积三类物理过程，移除任一模块都会导致性能下降。其中，移除TAD模块的影响最大（\PM MAE上升约10\%），表明时序累积建模对于捕捉污染物浓度的演化趋势至关重要。
 
 （2）排放物种消融。进一步分析不同排放物种对预测性能的贡献。图\ref{fig:emis_ablation}展示了分别移除\NOx、VOC、SO$_2$等排放变量后的性能变化。
 
@@ -860,11 +864,11 @@ PCDCNet采用以下训练策略：
 
 排放物种消融的关键发现包括：
 
-\textbf{\NOx 和VOC是\ozone 预测的关键排放}：移除\NOx 后\ozone MAE上升约8\%，移除VOC后上升约6\%。这与\ozone 的光化学生成机理一致——\NOx 和VOC是\ozone 的两个主要前驱物。
+\NOx 和VOC是\ozone 预测的关键排放：移除\NOx 后\ozone MAE上升约8\%，移除VOC后上升约6\%。这与\ozone 的光化学生成机理一致——\NOx 和VOC是\ozone 的两个主要前驱物。
 
-\textbf{SO$_2$对\PM 预测贡献显著}：移除SO$_2$后\PM MAE上升约5\%，这是因为SO$_2$氧化生成的硫酸盐是\PM 的重要组分。
+SO$_2$对\PM 预测贡献显著：移除SO$_2$后\PM MAE上升约5\%，这是因为SO$_2$氧化生成的硫酸盐是\PM 的重要组分。
 
-\textbf{NH$_3$的影响相对较小}：移除NH$_3$后性能变化不大，可能是因为在当前模型分辨率下，氨盐生成的非线性过程难以被充分捕捉。
+NH$_3$的影响相对较小：移除NH$_3$后性能变化不大，可能是因为在当前模型分辨率下，氨盐生成的非线性过程难以被充分捕捉。
 
 （3）隐层维度敏感性分析。评估不同隐层维度$d$对模型性能和计算效率的影响。图\ref{fig:ablation_sensitivity}左图展示了隐层维度为16、32、64时的性能对比。
 
@@ -917,9 +921,9 @@ PCDCNet采用以下训练策略：
 （2）针对PM$_{2.5}$-GNN的局限性，提出了PCDCNet模型。作为数值模式CMAQ的深度学习代理模型，PCDCNet具备以下创新特征：
 
 \begin{itemize}
-    \item \textbf{排放响应建模}：将排放清单作为动态输入变量纳入模型框架，实现对排放变化的显式响应能力，为后续的情景模拟应用奠定基础；
-    \item \textbf{LID--STD--TAD三模块架构}：分别对应公式\eqref{eq:advection_diffusion}中的化学反应与排放项（R、E）、平流与扩散项、沉降项与时间累积（D），实现\cqt{过程解耦+联合建模}，增强了模型的物理可解释性；
-    \item \textbf{领域知识约束（DIC）}：将质量守恒原则嵌入损失函数，引导模型学习物理一致的传输模式，有效抑制长时序预测中的误差累积。
+    \item 排放响应建模：将排放清单作为动态输入变量纳入模型框架，实现对排放变化的显式响应能力，为后续的情景模拟应用奠定基础；
+    \item LID--STD--TAD三模块架构：分别对应公式\eqref{eq:advection_diffusion}中的化学反应与排放项（R、E）、平流与扩散项、沉降项与时间累积（D），实现\cqt{过程解耦+联合建模}，增强了模型的物理可解释性；
+    \item 领域知识约束（DIC）：将质量守恒原则嵌入损失函数，引导模型学习物理一致的传输模式，有效抑制长时序预测中的误差累积。
 \end{itemize}
 
 （3）验证了物理知识约束在深度学习中的有效性。系统的消融实验和约束效果分析表明：（a）在损失函数中引入质量守恒等物理约束，能显著提升模型的泛化能力和长时序稳定性；（b）排放数据对于\ozone 等二次污染物的预测至关重要；（c）DIC约束具有正则化效果，有助于缓解过拟合。
