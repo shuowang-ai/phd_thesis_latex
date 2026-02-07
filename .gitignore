@@ -9,3 +9,5 @@
 # IDE
 .vscode/
 *.synctex(busy)
+
+/thesis_final/figures/spin_components

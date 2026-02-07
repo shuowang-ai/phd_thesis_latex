@@ -1,0 +1,340 @@
+<mxfile host="app.diagrams.net" modified="2026-02-07T00:00:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram name="SPIN Architecture" id="spin_arch">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="1" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ============================================ -->
+        <!-- STAGE BACKGROUND REGIONS                     -->
+        <!-- ============================================ -->
+
+        <!-- Stage 1 background -->
+        <mxCell id="stage1_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=30;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="30" width="160" height="680" as="geometry"/>
+        </mxCell>
+        <!-- Stage 1 label -->
+        <mxCell id="stage1_label" value="&lt;b&gt;Stage I&lt;/b&gt;&lt;br&gt;Dynamic Node&lt;br&gt;Masking" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#7F6000;" vertex="1" parent="1">
+          <mxGeometry x="355" y="40" width="130" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Stage 2 background -->
+        <mxCell id="stage2_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=30;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="540" y="30" width="260" height="680" as="geometry"/>
+        </mxCell>
+        <!-- Stage 2 label -->
+        <mxCell id="stage2_label" value="&lt;b&gt;Stage II&lt;/b&gt;&lt;br&gt;Local Physical&lt;br&gt;Feature Encoding" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#2D7600;" vertex="1" parent="1">
+          <mxGeometry x="595" y="40" width="130" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Stage 3 background -->
+        <mxCell id="stage3_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=30;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="840" y="30" width="300" height="680" as="geometry"/>
+        </mxCell>
+        <!-- Stage 3 label -->
+        <mxCell id="stage3_label" value="&lt;b&gt;Stage III&lt;/b&gt;&lt;br&gt;Physics-Inspired&lt;br&gt;Dual Graph Propagation" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#0050EF;" vertex="1" parent="1">
+          <mxGeometry x="885" y="40" width="170" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Stage 4 background -->
+        <mxCell id="stage4_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;opacity=30;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1430" y="30" width="260" height="680" as="geometry"/>
+        </mxCell>
+        <!-- Stage 4 label -->
+        <mxCell id="stage4_label" value="&lt;b&gt;Stage IV&lt;/b&gt;&lt;br&gt;Multi-level Loss&lt;br&gt;&amp; AOD Fusion" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#AE4132;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="40" width="130" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- ADVECTION-DIFFUSION EQUATION (top)           -->
+        <!-- ============================================ -->
+        <mxCell id="pde_eq" value="$$\frac{\partial C_i}{\partial t} = \underbrace{u\frac{\partial C_i}{\partial x} + v\frac{\partial C_i}{\partial y}}_{\text{Advection}} + \underbrace{\frac{\partial}{\partial x}(k\frac{\partial C_i}{\partial x}) + \frac{\partial}{\partial y}(k\frac{\partial C_i}{\partial y})}_{\text{Diffusion}} + R + D + S$$" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#666666;fillColor=#f5f5f5;fontSize=10;fontColor=#333333;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="100" width="560" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- INPUT BLOCKS (left side)                     -->
+        <!-- ============================================ -->
+
+        <!-- Meteorology input -->
+        <mxCell id="input_met" value="&lt;b&gt;Meteorology&lt;/b&gt;&lt;br&gt;$$\mathbf{M}^{F}_{t-T&#39;+1:t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#666&quot;&gt;Wind, Temp, RH,&lt;br&gt;BLH, Precip, Rad, SP&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9800;fontColor=#FFFFFF;strokeColor=#C67600;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="30" y="150" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <!-- Meteorology icon placeholder -->
+        <mxCell id="met_icon" value="[Heatmap]" style="text;html=1;align=center;verticalAlign=middle;fillColor=#FFE0B2;strokeColor=#FF9800;rounded=1;fontSize=9;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="210" y="165" width="70" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Emission input -->
+        <mxCell id="input_emis" value="&lt;b&gt;Emission&lt;/b&gt;&lt;br&gt;$$\mathbf{E}^{F}_{t-T&#39;+1:t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#666&quot;&gt;NO&lt;sub&gt;x&lt;/sub&gt;, VOC, SO&lt;sub&gt;2&lt;/sub&gt;,&lt;br&gt;PM&lt;sub&gt;2.5&lt;/sub&gt;, PM&lt;sub&gt;10&lt;/sub&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E53935;fontColor=#FFFFFF;strokeColor=#B71C1C;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="30" y="280" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <!-- Emission icon placeholder -->
+        <mxCell id="emis_icon" value="[Heatmap]" style="text;html=1;align=center;verticalAlign=middle;fillColor=#FFCDD2;strokeColor=#E53935;rounded=1;fontSize=9;fontColor=#B71C1C;" vertex="1" parent="1">
+          <mxGeometry x="210" y="295" width="70" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Air Quality Observation input -->
+        <mxCell id="input_obs" value="&lt;b&gt;Air Quality&lt;/b&gt;&lt;br&gt;$$\mathbf{X}^{\text{obs}}_{t-T&#39;+1:t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#666&quot;&gt;PM&lt;sub&gt;2.5&lt;/sub&gt; on&lt;br&gt;Monitoring Stations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#0D47A1;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="30" y="410" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <!-- Obs icon placeholder -->
+        <mxCell id="obs_icon" value="[Time Series]" style="text;html=1;align=center;verticalAlign=middle;fillColor=#BBDEFB;strokeColor=#1565C0;rounded=1;fontSize=9;fontColor=#0D47A1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="425" width="70" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Remote Sensing AOD input -->
+        <mxCell id="input_aod" value="&lt;b&gt;Remote Sensing&lt;/b&gt;&lt;br&gt;$$\mathbf{X}^{\text{AOD}}_{t-T&#39;+1:t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#666&quot;&gt;Himawari-8 AOD&lt;br&gt;(with missing)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#1B5E20;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="30" y="540" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <!-- AOD icon placeholder -->
+        <mxCell id="aod_icon" value="[AOD Map&lt;br&gt;+ Missing]" style="text;html=1;align=center;verticalAlign=middle;fillColor=#C8E6C9;strokeColor=#2E7D32;rounded=1;fontSize=9;fontColor=#1B5E20;" vertex="1" parent="1">
+          <mxGeometry x="210" y="555" width="70" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- STAGE 1: Dynamic Node Masking                -->
+        <!-- ============================================ -->
+        <mxCell id="node_mask" value="&lt;b&gt;Station&lt;br&gt;Mask&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Random split&lt;br&gt;$$\mathcal{V}_{\text{obs}} / \mathcal{V}_{\text{target}}$$&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F9A825;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="365" y="260" width="120" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Graph structure -->
+        <mxCell id="graph_struct" value="&lt;b&gt;Graph $$\mathcal{G}$$&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;[Map Image]&lt;br&gt;Observation &amp;bull;&lt;br&gt;Target &amp;#9675;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#5C6BC0;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="365" y="410" width="120" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- STAGE 2: TCN Feature Encoding                -->
+        <!-- ============================================ -->
+
+        <!-- Concat + TCN -->
+        <mxCell id="concat_box" value="&lt;b&gt;Concat&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;[M, E] per node&lt;br&gt;Feature &amp;times; Time&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#43A047;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="200" width="110" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="tcn_box" value="&lt;b&gt;Temporal Convolutional&lt;br&gt;Network (TCN)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Dilated convolution&lt;br&gt;Extract temporal features&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;shadow=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="570" y="310" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="init_repr" value="&lt;b&gt;Initial Feature&lt;br&gt;Representation&lt;/b&gt;&lt;br&gt;$$\mathbf{H}^{(0)}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;(Initial Proposal)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;shadow=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="600" y="430" width="150" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- STAGE 3: Dual Graph ST-GNN                   -->
+        <!-- ============================================ -->
+
+        <!-- ST-GNN main block -->
+        <mxCell id="stgnn_box" value="&lt;b&gt;Spatio-Temporal Graph&lt;br&gt;Neural Network (ST-GNN)&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Multi-layer graph convolution&lt;br&gt;+ Air quality data fusion&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90CAF9;strokeColor=#1976D2;shadow=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="870" y="200" width="240" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Diffusion Kernel -->
+        <mxCell id="diff_kernel" value="&lt;font color=&quot;#1565C0&quot;&gt;&lt;b&gt;Diffusion Kernel&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Isotropic&lt;br&gt;$$\tilde{A}^{\mathcal{D}}$$&lt;br&gt;Distance-based&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="370" width="110" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Advection Kernel -->
+        <mxCell id="adv_kernel" value="&lt;font color=&quot;#C62828&quot;&gt;&lt;b&gt;Advection Kernel&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Anisotropic&lt;br&gt;$$\tilde{A}^{\mathcal{A}}$$&lt;br&gt;Wind-driven&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="370" width="110" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Kernel connection arrows -->
+        <mxCell id="kern_to_gnn1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1976D2;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="diff_kernel" target="stgnn_box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="kern_to_gnn2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="adv_kernel" target="stgnn_box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Distance label between kernels -->
+        <mxCell id="dist_label" value="&lt;font style=&quot;font-size:9px;&quot;&gt;For each node pair:&lt;br&gt;&lt;b&gt;Distance&lt;/b&gt; + &lt;b&gt;Wind&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="910" y="465" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- OUTPUT BRANCHES                              -->
+        <!-- ============================================ -->
+
+        <!-- Problem 1: Station Inference Output -->
+        <mxCell id="output_station_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="150" width="190" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_station_title" value="&lt;font color=&quot;#0D47A1&quot;&gt;&lt;b&gt;Problem 1&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="155" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_station" value="&lt;b&gt;Station Inference&lt;/b&gt;&lt;br&gt;$$\hat{\mathbf{X}}^{\text{target}}_{t-T&#39;+1:t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;[Time Series Curve]&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="185" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Problem 2: Grid Inference Output -->
+        <mxCell id="output_grid_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="330" width="190" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_grid_title" value="&lt;font color=&quot;#BF360C&quot;&gt;&lt;b&gt;Problem 2&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="335" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_grid" value="&lt;b&gt;Grid Inference&lt;/b&gt;&lt;br&gt;$$\hat{\mathbf{X}}^{F}_{t}$$&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;[Spatial Heatmap]&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="365" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Output label -->
+        <mxCell id="output_label_1" value="&lt;b&gt;Output&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="200" width="55" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="output_label_2" value="&lt;b&gt;Output&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="385" width="55" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- STAGE 4: Loss + AOD Fusion                   -->
+        <!-- ============================================ -->
+
+        <!-- Ground Truth -->
+        <mxCell id="ground_truth" value="&lt;b&gt;Ground Truth&lt;/b&gt;&lt;br&gt;$$\mathbf{X}^{\text{obs}}$$" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#8E24AA;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="110" width="120" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Station Loss -->
+        <mxCell id="loss_station" value="&lt;font color=&quot;#d32f2f&quot;&gt;&lt;b&gt;Loss&lt;/b&gt;&lt;/font&gt;&lt;br&gt;$$\mathcal{L}_{\text{infer}} + \lambda_1 \mathcal{L}_{\text{init}}$$" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;shadow=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="200" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Grid Loss (with AOD) -->
+        <mxCell id="loss_grid" value="&lt;font color=&quot;#d32f2f&quot;&gt;&lt;b&gt;Loss&lt;/b&gt;&lt;/font&gt;&lt;br&gt;$$\mathcal{L}_{\text{infer}} + \lambda_1 \mathcal{L}_{\text{init}}$$&lt;br&gt;$$+ \lambda_2 \mathcal{L}_{\text{AOD}}$$" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#D32F2F;shadow=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="340" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- AOD input to loss -->
+        <mxCell id="aod_to_loss" value="&lt;b&gt;AOD Gradient&lt;br&gt;Constraint&lt;/b&gt;&lt;br&gt;$$\nabla(\mathbf{X}^{\text{AOD}})$$&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Masked by $$\boldsymbol{\omega}^{\text{AOD}}$$&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="470" width="140" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Grid-only annotation -->
+        <mxCell id="grid_only_label" value="&lt;font style=&quot;font-size:9px;color:#AE4132;&quot;&gt;&lt;i&gt;Grid Inference Only&lt;/i&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1465" y="425" width="120" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- ARROWS: Input to Stage 1                     -->
+        <!-- ============================================ -->
+        <mxCell id="arr_met_to_mask" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF9800;strokeWidth=2;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="1" source="met_icon" target="node_mask">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr_emis_to_mask" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E53935;strokeWidth=2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="emis_icon" target="node_mask">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arr_obs_to_mask" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=2;entryX=0;entryY=0.7;entryDx=0;entryDy=0;" edge="1" parent="1" source="obs_icon" target="node_mask">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Stage 1 to Stage 2 -->
+        <mxCell id="arr_mask_to_concat" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="node_mask" target="concat_box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Concat to TCN -->
+        <mxCell id="arr_concat_to_tcn" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="concat_box" target="tcn_box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: TCN to Init Repr -->
+        <mxCell id="arr_tcn_to_init" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="tcn_box" target="init_repr">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Init Repr to ST-GNN -->
+        <mxCell id="arr_init_to_gnn" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="init_repr" target="stgnn_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="830" y="470"/>
+              <mxPoint x="830" y="260"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow: Obs data to ST-GNN (direct air quality fusion) -->
+        <mxCell id="arr_obs_to_gnn" value="&lt;font style=&quot;font-size:8px;&quot;&gt;Air quality data&lt;br&gt;of observed nodes&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="graph_struct" target="stgnn_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="460"/>
+              <mxPoint x="530" y="530"/>
+              <mxPoint x="850" y="530"/>
+              <mxPoint x="850" y="260"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow: ST-GNN to Station Output -->
+        <mxCell id="arr_gnn_to_station" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=2.5;" edge="1" parent="1" source="stgnn_box" target="output_station">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: ST-GNN to Grid Output -->
+        <mxCell id="arr_gnn_to_grid" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E65100;strokeWidth=2.5;" edge="1" parent="1" source="stgnn_box" target="output_grid">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="260"/>
+              <mxPoint x="1170" y="405"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow: Station Output to Station Loss -->
+        <mxCell id="arr_sta_to_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#D32F2F;strokeWidth=2;" edge="1" parent="1" source="output_station" target="loss_station">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Grid Output to Grid Loss -->
+        <mxCell id="arr_grid_to_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#D32F2F;strokeWidth=2;" edge="1" parent="1" source="output_grid" target="loss_grid">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Ground Truth to Station Loss -->
+        <mxCell id="arr_gt_to_sta_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#8E24AA;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="ground_truth" target="loss_station">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: Ground Truth to Grid Loss -->
+        <mxCell id="arr_gt_to_grid_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#8E24AA;strokeWidth=1.5;dashed=1;" edge="1" parent="1" source="ground_truth" target="loss_grid">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1630" y="138"/>
+              <mxPoint x="1630" y="380"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Arrow: AOD to Grid Loss -->
+        <mxCell id="arr_aod_to_grid_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2;" edge="1" parent="1" source="aod_to_loss" target="loss_grid">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow: AOD input direct to AOD loss (long path from left) -->
+        <mxCell id="arr_aod_input_to_loss" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=1.5;dashed=1;dashPattern=8 4;" edge="1" parent="1" source="input_aod" target="aod_to_loss">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="585"/>
+              <mxPoint x="20" y="700"/>
+              <mxPoint x="1530" y="700"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================ -->
+        <!-- MODEL LABEL                                  -->
+        <!-- ============================================ -->
+        <mxCell id="model_label" value="&lt;font style=&quot;font-size:14px;&quot;&gt;$$\mathcal{F}_{\Theta}$$&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fillColor=#E8EAF6;strokeColor=#3F51B5;rounded=1;fontSize=14;fontStyle=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="905" y="500" width="60" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Shared annotation -->
+        <mxCell id="shared_note" value="&lt;font style=&quot;font-size:9px;&quot;&gt;&lt;i&gt;Stages I-III: shared by both problems&lt;br&gt;Stage IV: Grid Inference only (AOD gradient loss)&lt;/i&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#666;fillColor=#F5F5F5;rounded=1;fontSize=9;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="490" y="640" width="260" height="45" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
