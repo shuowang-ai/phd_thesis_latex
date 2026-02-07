@@ -74,6 +74,8 @@
 
 本章选取京津冀及周边地区（简称\cqt{2+26}城市）作为研究区域，涵盖北京、天津及周边26个城市，共计28个主要城市。该区域自1980年代以来经历了快速城市化进程\citep{bai2014society}，工业生产和能源消费量巨大，自2010年以来频繁遭受严重的大气污染事件，尤其是冬季\citep{an2019severe}。选择该区域的理由包括：（1）该区域是中国大气污染防治的重点区域，具有典型性和代表性；（2）监测网络密集，数据质量较高；（3）区域内城市间存在显著的污染物传输关系，适合图神经网络建模。
 
+值得说明的是，本章的图网络构建粒度与前述章节存在显著差异。第\ref{chap:prediction}章（PCDCNet）以中东部184个城市或京津冀--长三角327个监测站点为节点构建大尺度预测网络；第\ref{chap:inference}章（SPIN）虽然也聚焦于京津冀及周边的\cqt{2+26}城市区域（图\ref{fig:study_area}(a)展示了该区域的城市分布），但其图节点为该经纬度范围内全部152个国控监测站点，用于站点级和网格级的空间推断。与之不同，本章以28个城市作为图节点，将各城市内多个站点的观测数据聚合为城市级均值，构建城市尺度的时空图网络。采用城市级粒度的原因在于：情景模拟任务的核心驱动变量——排放清单（MEIC/DPEC）——本身以城市或区县为统计单元编制，城市级建模能够与排放数据的空间分辨率自然对齐，确保排放变化信号被模型有效接收和响应。
+
 图\ref{fig:bthsa_network}展示了研究区域内28个城市的空间分布及其网络连接结构。网络的构建基于城市间的空间邻近性，距离阈值设为200 km。
 
 \begin{figure}[htbp]
@@ -210,11 +212,7 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
 
 IGNN模型采用两阶段范式实现从历史学习到未来模拟的知识迁移。如图\ref{fig:simulation_problem}所示，该范式的核心是建立从驱动数据（气象$\mathbf{M}$、排放$\mathbf{E}$）到响应变量（污染物浓度$\mathbf{X}$）的映射关系$\mathcal{F}_\Theta$。训练阶段利用历史观测数据学习这一映射，推理阶段将学习到的映射应用于未来情景数据，生成不同减排策略下的空气质量模拟结果。
 
-训练阶段（$t \in \mathcal{T}_{\text{hist}}$）。训练阶段的目标是从历史数据中学习排放-气象-浓度之间的非线性响应关系。如图\ref{fig:simulation_problem}上半部分所示，模型的输入为长度$T'$的时间窗口内的历史驱动数据：
-\begin{itemize}
-    \item 气象驱动$\mathbf{M}^{\text{hist}}_{t-T'+1:t}$：来自ERA5再分析资料（2014-2020年），涵盖温度、风速、风向、降水、辐射、湿度、气压等7个变量；
-    \item 排放驱动$\mathbf{E}^{\text{hist}}_{t-T'+1:t}$：来自MEIC清单（2014-2020年），涵盖\PM、PM$_{10}$、SO$_2$、\NOx、VOC等5个物种的排放强度。
-\end{itemize}
+\textbf{训练阶段}（$t \in \mathcal{T}_{\text{hist}}$）。训练阶段的目标是从历史数据中学习排放-气象-浓度之间的非线性响应关系。如图\ref{fig:simulation_problem}上半部分所示，模型的输入为长度$T'$的时间窗口内的历史气象驱动$\mathbf{M}^{\text{hist}}_{t-T'+1:t}$和排放驱动$\mathbf{E}^{\text{hist}}_{t-T'+1:t}$（数据来源与变量定义详见第\ref{subsec:historical_data}节）。
 
 模型的监督信号$\mathbf{X}^{\text{hist}}_{t}$来自CNEMC国家监测站点的实测浓度数据。训练过程中，时间索引$t$遍历整个历史时段$\mathcal{T}_{\text{hist}}$（2014-2020年的每一个3小时时间步）。对于每个$t$，模型接收其前$T'$个时间步的气象和排放数据$(\mathbf{M}^{\text{hist}}_{t-T'+1:t}, \mathbf{E}^{\text{hist}}_{t-T'+1:t})$作为输入，经由图神经网络$\mathcal{F}_\Theta$处理后，输出该时刻的\PM 和\ozone 浓度预测$\hat{\mathbf{X}}^{\text{hist}}_t$，并与真实观测$\mathbf{X}^{\text{hist}}_t$计算损失进行梯度更新。
 
@@ -225,11 +223,7 @@ IGNN模型采用两阶段范式实现从历史学习到未来模拟的知识迁�
 \end{equation}
 \noindent 式中$\mathcal{T}_{\text{hist}}$为历史训练时段（2014-2020年），$\mathcal{L}$为均方误差损失函数，$\mathcal{G}$为图\ref{fig:simulation_problem}所示的城市网络结构。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，IGNN采用纯监督损失而未引入显式物理约束项，原因在于：（1）长期模拟的关键挑战是误差累积而非单步物理一致性，而非自回归架构已从根本上解决了这一问题；（2）模型通过大量历史数据隐式学习了公式\eqref{eq:advection_diffusion}所描述的物理响应关系；（3）城市级别的空间聚合平滑了局部物理约束的必要性。通过这种窗口到点的映射方式，模型学习到了在给定气象条件和排放强度下，大气系统如何响应并产生特定的污染物浓度。
 
-推理阶段（$t \in \mathcal{T}_{\text{future}}$）。推理阶段的目标是将训练好的模型迁移至未来情景，生成2025-2050年的空气质量模拟结果。如图\ref{fig:simulation_problem}下半部分所示，模型结构$\mathcal{F}$和参数$\Theta^*$保持固定（图中雪花图标表示参数冻结），仅将输入数据替换为未来情景驱动：
-\begin{itemize}
-    \item 气象驱动$\mathbf{M}^{\text{future}}_{t-T'+1:t}$：来自CMIP6气候模式的RCP8.5高排放情景输出（CAS FGOALS-f3-L模型，2025-2050年）；
-    \item 排放驱动$\mathbf{E}^{\text{future}}_{t-T'+1:t}$：来自DPEC模型的六种减排策略（从Baseline到1.5°C目标，2025-2050年）。
-\end{itemize}
+\textbf{推理阶段}（$t \in \mathcal{T}_{\text{future}}$）。推理阶段的目标是将训练好的模型迁移至未来情景，生成2025-2050年的空气质量模拟结果。如图\ref{fig:simulation_problem}下半部分所示，模型结构$\mathcal{F}$和参数$\Theta^*$保持固定（图中雪花图标表示参数冻结），仅将输入数据替换为未来气象驱动$\mathbf{M}^{\text{future}}_{t-T'+1:t}$和排放驱动$\mathbf{E}^{\text{future}}_{t-T'+1:t}$（数据来源与情景设置详见第\ref{subsec:future_data}节）。
 
 推理过程中，时间索引$t$遍历整个未来时段$\mathcal{T}_{\text{future}}$（2025-2050年的每一个3小时时间步）。对于每个$t$，模型独立计算该时刻的浓度输出$\hat{\mathbf{X}}^{\text{future}}_t$：
 \begin{equation}
@@ -368,12 +362,12 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
         \cmidrule(lr){2-4} \cmidrule(lr){5-7}
         \textbf{排放策略} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} & \textbf{斜率} & \textbf{截距} & \textbf{AAC} \\
         \midrule
-        Baseline      & \textbf{$-1.44$} & 53.87 & $-0.14$ & \textbf{$-0.49$} & 61.96 & $-0.05$ \\
-        Current Goals & \textbf{$-2.98$} & 38.90 & $-0.29$ & \textbf{0.69} & 67.88 & 0.07 \\
-        NDC Goals     & \textbf{$-2.89$} & 37.92 & $-0.29$ & \textbf{1.04} & 68.39 & 0.10 \\
-        2D Goals      & \textbf{$-3.54$} & 32.65 & $-0.35$ & \textbf{1.86} & 71.34 & 0.19 \\
-        Neutral Goals & \textbf{$-3.67$} & 31.83 & $-0.37$ & \textbf{2.07} & 71.81 & 0.21 \\
-        1.5D Goals    & \textbf{$-3.41$} & 29.81 & $-0.34$ & \textbf{2.22} & 72.43 & 0.22 \\
+        Baseline（基准） & \textbf{$-1.44$} & 53.87 & $-0.14$ & \textbf{$-0.49$} & 61.96 & $-0.05$ \\
+        Current Goals（当前目标） & \textbf{$-2.98$} & 38.90 & $-0.29$ & \textbf{0.69} & 67.88 & 0.07 \\
+        NDC Goals（NDC目标） & \textbf{$-2.89$} & 37.92 & $-0.29$ & \textbf{1.04} & 68.39 & 0.10 \\
+        2D Goals（2°C目标） & \textbf{$-3.54$} & 32.65 & $-0.35$ & \textbf{1.86} & 71.34 & 0.19 \\
+        Neutral Goals（碳中和） & \textbf{$-3.67$} & 31.83 & $-0.37$ & \textbf{2.07} & 71.81 & 0.21 \\
+        1.5D Goals（1.5°C目标） & \textbf{$-3.41$} & 29.81 & $-0.34$ & \textbf{2.22} & 72.43 & 0.22 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -450,12 +444,12 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
         \toprule
         \textbf{排放策略} & \textbf{PM$_{2.5}$重污染日 AAC} & \textbf{O$_3$重污染日 AAC} \\
         \midrule
-        Baseline      & $-0.54$ & $-0.24$ \\
-        Current Goals & $-0.66$ & $0.12$ \\
-        NDC Goals     & $-0.62$ & $0.04$ \\
-        2D Goals      & $-0.58$ & $0.76$ \\
-        Neutral Goals & $-0.48$ & $0.86$ \\
-        1.5D Goals    & $-0.32$ & $0.88$ \\
+        Baseline（基准） & $-0.54$ & $-0.24$ \\
+        Current Goals（当前目标） & $-0.66$ & $0.12$ \\
+        NDC Goals（NDC目标） & $-0.62$ & $0.04$ \\
+        2D Goals（2°C目标） & $-0.58$ & $0.76$ \\
+        Neutral Goals（碳中和） & $-0.48$ & $0.86$ \\
+        1.5D Goals（1.5°C目标） & $-0.32$ & $0.88$ \\
         \bottomrule
     \end{tabular}
 \end{table}
