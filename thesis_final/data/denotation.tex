@@ -14,9 +14,10 @@
 
 % 2. 图结构与时空参数
 \item[\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)] 图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}\) 为基于风场或距离构建的边集。
-\item[\(\mathcal{G}^{\text{s}}, \mathcal{G}^{\text{g}}\)] 站点图与网格图（第\ref{chap:inference}章）。$\mathcal{G}^{\text{s}}$以$N^{\text{s}}$个监测站点为节点，$\mathcal{G}^{\text{g}}$以$N^{\text{g}}$个$0.25^{\circ}$网格像素为节点，两者共享相同的图核构建方法与神经网络参数，但所得邻接矩阵维度不同。
+\item[\(\mathcal{G}^{\text{s}}, \mathcal{G}^{\text{g}}\)] 站点图与网格图（第\ref{chap:inference}章）。$\mathcal{G}^{\text{s}}$以$N^{\text{s}}$个监测站点为节点，$\mathcal{G}^{\text{g}}$以$N^{\text{g}}$个$0.25^{\circ}$网格像素为节点，两者采用相同的模型架构与图核构建方法，但各自独立训练，所得邻接矩阵维度不同。
 \item[\(N^{\text{s}}, N^{\text{g}}\)] 站点图与网格图的节点数（第\ref{chap:inference}章）。$N^{\text{s}} = |\mathcal{V}^{\text{s}}|$为监测站点数，$N^{\text{g}} = |\mathcal{V}^{\text{g}}|$为网格像素数。
 \item[\(\mathbf{A}, \tilde{\mathbf{A}}\)] 图邻接矩阵与归一化后的邻接矩阵。
+\item[\(A^{\text{s}}, A^{\text{g}}\)] 站点图与网格图的基础邻接矩阵（第\ref{chap:inference}章），基于节点间测地距离$d_{ij}$按高斯核构建，$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，$A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。
 \item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$与归一化拉普拉斯矩阵。
 \item[\(K\)] 大气扩散系数，用于对流-扩散方程的扩散项。
 \item[\(t=0\)] 起报时刻，\(t \leq 0\) 为历史时刻，\(t>0\) 为未来预测时刻。
