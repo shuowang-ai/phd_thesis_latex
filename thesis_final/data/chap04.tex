@@ -257,12 +257,12 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 
 对于观测节点$v \in \mathcal{V}_{\text{obs}}$，将观测值$X_v$与时序表征拼接：
 \begin{equation}
-h_v^{(0)} = [h_v^{\text{temp}}, X_v] \in \mathbb{R}^{d_h+1}
+\mathbf{h}_v^{(0)} = [\mathbf{h}_v^{\text{temp}}, X_v] \in \mathbb{R}^{d_h+1}
 \label{eq:obs_init}
 \end{equation}
 \noindent 对于目标节点$v \in \mathcal{V}_{\text{target}}$，仅使用时序表征作为初始化：
 \begin{equation}
-h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
+\mathbf{h}_v^{(0)} = [\mathbf{h}_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
 \label{eq:target_init}
 \end{equation}
 
@@ -272,7 +272,7 @@ h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
 \subsection{阶段三：物理启发的双图空间传播}
 \label{subsec:stage3_propagation}
 
-经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段在第\ref{subsec:spin_graph}节构建的基础图结构上，进一步定义两类具有不同物理意义的传播核——扩散核与平流核，分别对应大气污染物传输的两种基本机制（各向同性扩散与各向异性平流），从而在图神经网络中显式建模对流--扩散方程（公式\ref{eq:advection_diffusion}）的物理过程。两个子任务$\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}$与$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$采用相同的核\textbf{构建方法}和\textbf{网络层设计}（包括传播权重$W^{\mathcal{D}}$、$W^{\mathcal{A}}$和门控参数$W_g$的结构），但各自独立训练，参数不共享；由于节点集合不同，所得核矩阵维度分别为$N^{\text{s}} \times N^{\text{s}}$和$N^{\text{g}} \times N^{\text{g}}$。
+经过阶段二的编码后，观测节点携带真实的污染信息，而目标节点（站点或网格像素）仅携带环境背景信息。本阶段在第\ref{subsec:spin_graph}节构建的基础图结构上，进一步定义两类具有不同物理意义的传播核——扩散核与平流核，分别对应大气污染物传输的两种基本机制（各向同性扩散与各向异性平流），从而在图神经网络中显式建模对流--扩散方程（公式\ref{eq:advection_diffusion}）的物理过程。两个子任务$\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}$与$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$采用相同的核\textbf{构建方法}和\textbf{网络层设计}（包括传播权重$\mathbf{W}^{\mathcal{D}}$、$\mathbf{W}^{\mathcal{A}}$和门控参数$\mathbf{W}_g$的结构），但各自独立训练，参数不共享；由于节点集合不同，所得核矩阵维度分别为$N^{\text{s}} \times N^{\text{s}}$和$N^{\text{g}} \times N^{\text{g}}$。
 
 
 \subsubsection{扩散核}
@@ -317,41 +317,41 @@ h_v^{(0)} = [h_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
 
 \subsubsection{双流传播层}
 
-基于上述扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$，我们设计了双流时空图神经网络层。对于节点$v$的特征表示$h_v$，双图传播的更新规则为：
+基于上述扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$，我们设计了双流时空图神经网络层。对于节点$v$的特征表示$\mathbf{h}_v$，双图传播的更新规则为：
 
 扩散传播（各向同性，无方向性）：
 \begin{equation}
-m_v^{\mathcal{D}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{D}} \cdot W^{\mathcal{D}} h_u^{(l)}
+\mathbf{m}_v^{\mathcal{D}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{D}} \cdot \mathbf{W}^{\mathcal{D}} \mathbf{h}_u^{(l)}
 \label{eq:diffusion_message}
 \end{equation}
 
 平流传播（各向异性，沿风向）：
 \begin{equation}
-m_v^{\mathcal{A}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{A}} \cdot W^{\mathcal{A}} h_u^{(l)}
+\mathbf{m}_v^{\mathcal{A}} = \sum_{u \in \mathcal{N}(v)} \tilde{A}_{uv}^{\mathcal{A}} \cdot \mathbf{W}^{\mathcal{A}} \mathbf{h}_u^{(l)}
 \label{eq:advection_message}
 \end{equation}
-\noindent 式中$W^{\mathcal{D}}, W^{\mathcal{A}} \in \mathbb{R}^{d_h \times d_h}$为可学习的权重矩阵，$l$为层索引。
+\noindent 式中$\mathbf{W}^{\mathcal{D}}, \mathbf{W}^{\mathcal{A}} \in \mathbb{R}^{d_h \times d_h}$为可学习的权重矩阵，$l$为层索引。
 
 两类消息通过门控机制融合，允许模型自适应平衡扩散和平流的相对贡献：
 \begin{equation}
-g_v = \sigma\left(W_g [m_v^{\mathcal{D}}, m_v^{\mathcal{A}}] + b_g\right)
+\mathbf{g}_v = \sigma\left(\mathbf{W}_g [\mathbf{m}_v^{\mathcal{D}}, \mathbf{m}_v^{\mathcal{A}}] + \mathbf{b}_g\right)
 \label{eq:gate_weight}
 \end{equation}
 \begin{equation}
-m_v = g_v \odot m_v^{\mathcal{D}} + (1 - g_v) \odot m_v^{\mathcal{A}}
+\mathbf{m}_v = \mathbf{g}_v \odot \mathbf{m}_v^{\mathcal{D}} + (1 - \mathbf{g}_v) \odot \mathbf{m}_v^{\mathcal{A}}
 \label{eq:gate_fusion}
 \end{equation}
-\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$W_g \in \mathbb{R}^{d_h \times 2d_h}$为门控权重。具体而言，$g_v \in \mathbb{R}^{d_h}$为门控权重向量（对应算法\ref{alg:spin}第15行的$\mathbf{G}$），其每个分量取值于$[0,1]$，逐维度控制扩散消息与平流消息的混合比例；$m_v \in \mathbb{R}^{d_h}$为融合后的空间消息（对应算法\ref{alg:spin}第16行的$\Delta\mathbf{H}$），综合了来自两类图结构的邻域信息，随后通过残差连接注入节点表示。
+\noindent 式中$\sigma$为Sigmoid函数，$\odot$为逐元素乘法，$\mathbf{W}_g \in \mathbb{R}^{d_h \times 2d_h}$为门控权重。具体而言，$\mathbf{g}_v \in \mathbb{R}^{d_h}$为门控权重向量（对应算法\ref{alg:spin}第15行的$\mathbf{G}$），其每个分量取值于$[0,1]$，逐维度控制扩散消息与平流消息的混合比例；$\mathbf{m}_v \in \mathbb{R}^{d_h}$为融合后的空间消息（对应算法\ref{alg:spin}第16行的$\Delta\mathbf{H}$），综合了来自两类图结构的邻域信息，随后通过残差连接注入节点表示。
 
-门控机制的物理意义在于：在静风条件下，扩散过程主导污染物的空间分布，模型应侧重扩散核（$g_v \to 1$）；在强风条件下，平流输送成为主导机制，模型应侧重平流核（$g_v \to 0$）。这种自适应的权重分配使得模型能够根据局地气象条件动态调整传播策略。
+门控机制的物理意义在于：在静风条件下，扩散过程主导污染物的空间分布，模型应侧重扩散核（$\mathbf{g}_v \to 1$）；在强风条件下，平流输送成为主导机制，模型应侧重平流核（$\mathbf{g}_v \to 0$）。这种自适应的权重分配使得模型能够根据局地气象条件动态调整传播策略。
 
-融合消息$m_v$通过残差连接更新节点特征（对应算法\ref{alg:spin}第17行）：
+融合消息$\mathbf{m}_v$通过残差连接更新节点特征（对应算法\ref{alg:spin}第17行）：
 \begin{equation}
-h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
+\mathbf{h}_v^{(l+1)} = \text{ReLU}\left(\mathbf{h}_v^{(l)} + \mathbf{m}_v\right)
 \label{eq:residual_update}
 \end{equation}
 
-\noindent 残差连接确保了信息的有效传递和梯度的稳定流动，同时允许模型在必要时\cqt{跳过}某些传播层，直接利用初始特征。经过$L$层传播后，每个节点的最终表示$h_v^{(L)}$已融合了TCN提取的本地物理特征（阶段二）与GNN从邻域聚合的外部污染信息（阶段三），随后送入阶段四的读出层生成浓度推断。
+\noindent 残差连接确保了信息的有效传递和梯度的稳定流动，同时允许模型在必要时\cqt{跳过}某些传播层，直接利用初始特征。经过$L$层传播后，每个节点的最终表示$\mathbf{h}_v^{(L)}$已融合了TCN提取的本地物理特征（阶段二）与GNN从邻域聚合的外部污染信息（阶段三），随后送入阶段四的读出层生成浓度推断。
 
 
 
@@ -365,11 +365,11 @@ h_v^{(l+1)} = \text{ReLU}\left(h_v^{(l)} + m_v\right)
 
 经过$L$层物理启发的空间传播后，由于目标节点本身没有任何历史观测数据，无法采用自回归方式。因此设计了一个节点共享的读出层（Readout Layer），由多层感知机构成，直接将高维潜在特征映射为标量的\PM 浓度推断值（对应算法\ref{alg:spin}第21行及图\ref{fig:model_architecture}右侧）：
 \begin{equation}
-    \hat{X}_v = W_{\text{out}} h_v^{(L)} + b_{\text{out}}
+    \hat{X}_v = \mathbf{W}_{\text{out}} \mathbf{h}_v^{(L)} + b_{\text{out}}
 \label{eq:decoder_stage4}
 \end{equation}
 
-\noindent 式中$h_v^{(L)} \in \mathbb{R}^{d_h}$为节点$v$经过阶段三传播后的最终潜在表示，$W_{\text{out}} \in \mathbb{R}^{1 \times d_h}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
+\noindent 式中$\mathbf{h}_v^{(L)} \in \mathbb{R}^{d_h}$为节点$v$经过阶段三传播后的最终潜在表示，$\mathbf{W}_{\text{out}} \in \mathbb{R}^{1 \times d_h}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
 
 共享参数的设计使得模型学习到的是一个通用的\cqt{特征到浓度}映射函数，而非针对特定站点的过拟合表示，确保了模型能够完全基于物理环境特征来填补数据盲区，实现真正的归纳式推断。
 

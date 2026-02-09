@@ -162,7 +162,7 @@ DPEC设计了六种不同力度的污染控制策略，依据减排力度从弱�
 \subsection{模型架构}
 \label{subsec:ignn_arch}
 
-IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}统一框架，将研究区域内的城市监测站点抽象为一个图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{A})$，式中$\mathcal{V}$为节点集合（28个城市），$\mathcal{E}$为边集合（基于空间邻近性定义），$\mathbf{A} \in \mathbb{R}^{N \times N}$为邻接矩阵。模型通过图卷积网络（GCN）捕捉污染物在城市间的空间输送与扩散过程，同时采用时间卷积网络（TCN）提取气象条件和排放源强度随时间变化的动态特征。
+IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}统一框架，将研究区域内的城市监测站点抽象为一个图结构$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，式中$\mathcal{V}$为节点集合（28个城市），$\mathcal{E}$为边集合（基于空间邻近性定义），对应的邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$。模型通过图卷积网络（GCN）捕捉污染物在城市间的空间输送与扩散过程，同时采用时间卷积网络（TCN）提取气象条件和排放源强度随时间变化的动态特征。
 
 如图\ref{fig:ignn_arch}所示，IGNN模型采用一对一映射的输入输出范式：
 

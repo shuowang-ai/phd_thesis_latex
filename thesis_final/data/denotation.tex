@@ -25,6 +25,7 @@
 
 % 3. 模型与物理算子
 \item[\(\mathcal{F}_\Theta\)] 参数为 \(\Theta\) 的深度学习模型，学习真实空气质量生成过程 \(f(\mathbf{M}, \mathbf{E})\) 的映射。
+\item[\(\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}, \mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}\)] 站点推断模型与网格推断模型（第\ref{chap:inference}章）。两者采用相同的SPIN四阶段架构，但各自独立训练，$\Theta^{\text{s}} \neq \Theta^{\text{g}}$。
 \item[\(C\)] 污染物浓度场的点值形式，用于对流-扩散方程表述。
 \item[\(S, D\)] 对流-扩散方程中的排放源项与沉降汇项。
 \item[\(\mathbf{u}\)] 风速矢量场，用于计算平流传输。
