@@ -43,7 +43,7 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap04_inference_problem.pdf}
     \caption{大气污染空间推断问题示意图}
-    \caption*{输入：观测站点$\mathcal{V}_{\text{obs}}$的历史时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$、排放场$\mathbf{E}^{F}_{t-T'+1:t}$、卫星AOD $\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$；输出对应两个子任务——\textbf{站点推断}（图$\mathcal{G}^{\text{s}}$）：目标站点$\mathcal{V}_{\text{target}}$的浓度时序$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$（图中蓝色曲线），\textbf{网格推断}（图$\mathcal{G}^{\text{g}}$）：全域$N^{\text{g}}$个网格像素的浓度分布$\hat{\mathbf{X}}^{F}_t \in \mathbb{R}^{N^{\text{g}}}$（图中红色热力图）；两个子任务采用相同的SPIN架构设计但各自独立训练（参数$\Theta^{\text{s}} \neq \Theta^{\text{g}}$），本图在统一框架内展示它们的共性与差异。图中黑色实心圆点为观测站点，空心圆点为待推断的目标站点，斜线阴影区域表示卫星AOD因云层遮挡而缺失的区域，虚线圆圈示意图神经网络的多跳感受野——目标节点通过消息传递逐层聚合感受野内观测节点的信息。}
+    \caption*{输入包括观测站点的历史时序、全域气象场、排放场和卫星AOD数据；输出对应两个子任务——站点推断（图$\mathcal{G}^{\text{s}}$，蓝色曲线）和网格推断（图$\mathcal{G}^{\text{g}}$，红色热力图）。两个子任务采用相同的SPIN架构但各自独立训练。图中黑色实心圆点为观测站点，空心圆点为待推断的目标站点，斜线阴影区域表示AOD缺失区域，虚线圆圈示意图神经网络的多跳感受野。详细说明见正文。}
     \label{fig:inference_problem}
 \end{figure}
 
@@ -58,6 +58,27 @@
 （2）\textbf{网格推断（Grid Inference）}。在网格图$\mathcal{G}^{\text{g}} = (\mathcal{V}^{\text{g}}, \mathcal{E}^{\text{g}})$上进行，其中$\mathcal{V}^{\text{g}}$为$0.25^{\circ}$网格像素节点集合（$|\mathcal{V}^{\text{g}}| = N^{\text{g}}$，如图~\ref{fig:study_area}(d)所示），$\mathcal{E}^{\text{g}}$为网格像素间的边集合。对区域内所有网格点进行推断，生成连续的高分辨率污染场$\hat{\mathbf{X}}^{F}_t$，以消除监测盲区。这一任务的应用场景包括：生成空间连续的污染暴露评估图、识别缺乏监测的污染热点、支撑精细化的区域联防联控决策。
 
 需要强调的是，虽然两个子任务使用不同粒度的图$\mathcal{G}^{\text{s}}$和$\mathcal{G}^{\text{g}}$，但它们采用\textbf{完全相同的模型架构}和\textbf{图核构建方法}（扩散核公式\ref{eq:diffusion_adjacency}--\ref{eq:diffusion_normalized}与平流核公式\ref{eq:advection_adjacency}--\ref{eq:advection_normalized}），仅在输入节点集合、训练数据与损失函数上有所区别（网格推断额外引入AOD空间约束损失），且各自独立训练。由于节点集合不同，两套图上所得的邻接矩阵维度不同：在$\mathcal{G}^{\text{s}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，在$\mathcal{G}^{\text{g}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。这种设计体现了SPIN的核心思想：同一物理传输架构可在不同空间尺度上复用。
+
+表\ref{tab:task_comparison}对比了两个子任务的主要特征与差异。
+
+\begin{table}[htbp]
+    \centering
+    \caption{站点推断与网格推断任务对比}
+    \caption*{两个子任务采用相同的SPIN架构和图核构建方法，但在节点集合、输出粒度和损失函数上有所区别。}
+    \label{tab:task_comparison}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        特征 & 站点推断 & 网格推断 \\
+        \midrule
+        图结构 & $\mathcal{G}^{\text{s}}$ & $\mathcal{G}^{\text{g}}$ \\
+        节点数 & $N^{\text{s}}=152$ & $N^{\text{g}}$（全域网格） \\
+        输出类型 & 时序浓度$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$ & 空间场$\hat{\mathbf{X}}^{F}_t$ \\
+        应用场景 & 离散站点插值 & 连续空间制图 \\
+        AOD约束 & 无 & 有（$\mathcal{L}_{\mathrm{AOD}}$） \\
+        参数 & $\Theta^{\text{s}}$ & $\Theta^{\text{g}}$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 形式化地，以$\mathcal{G} = (\mathcal{V}, \mathcal{E})$统一表示两类图结构（$\mathcal{G} \in \{\mathcal{G}^{\text{s}}, \mathcal{G}^{\text{g}}\}$），其中$\mathcal{V}$为节点集合（$|\mathcal{V}| = N$），$\mathcal{E}$为边集合。我们将节点动态划分为观测节点集$\mathcal{V}_{\text{obs}}$和目标推断节点集$\mathcal{V}_{\text{target}}$。给定观测节点过去$T'$个时间步的历史污染数据$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$，以及全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$和排放场$\mathbf{E}^{F}_{t-T'+1:t}$，两个子任务分别学习映射$\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}$与$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$：
 \begin{align}
