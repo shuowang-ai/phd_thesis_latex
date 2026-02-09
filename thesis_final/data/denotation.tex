@@ -4,6 +4,7 @@
 
 % 1. 核心变量
 \item[\(\mathbf{X}_t, \hat{\mathbf{X}}_t\)] 时间 \(t\) 的空气质量观测值与预测值（单位：\(\mu\)g/m\(^3\)），$\mathbf{X} \in \mathbb{R}^{N \times D_X}$，包含 PM\(_{2.5}\)、PM\(_{10}\)、O\(_3\)、NO\(_2\) 等污染物。
+\item[\(X_v, \hat{X}_v\)] 节点 $v$ 的污染物浓度观测值与推断值，标量形式。$X_v \in \mathbb{R}$ 为节点级浓度观测，$\hat{X}_v \in \mathbb{R}$ 为模型输出的推断值（第\ref{chap:inference}章）。
 \item[\(\mathbf{M}_t, \mathbf{E}_t\)] 时间 \(t\) 的气象变量与排放变量集合。
     \begin{itemize}
         \item \(\mathbf{M}_t\) 包含：气温 ($M_{\text{t2m}}$)、露点 ($M_{\text{d2m}}$)、边界层高度 ($M_{\text{blh}}$)、风速 ($M_{u}$, $M_{v}$) 等
