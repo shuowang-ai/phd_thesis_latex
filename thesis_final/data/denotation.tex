@@ -10,7 +10,7 @@
         \item \(\mathbf{E}_t\) 包含：NO\(_x\) ($E_{\text{NO}_x}$)、VOC ($E_{\text{VOC}}$)、SO\(_2\) ($E_{\text{SO}_2}$) 等
     \end{itemize}
 \item[\(\mathbf{X}^{F}_t\)] 污染物浓度的连续空间场（Field），用于网格化推断与模拟任务。
-\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带有效性掩码 $\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$标记云遮挡区域。
+\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带节点级有效性掩码 $\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（$\omega_i^{\text{AOD}} = 1$表示有效，$0$表示云遮挡缺失），以及由此导出的边级掩码$\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}$。
 
 % 2. 图结构与时空参数
 \item[\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)] 图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}\) 为基于风场或距离构建的边集。

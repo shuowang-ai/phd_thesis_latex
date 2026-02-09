@@ -248,7 +248,7 @@
 
 TCN由多层膨胀卷积组成。第$l$层的输出为：
 \begin{equation}
-h^{(l)} = \text{ReLU}\left(\text{Conv1D}(h^{(l-1)}, W^{(l)}, \text{dilation}=2^l) + b^{(l)}\right)
+\mathbf{h}^{(l)} = \text{ReLU}\left(\text{Conv1D}(\mathbf{h}^{(l-1)}, \mathbf{W}^{(l)}, \text{dilation}=2^l) + \mathbf{b}^{(l)}\right)
 \label{eq:tcn_layer}
 \end{equation}
 \noindent 式中膨胀因子$2^l$使得$L$层TCN的感受野达到$2^L$个时间步。本研究采用4层膨胀卷积（膨胀因子$[1, 2, 4, 8]$），感受野覆盖16小时，足以捕捉日变化特征。
@@ -369,7 +369,7 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 \label{eq:decoder_stage4}
 \end{equation}
 
-\noindent 式中$\mathbf{h}_v^{(L)} \in \mathbb{R}^{d_h}$为节点$v$经过阶段三传播后的最终潜在表示，$\mathbf{W}_{\text{out}} \in \mathbb{R}^{1 \times d_h}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断值。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
+\noindent 式中$\mathbf{h}_v^{(L)} \in \mathbb{R}^{d_h}$为节点$v$经过阶段三传播后的最终潜在表示，$\mathbf{W}_{\text{out}} \in \mathbb{R}^{1 \times d_h}$和$b_{\text{out}} \in \mathbb{R}$为共享的读出参数，$\hat{X}_v \in \mathbb{R}$为节点$v$的\PM 浓度推断标量值。将所有节点的推断值堆叠即得到全局推断向量$\hat{\mathbf{X}} = [\hat{X}_1, \hat{X}_2, \ldots, \hat{X}_N]^\top \in \mathbb{R}^{N}$，对应问题定义（公式\ref{eq:infer_problem}--\ref{eq:infer_problem_grid}）中的$\hat{\mathbf{X}}^{\text{target}}$或$\hat{\mathbf{X}}^{F}$。该输出直接用于后续三部分损失函数的计算：对目标节点计算推断损失$\mathcal{L}_{\mathrm{infer}}$（公式\ref{eq:infer_loss}），对观测节点计算初始化损失$\mathcal{L}_{\mathrm{init}}$（公式\ref{eq:init_loss}），在网格推断中还通过相邻节点的$\hat{X}_v$差值计算AOD梯度损失$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）。
 
 共享参数的设计使得模型学习到的是一个通用的\cqt{特征到浓度}映射函数，而非针对特定站点的过拟合表示，确保了模型能够完全基于物理环境特征来填补数据盲区，实现真正的归纳式推断。
 
@@ -418,17 +418,14 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 \label{eq:gradient_definition}
 \end{equation}
 
-为了处理缺失值，引入了二值掩码矩阵$\boldsymbol{\omega}^{\text{AOD}}$（当且仅当两点均有有效AOD数据时为1，否则为0）：
+为了处理缺失值，利用节点级有效性掩码$\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（第\ref{sec:infer_data}节），其中$\omega_i^{\text{AOD}} = 1$表示节点$i$处有有效AOD观测，$\omega_i^{\text{AOD}} = 0$表示该节点因云遮挡而缺失。在此基础上定义边级掩码$\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}$，当且仅当边$(i,j)$两端节点均有有效AOD数据时$\Omega_{ij}^{\text{AOD}} = 1$：
 \begin{equation}
     \mathcal{L}_{\mathrm{AOD}} = \sum_{t=1}^{T'} \sum_{(i,j) \in \mathcal{E}} \left| \nabla_{ij}(\hat{\mathbf{X}}_t) - \nabla_{ij}(\mathbf{X}^{\text{AOD}}_t) \right| \cdot \Omega_{ij}^{\text{AOD}}
 \label{eq:aod_loss}
 \end{equation}
-\noindent 式中时刻$t$的边$(i,j)$掩码定义为：
+\noindent 式中边级掩码由节点级掩码的乘积导出：
 \begin{equation}
-\Omega_{ij}^{\text{AOD}} = \begin{cases}
-1 & \text{if } X_i^{\text{AOD}} \text{ and } X_j^{\text{AOD}} \text{ both valid} \\
-0 & \text{otherwise}
-\end{cases}
+\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}
 \label{eq:aod_mask}
 \end{equation}
 
