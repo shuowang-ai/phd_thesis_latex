@@ -186,12 +186,12 @@
 \begin{table}[htbp]
 \centering
 \caption{KnowAir系统与数值模型的预报性能对比}
-\caption*{在长三角地区测试中，KnowAir系统在多数指标上取得最优性能。该系统的预报核心为本文第\ref{chap:prediction}章提出的PCDCNet模型。RMSE为预报值与实测值之间的均方根误差（$\downarrow$越小越好），R为预报值与实测值之间的Pearson相关系数（$\uparrow$越大越好，反映模型对污染变化趋势的把握能力）。对于\ozone 预报，尽管RMSE与CMAQ-2接近（38.4 vs 38.2），但KnowAir的相关系数R（0.756）显著优于所有数值模型（0.548--0.644），表明其对\ozone 变化趋势的把握更为准确。}
+\caption*{在长三角地区测试中，KnowAir系统在多数指标上取得最优性能。该系统的预报核心为本文第\ref{chap:prediction}章提出的PCDCNet模型。RMSE为预报值与实测值之间的均方根误差（$\downarrow$越小越好），R为预报值与实测值之间的Pearson相关系数（$\uparrow$越大越好，反映模型对污染变化趋势的把握能力）。对于\ozone 预报，尽管RMSE与CMAQ接近（38.4 vs 38.2），但KnowAir的相关系数R（0.756）显著优于所有数值模型（0.548--0.644），表明其对\ozone 变化趋势的把握更为准确。CAMx\footnote{Comprehensive Air quality Model with extensions, \url{https://www.camx.com/}}是一个多尺度光化学建模系统，用于气态和颗粒物空气污染模拟。}
 \label{tab:model_vs_numerical}
 \small
 \begin{tabular}{@{}llccccc@{}}
 \toprule
-\textbf{污染物} & \textbf{指标} & \textbf{CMAQ-1} & \textbf{CMAQ-2} & \textbf{WRF-Chem} & \textbf{NAQPMS} & \textbf{KnowAir} \\
+\textbf{污染物} & \textbf{指标} & \textbf{CAMx} & \textbf{CMAQ} & \textbf{WRF-Chem} & \textbf{NAQPMS} & \textbf{KnowAir} \\
 \midrule
 \multirow{2}{*}{\PM} & RMSE & 18.3 & 14.5 & 25.1 & 21.4 & \textbf{5.7} \\
 & R & 0.395 & 0.425 & 0.641 & 0.588 & \textbf{0.820} \\
@@ -205,7 +205,7 @@
 \end{tabular}
 \end{table}
 
-如表\ref{tab:model_vs_numerical}所示，KnowAir在\PM 和PM$_{10}$预报上全面领先：\PM 的RMSE从14.5--25.1降至5.7，相关系数从0.395--0.641提升至0.820；PM$_{10}$的RMSE从14.8--21.3降至7.3，相关系数从0.457--0.650提升至0.856。对于\ozone 预报，KnowAir在相关系数上显著优于所有数值模型（0.756 vs 0.548--0.644），表明其对污染变化趋势的把握更为准确；RMSE（38.4）与最优数值模型CMAQ-2（38.2）基本持平。
+如表\ref{tab:model_vs_numerical}所示，KnowAir在\PM 和PM$_{10}$预报上全面领先：\PM 的RMSE从14.5--25.1降至5.7，相关系数从0.395--0.641提升至0.820；PM$_{10}$的RMSE从14.8--21.3降至7.3，相关系数从0.457--0.650提升至0.856。对于\ozone 预报，KnowAir的RMSE（38.4）与最优数值模型CMAQ（38.2）基本持平，但在相关系数R上取得显著优势（0.756 vs 0.563，提升34\%），远超WRF-Chem（0.644）和CAMx（0.548）等其他数值模式。这一结果表明，尽管KnowAir与CMAQ的绝对误差相近，但其对\ozone 浓度变化趋势的捕捉能力明显更强——相关系数R直接反映了模型预测值与观测值变化同步性，高R值意味着模型能更准确地预报污染过程的峰谷时间和演变节律，这在污染预警和应急决策中具有更高的实用价值。这也凸显了多指标综合评估的重要性：RMSE衡量绝对精度，R评估趋势捕捉能力，两者结合才能全面刻画模型的实战预报水平。
 
 \subsubsection{实战预报表现}
 
