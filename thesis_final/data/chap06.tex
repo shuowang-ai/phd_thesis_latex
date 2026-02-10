@@ -186,7 +186,7 @@
 \begin{table}[htbp]
 \centering
 \caption{KnowAir系统与数值模型的预报性能对比}
-\caption*{在长三角地区测试中，KnowAir系统在三种污染物预报任务上均取得最优性能。该系统的预报核心为本文第\ref{chap:prediction}章提出的PCDCNet模型。RMSE为预报值与实测值之间的均方根误差（$\downarrow$越小越好），R为预报值与实测值之间的Pearson相关系数（$\uparrow$越大越好，反映模型对污染变化趋势的把握能力）。}
+\caption*{在长三角地区测试中，KnowAir系统在多数指标上取得最优性能。该系统的预报核心为本文第\ref{chap:prediction}章提出的PCDCNet模型。RMSE为预报值与实测值之间的均方根误差（$\downarrow$越小越好），R为预报值与实测值之间的Pearson相关系数（$\uparrow$越大越好，反映模型对污染变化趋势的把握能力）。对于\ozone 预报，尽管RMSE与CMAQ-2接近（38.4 vs 38.2），但KnowAir的相关系数R（0.756）显著优于所有数值模型（0.548--0.644），表明其对\ozone 变化趋势的把握更为准确。}
 \label{tab:model_vs_numerical}
 \small
 \begin{tabular}{@{}llccccc@{}}
@@ -196,7 +196,7 @@
 \multirow{2}{*}{\PM} & RMSE & 18.3 & 14.5 & 25.1 & 21.4 & \textbf{5.7} \\
 & R & 0.395 & 0.425 & 0.641 & 0.588 & \textbf{0.820} \\
 \midrule
-\multirow{2}{*}{\ozone} & RMSE & 48.3 & 38.2 & 79.5 & 96.6 & \textbf{38.4} \\
+\multirow{2}{*}{\ozone} & RMSE & 48.3 & \textbf{38.2} & 79.5 & 96.6 & 38.4 \\
 & R & 0.548 & 0.563 & 0.644 & 0.585 & \textbf{0.756} \\
 \midrule
 \multirow{2}{*}{PM$_{10}$} & RMSE & 15.4 & 14.8 & 21.3 & 15.9 & \textbf{7.3} \\
@@ -205,7 +205,7 @@
 \end{tabular}
 \end{table}
 
-如表\ref{tab:model_vs_numerical}所示，本模型在三种污染物的预报上均取得最优性能：相较数值模型，\PM 的RMSE大幅降低，相关系数显著提升；PM$_{10}$的预报改进同样明显。这表明AI模型的预报结果与实测值更为接近，且对污染变化趋势的把握更为准确。
+如表\ref{tab:model_vs_numerical}所示，KnowAir在\PM 和PM$_{10}$预报上全面领先：\PM 的RMSE从14.5--25.1降至5.7，相关系数从0.395--0.641提升至0.820；PM$_{10}$的RMSE从14.8--21.3降至7.3，相关系数从0.457--0.650提升至0.856。对于\ozone 预报，KnowAir在相关系数上显著优于所有数值模型（0.756 vs 0.548--0.644），表明其对污染变化趋势的把握更为准确；RMSE（38.4）与最优数值模型CMAQ-2（38.2）基本持平。
 
 \subsubsection{实战预报表现}
 
