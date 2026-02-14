@@ -41,7 +41,7 @@
   \label{fig:system_architecture}
 \end{figure}
 
-如图\ref{fig:system_architecture}所示，该架构包含两条核心数据流。数据采集链路周期性从GFS/ERA5气象预报、MEIC/DPEC排放清单及国家监测网实时观测等数据源拉取原始数据，经清洗预处理后存入数据库，为模型训练和推理提供数据基础。API服务链路处理用户的实时请求，经过WAF、SLB和API网关组成的安全层后，由模型推理服务加载特征数据并调用KnowAir模型进行计算，返回预报结果。
+如图\ref{fig:system_architecture}所示，该架构包含两条核心数据流。数据采集链路周期性从气象驱动数据（GFS预报/ERA5再分析）、MEIC/DPEC排放清单及国家监测网实时观测等数据源拉取原始数据，经清洗预处理后存入数据库，为模型训练和推理提供数据基础。API服务链路处理用户的实时请求，经过WAF、SLB和API网关组成的安全层后，由模型推理服务加载特征数据并调用KnowAir模型进行计算，返回预报结果。
 
 \begin{table}[htbp]
     \centering

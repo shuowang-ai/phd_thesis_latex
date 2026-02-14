@@ -11,7 +11,7 @@
         \item \(\mathbf{E}_t\) 包含：NO\(_x\) ($E_{\text{NO}_x}$)、VOC ($E_{\text{VOC}}$)、SO\(_2\) ($E_{\text{SO}_2}$) 等
     \end{itemize}
 \item[\(\mathbf{X}^{F}_t\)] 污染物浓度的连续空间场（Field），用于网格化推断与模拟任务。
-\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带节点级有效性掩码 $\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（$\omega_i^{\text{AOD}} = 1$表示有效，$0$表示云遮挡缺失），以及由此导出的边级掩码$\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}$。
+\item[\(\mathbf{X}^{\text{AOD}}\)] 遥感观测的气溶胶光学厚度（Aerosol Optical Depth），作为空间约束。附带节点级有效性掩码 $\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（$\omega_i^{\text{AOD}} = 1$表示有效，$0$表示云遮挡缺失），以及由此导出的边级掩码$\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}$\penalty10000{}。
 
 % 2. 图结构与时空参数
 \item[\(\mathcal{G} = (\mathcal{V}, \mathcal{E})\)] 图结构，\(\mathcal{V}\) 为站点/城市节点集，\(\mathcal{E}\) 为基于风场或距离构建的边集。
@@ -36,6 +36,7 @@
 \item[\(\mathcal{L}\)] 总损失函数，由监督损失与物理约束损失组成。
 \item[\(\mathcal{L}_{\mathrm{Pred}}, \mathcal{L}_{\mathrm{DIC}}\)] 预测损失与领域一致性约束损失（第\ref{chap:prediction}章）。
 \item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{init}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失、初始场约束损失与AOD梯度约束损失（第\ref{chap:inference}章）。
+\item[\(\ell_1, \ell_2\)] $\ell_1$损失（平均绝对误差MAE）与$\ell_2$损失（均方误差MSE）。本文采用$\ell_1$损失作为主要优化目标，以降低对异常值的敏感性。
 
 % 4. 缩略语
 \item[AOD] Aerosol Optical Depth (气溶胶光学厚度)。
