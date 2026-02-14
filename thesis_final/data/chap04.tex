@@ -24,7 +24,7 @@
 
 （1）监测网络稀疏与空间泛化。现有监测网络（约1618个国控站点）虽然规模庞大，但超过80\%的人口仍生活在缺乏直接监测的区域\citep{southerland2022global,wei2023first}。监测站点主要集中在城市建成区，广大农村地区、山区和边远地区存在大面积监测盲区。传统空间插值方法（如克里金、反距离加权）假设空间平稳性，难以处理站点分布不均匀、地形与气象条件差异显著的复杂场景。如何基于稀疏的已知观测，对空间中任意未观测位置进行精确推断，并具备归纳式泛化能力——即推广至训练时未见的位置——是首要挑战。
 
-（2）遥感约束数据的大面积缺失。卫星遥感的气溶胶光学厚度（AOD）与\PM 具有明确的物理关联（柱积分气溶胶光学特性），可为无观测区域提供空间结构线索。然而，卫星AOD受云层遮挡影响严重，在重污染高发的冬季缺失率可超过70\%。现有方法多将AOD作为模型的强制输入特征，在AOD缺失时推断质量急剧下降。如何有效利用AOD的空间分布信息作为约束，同时在AOD不可用时自动回退至物理驱动模式以实现全天候推断，是数据融合的核心挑战。
+（2）遥感约束数据的大面积缺失。气溶胶光学厚度（Aerosol Optical Depth, AOD）是描述大气柱中气溶胶粒子对太阳辐射总消光能力的无量纲物理量，可由搭载于卫星平台的光学传感器（如极轨卫星Terra/Aqua的MODIS、静止卫星Himawari-8的AHI）通过辐射反演获得\citep{bessho2016introduction}。由于AOD表征的是整层大气气溶胶的光学特性，而地面\PM 浓度主要受控于近地面气溶胶的质量浓度，两者在物理上存在内在关联\citep{van2016global}。利用这一关联，卫星AOD已被广泛用于推算地面\PM 浓度，在全球和区域尺度的污染暴露评估中发挥了关键作用\citep{geng2021tracking,xiao2017full}。更重要的是，与稀疏分布的地面监测站点不同，卫星AOD能够提供空间连续覆盖的大气气溶胶载荷信息，为无监测区域的\PM 浓度推断提供重要的空间结构线索。然而，卫星AOD的获取严格依赖晴空条件下的光学反演，云层遮挡会导致大面积数据缺失\citep{just2020gradient}。这一问题在中国冬季尤为突出——冬季既是重污染事件的高发期，也是云覆盖率较高的季节，AOD缺失率可超过70\%。现有方法多将AOD作为模型的强制输入特征，导致在AOD不可用时推断质量急剧下降，形成\cqt{最需要推断时恰好缺乏数据}的矛盾局面。如何有效利用AOD的空间分布信息作为约束，同时在AOD不可用时自动回退至物理驱动模式以实现全天候推断，是数据融合的核心挑战。
 
 （3）大气动力过程的显式建模。空间推断并非静态的空间插值——污染物浓度场受对流--扩散方程（公式\ref{eq:advection_diffusion}）支配，呈现显著的时间演化特征。风场驱动的平流传输使得上风向站点的历史观测对下风向无观测区域具有重要参考价值。因此，推断模型需要以历史时间窗口（而非单一时刻快照）作为输入，通过时序特征提取捕捉动力过程的时空耦合效应。如何将物理传输机制显式嵌入推断框架，是保证推断结果物理合理性的关键挑战。
 
@@ -43,7 +43,7 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap04_inference_problem.pdf}
     \caption{大气污染空间推断问题示意图}
-    \caption*{输入包括观测站点的历史时序、全域气象场、排放场和卫星AOD数据；输出对应两个子任务——站点推断（图$\mathcal{G}^{\text{s}}$，蓝色曲线）和网格推断（图$\mathcal{G}^{\text{g}}$，红色热力图）。两个子任务采用相同的SPIN架构但各自独立训练。图中黑色实心圆点为观测站点，空心圆点为待推断的目标站点，斜线阴影区域表示AOD缺失区域，虚线圆圈示意图神经网络的多跳感受野。详细说明见正文。}
+    \caption*{左侧与上方为四类输入数据（标注为Input）：观测站点历史\PM 时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$（上方中部）、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$（左上）、排放场$\mathbf{E}^{F}_{t-T'+1:t}$（左中）和卫星遥感AOD数据$\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$（左下，其中斜线阴影区域表示因云层遮挡等原因导致的AOD缺失区域）。需要注意的是，AOD数据的输入箭头标注为\cqt{Input (Loss)}，表示AOD并非作为模型的直接输入特征，而是通过损失函数$\mathcal{L}_{\mathrm{AOD}}$以空间结构约束的形式参与训练（详见第\ref{subsubsec:aod_data}节）。中央地图展示图$\mathcal{G}$上的空间传播结构：黑色实心圆点为观测站点，蓝色圆点为待推断的目标节点；图中大面积的蓝色色块为缺乏地面监测数据的未知网格单元（Unknown Grid Cell），直观展示了地面监测网络覆盖的有限性——这正是空间推断任务需要填补的区域。以中央蓝色节点为例，实线表示1跳连接，虚线表示2跳连接，周围更浅的蓝色区域表示该节点的2跳感受野。右侧为两个子任务的输出（标注为Output）——站点推断$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$（蓝色曲线，右上）和网格推断$\hat{\mathbf{X}}^{F}_t$（红色热力图，右下）。两个子任务采用相同的SPIN架构$\mathcal{F}_{\Theta}$但各自独立训练。}
     \label{fig:inference_problem}
 \end{figure}
 
@@ -57,7 +57,15 @@
 
 （2）\textbf{网格推断（Grid Inference）}。在网格图$\mathcal{G}^{\text{g}} = (\mathcal{V}^{\text{g}}, \mathcal{E}^{\text{g}})$上进行，其中$\mathcal{V}^{\text{g}}$为$0.25^{\circ}$网格像素节点集合（$|\mathcal{V}^{\text{g}}| = N^{\text{g}}$，如图~\ref{fig:study_area}(d)所示），$\mathcal{E}^{\text{g}}$为网格像素间的边集合。对区域内所有网格点进行推断，生成连续的高分辨率污染场$\hat{\mathbf{X}}^{F}_t$，以消除监测盲区。这一任务的应用场景包括：生成空间连续的污染暴露评估图、识别缺乏监测的污染热点、支撑精细化的区域联防联控决策。
 
-需要强调的是，虽然两个子任务使用不同粒度的图$\mathcal{G}^{\text{s}}$和$\mathcal{G}^{\text{g}}$，但它们采用\textbf{完全相同的模型架构}和\textbf{图核构建方法}（扩散核公式\ref{eq:diffusion_adjacency}--\ref{eq:diffusion_normalized}与平流核公式\ref{eq:advection_adjacency}--\ref{eq:advection_normalized}），仅在输入节点集合、训练数据与损失函数上有所区别（网格推断额外引入AOD空间约束损失），且各自独立训练。由于节点集合不同，两套图上所得的邻接矩阵维度不同：在$\mathcal{G}^{\text{s}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，在$\mathcal{G}^{\text{g}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。这种设计体现了SPIN的核心思想：同一物理传输架构可在不同空间尺度上复用。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]{figures/chap04_study_area.pdf}
+    \caption{京津冀及周边地区研究区域与任务设置}
+    \caption*{(a) 区域内的\cqt{2+26}城市分布；(b) 站点图$\mathcal{G}^{\text{s}}$（$N^{\text{s}} = 152$个节点）：基于地理邻近性（$<$200 km）构建的站点级空间图结构（邻接矩阵$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$），节点为监测站点，连边表示地理距离阈值内的空间邻接关系，用于问题一（站点推断）；(c) $N^{\text{s}}$个地面监测站点的稀疏分布；(d) 网格图$\mathcal{G}^{\text{g}}$（$N^{\text{g}}$个节点）：用于网格推断的$0.25^{\circ}$标准网格（邻接矩阵$A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$），图构建规则与(b)相同，但节点为网格像素，用于问题二（网格推断）。两套图$\mathcal{G}^{\text{s}}$与$\mathcal{G}^{\text{g}}$采用相同的扩散核$\tilde{A}^{\mathcal{D}}$和平流核$\tilde{A}^{\mathcal{A}}$的构建方法，但各自独立训练（参数不共享），仅节点集合与矩阵维度不同。}
+    \label{fig:study_area}
+\end{figure}
+
+需要强调的是，虽然两个子任务使用不同粒度的图$\mathcal{G}^{\text{s}}$和$\mathcal{G}^{\text{g}}$，但它们采用\textbf{完全相同的模型架构}和\textbf{图核构建方法}（扩散核公式\ref{eq:diffusion_adjacency}--\ref{eq:diffusion_normalized}与平流核公式\ref{eq:advection_adjacency}--\ref{eq:advection_normalized}），仅在输入节点集合、训练数据与损失函数上有所区别（网格推断额外引入AOD空间约束损失），且各自独立训练。由于节点集合不同，两套图上所得的邻接矩阵维度不同。其中$\tilde{A}^{\mathcal{D}}$为归一化扩散邻接矩阵，刻画污染物在浓度梯度驱动下的各向同性扩散传播；$\tilde{A}^{\mathcal{A}}$为归一化平流邻接矩阵，刻画风场驱动下的定向平流传输（两者的详细构建方法见第\ref{subsec:stage3_propagation}节）。在$\mathcal{G}^{\text{s}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，在$\mathcal{G}^{\text{g}}$上$\tilde{A}^{\mathcal{D}}, \tilde{A}^{\mathcal{A}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。这种设计体现了SPIN的核心思想：同一物理传输架构可在不同空间尺度上复用。
 
 表\ref{tab:task_comparison}对比了两个子任务的主要特征与差异。
 
@@ -88,7 +96,7 @@
 \noindent 其中站点级气象与排放数据$\mathbf{M}^{\text{s}}, \mathbf{E}^{\text{s}}$通过对全域网格场$\mathbf{M}^{F}, \mathbf{E}^{F}$按各站点经纬度进行空间索引（Spatial Indexing）得到，网格推断则直接使用完整的全域场$\mathbf{M}^{F}, \mathbf{E}^{F}$。
 \noindent 式中$\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}$与$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$具有相同的网络架构（即四阶段流水线），但各自独立训练，$\Theta^{\text{s}}$与$\Theta^{\text{g}}$分别为两套独立的模型参数。两者的核心差异在于：网格推断额外引入了AOD空间约束损失$\mathcal{L}_{\mathrm{AOD}}$以保证无观测区域推断结果的物理合理性。如图~\ref{fig:inference_problem}所示：站点推断（公式\ref{eq:infer_problem}）在站点图$\mathcal{G}^{\text{s}}$上推断目标站点$\mathcal{V}_{\text{target}}$在$T'$个时间步上的浓度时序$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$（图中蓝色曲线）；网格推断（公式\ref{eq:infer_problem_grid}）在网格图$\mathcal{G}^{\text{g}}$上推断全域所有$N^{\text{g}}$个网格像素在时刻$t$的浓度分布$\hat{\mathbf{X}}^{F}_t \in \mathbb{R}^{N^{\text{g}}}$（图中红色热力图）。
 
-与第\ref{chap:prediction}章的预测问题（公式\eqref{eq:pred_problem}）相比，本章的关键区别在于：目标节点$\mathcal{V}_{\text{target}}$本身没有任何历史观测数据，模型必须完全依靠空间传播和环境上下文来进行推断。这一区别决定了本章需要采用归纳式学习范式，而非第\ref{chap:prediction}章的直推式范式。
+与第\ref{chap:prediction}章的预测问题（公式\eqref{eq:pred_problem}）相比，本章的关键区别在于：目标节点$\mathcal{V}_{\text{target}}$本身没有任何历史观测数据，模型必须完全依靠空间传播和环境上下文来进行推断。这一区别决定了本章需要采用归纳式学习范式（Inductive Learning），而非第\ref{chap:prediction}章的直推式范式（Transductive Learning）\citep{battaglia2018relational}。在图神经网络的语境下，直推式学习要求训练与推断在\textbf{同一固定图}上进行——模型为图中每个节点学习特定的嵌入表示，因此只能对训练时已见的节点做出预测，第\ref{chap:prediction}章的预测任务即属于此类，所有站点在训练阶段均已知且具备历史观测。相比之下，归纳式学习要求模型学习可迁移的\textbf{局部计算规则}（即消息传递与聚合函数），使其能够泛化至训练时未见的新节点乃至全新的图结构。正如第\ref{sec:atmospheric_dynamics}节所述，这种局部计算规则本质上是一种关系归纳偏置——模型不依赖特定节点的身份信息，而是通过节点的局部特征（气象、排放等环境上下文）和邻域结构进行推断，从而具备对任意未观测位置的空间泛化能力。
 
 在网格推断任务中，一个关键挑战是如何保证广阔无观测区域内推断结果的物理合理性。虽然卫星AOD能提供空间指导，但存在严重的缺失问题。因此，本框架将AOD数据$\mathbf{X}^{\text{AOD}}$作为训练时的空间结构约束（Spatial Structural Constraint），而非直接输入，从根本上解决了传统方法对卫星数据的过度依赖问题。
 
@@ -113,15 +121,6 @@
 （2）污染梯度的显著性。区域内包含了北京、天津等超大城市，同时也分布着大量重工业基地（如唐山、邯郸的钢铁产业）和广阔的农业农村地区。这种城乡二元结构和密集的工业布局，使得该区域内的污染物浓度在空间上呈现出极陡峭的梯度变化（Sharp Gradients）\citep{chen2020influence}。研究表明，相邻城市之间的\PM 浓度差异可达50 $\mu$g/m$^3$以上，对推断模型的空间解析能力提出了极大挑战。
 
 （3）传输通道的典型性。\cqt{南风输送型}重污染过程在该区域频繁发生：污染气团从河北中南部沿太行山东麓北上，经石家庄、保定至北京，形成跨越数百公里的\cqt{污染传输带}\citep{yin2025regional}。这种定向传输特征为验证平流核的有效性提供了理想的实验条件。
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.90\textwidth]{figures/chap04_study_area.pdf}
-    \caption{京津冀及周边地区研究区域与任务设置}
-    \caption*{(a) 区域内的\cqt{2+26}城市分布；(b) 站点图$\mathcal{G}^{\text{s}}$（$N^{\text{s}} = 152$个节点）：基于地理邻近性（$<$200 km）构建的站点级空间图结构（邻接矩阵$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$），节点为监测站点，连边表示地理距离阈值内的空间邻接关系，用于问题一（站点推断）；(c) $N^{\text{s}}$个地面监测站点的稀疏分布；(d) 网格图$\mathcal{G}^{\text{g}}$（$N^{\text{g}}$个节点）：用于网格推断的$0.25^{\circ}$标准网格（邻接矩阵$A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$），图构建规则与(b)相同，但节点为网格像素，用于问题二（网格推断）。两套图$\mathcal{G}^{\text{s}}$与$\mathcal{G}^{\text{g}}$采用相同的扩散核$\tilde{A}^{\mathcal{D}}$和平流核$\tilde{A}^{\mathcal{A}}$的构建方法，但各自独立训练（参数不共享），仅节点集合与矩阵维度不同。}
-    \label{fig:study_area}
-\end{figure}
-
 
 \subsection{多源异构数据集构建}
 \label{subsec:multimodal_data}
@@ -166,20 +165,12 @@
 
 \subsubsection{气象驱动数据（$\mathbf{M}$）}
 
-气象条件（记为$\mathbf{M} \in \mathbb{R}^{N \times D_M}$）是决定污染物扩散、输送和沉降的关键动力学因素。本研究采用欧洲中期天气预报中心（ECMWF）发布的ERA5再分析资料\citep{hersbach2020era5}。相比于传统的地面气象站点观测，ERA5提供了全覆盖的格点化数据，能够更好地描述区域气象场的空间连续性。
-
-选取的气象变量与第\ref{chap:prediction}章一致，涵盖了影响\PM 演化的关键物理过程：风场向量（$u_{100}, v_{100}$）直接决定污染物的水平平流输送方向与强度；边界层高度（BLH）决定污染物垂直扩散的混合层体积；降水（TP）与相对湿度（RH）反映湿沉降清除机制和吸湿性增长过程\citep{tai2010correlations}。
-
-值得注意的是，对于推断任务，气象数据在所有节点（包括目标节点）上都是可用的——这与目标节点缺乏历史污染观测形成鲜明对比。这一特点为模型提供了重要的物理上下文信息，使得即使在完全无观测的位置，模型也能基于当地的气象条件进行合理推断。
+气象驱动数据（$\mathbf{M} \in \mathbb{R}^{N \times D_M}$）采用与第\ref{chap:prediction}章相同的ERA5再分析资料\citep{hersbach2020era5}，选取的变量涵盖风场、边界层高度、温度、湿度、降水等影响\PM 演化的关键物理过程（详见第\ref{subsec:meteo_data}节）。值得注意的是，与目标节点缺乏历史污染观测不同，气象数据在所有节点（包括目标节点）上都是可用的，为模型提供了重要的物理上下文信息，使得即使在完全无观测的位置，模型也能基于当地的气象条件进行合理推断。
 
 
 \subsubsection{排放清单数据（$\mathbf{E}$）}
 
-人为排放（记为$\mathbf{E} \in \mathbb{R}^{N \times D_E}$）是大气污染的物质基础。本研究使用了清华大学开发的中国多尺度排放清单模型（MEIC）\citep{zheng2018trends,li2017anthropogenic}。该清单提供了包括\NOx（$E_{\text{NO}_x}$）、VOC（$E_{\text{VOC}}$）、\SOtwo（$E_{\text{SO}_2}$）、\NHthree（$E_{\text{NH}_3}$）以及一次\PM（$E_{\text{PM}_{2.5}}$）等主要污染物的月度网格化排放数据。
-
-由于月度数据的时效性不足以支撑小时级推断，采用与第\ref{chap:prediction}章相同的时间分配方法\citep{inventory}，将月度排放总量降尺度为小时分辨率（详见第\ref{subsec:emis_data}节）。
-
-排放数据在推断任务中的角色与预测任务类似：通过提供污染物的\cqt{源强}信息，帮助模型学习\cqt{高排放区域污染水平通常较高}的关联规律。这一信息对于推断缺乏监测的工业区域尤为重要。
+排放数据（$\mathbf{E} \in \mathbb{R}^{N \times D_E}$）采用与第\ref{chap:prediction}章相同的MEIC清单\citep{zheng2018trends,li2017anthropogenic}，包含\NOx、VOC、\SOtwo、\NHthree 及一次\PM 等主要污染物的网格化排放，并通过时间分配方法降尺度为小时分辨率（详见第\ref{subsec:emis_data}节）。排放数据通过提供污染物的\cqt{源强}信息，帮助模型学习\cqt{高排放区域污染水平通常较高}的关联规律，对于推断缺乏监测的工业区域尤为重要。
 
 
 \subsubsection{卫星遥感AOD数据（$\mathbf{X}^{\text{AOD}}$）}
@@ -191,18 +182,18 @@
 
 然而，如第\ref{sec:infer_intro}节所述，AOD数据存在以下局限性：（1）云层遮挡导致非随机缺失——在AHI的反演算法中，被判定为有云的像素将被直接标记为无效值，夜间也完全不可用；（2）地表反射率干扰——在冬季的北方地区，地表积雪的高反射率会与大气信号混淆；（3）垂直分布解耦——当存在高空传输层时，高AOD值并不一定代表近地面高污染。
 
-鉴于上述特性，若将AOD作为模型的输入特征，会导致模型在云覆盖区域因特征缺失而瘫痪。因此，本研究采取了全新的策略：不将AOD作为输入，而是将其作为训练时的空间结构约束。我们对原始AOD数据进行了严格的质量控制，剔除置信度较低的像素，并生成对应的有效性掩码矩阵$\boldsymbol{\omega}^{\text{AOD}}$，使得损失函数能够自动忽略无效区域。
+鉴于上述特性，若将AOD作为模型的输入特征，会导致模型在云覆盖区域因特征缺失而瘫痪。因此，本研究采取了全新的策略：不将AOD作为模型的直接输入，而是将其作为训练时的空间结构约束——正如图~\ref{fig:inference_problem}中AOD数据箭头标注的\cqt{Input (Loss)}所示，AOD通过损失函数$\mathcal{L}_{\mathrm{AOD}}$间接参与模型训练，而非作为前向传播的输入特征。我们对原始AOD数据进行了严格的质量控制，剔除置信度较低的像素，并生成对应的有效性掩码矩阵$\boldsymbol{\omega}^{\text{AOD}}$，使得损失函数能够自动忽略无效区域。
 
 \subsection{图结构构建（$\mathcal{G}^{\text{s}}$与$\mathcal{G}^{\text{g}}$）}
 \label{subsec:spin_graph}
 
-在进入推断流水线之前，需要为两个子任务分别构建空间传播的基础图结构。两套图采用相同的连边规则，仅节点集合不同。
+在进入推断流水线之前，需要为两个子任务分别构建空间传播的基础图结构。如图~\ref{fig:study_area}所示，两套图虽然节点集合不同——站点图$\mathcal{G}^{\text{s}}$以监测站点为节点（图~\ref{fig:study_area}(b)），网格图$\mathcal{G}^{\text{g}}$以$0.25^{\circ}$网格像素为节点（图~\ref{fig:study_area}(d)）——但\textbf{采用完全相同的连边规则和邻接矩阵构建方法}，即下文公式\eqref{eq:diffusion_adjacency}。区别仅在于：节点集合不同导致边集合的具体构成和邻接矩阵的维度不同（$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$ vs.\ $A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$）。
 
-\textbf{站点图$\mathcal{G}^{\text{s}} = (\mathcal{V}^{\text{s}}, \mathcal{E}^{\text{s}})$}。如图~\ref{fig:study_area}(b)所示，节点集$\mathcal{V}^{\text{s}}$为$N^{\text{s}} = 152$个国控监测站点，连边基于站点间的测地距离构建（邻接矩阵$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$），权重反映站点间的空间关联强度。
+\textbf{站点图$\mathcal{G}^{\text{s}} = (\mathcal{V}^{\text{s}}, \mathcal{E}^{\text{s}})$}。如图~\ref{fig:study_area}(b)所示，节点集$\mathcal{V}^{\text{s}}$为$N^{\text{s}} = 152$个国控监测站点，连边基于站点间的测地距离构建，权重反映站点间的空间关联强度。
 
-\textbf{网格图$\mathcal{G}^{\text{g}} = (\mathcal{V}^{\text{g}}, \mathcal{E}^{\text{g}})$}。节点集$\mathcal{V}^{\text{g}}$为覆盖研究区域的$N^{\text{g}}$个$0.25^{\circ}$网格像素，连边规则与站点图完全相同（邻接矩阵$A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$）。为了在网格图上提供训练监督信号，需要将图~\ref{fig:study_area}(c)中的站点观测映射到$0.25^{\circ}$网格上：将每个站点的坐标匹配到最近的网格像素，若同一像素内落入多个站点则取算术平均。如图~\ref{fig:study_area}(d)所示，蓝色区域为映射后拥有观测值的网格像素，其余大面积区域为无观测像素，直观展示了地面监测网络在网格尺度上的极端稀疏性——这正是网格推断任务需要克服的核心困难。
+\textbf{网格图$\mathcal{G}^{\text{g}} = (\mathcal{V}^{\text{g}}, \mathcal{E}^{\text{g}})$}。如图~\ref{fig:study_area}(d)所示，节点集$\mathcal{V}^{\text{g}}$为覆盖研究区域的$N^{\text{g}}$个$0.25^{\circ}$网格像素，连边规则与站点图完全相同。为了在网格图上提供训练监督信号，需要将图~\ref{fig:study_area}(c)中的站点观测映射到$0.25^{\circ}$网格上：将每个站点的坐标匹配到最近的网格像素，若同一像素内落入多个站点则取算术平均。图中蓝色区域为映射后拥有观测值的网格像素，其余大面积区域为无观测像素，直观展示了地面监测网络在网格尺度上的极端稀疏性——这正是网格推断任务需要克服的核心困难。
 
-两套图的邻接矩阵均基于地理学第一定律\cqt{相近事物更相关}（Tobler's First Law of Geography），按节点间的测地距离定义：
+两套图的邻接矩阵$A$（$A \in \{A^{\text{s}}, A^{\text{g}}\}$）均基于地理学第一定律\cqt{相近事物更相关}（Tobler's First Law of Geography），按节点间的测地距离以相同的方式定义：
 \begin{equation}
     A_{ij} = \begin{cases}
         \exp\left(-\frac{d_{ij}^2}{2\sigma_d^2}\right), & \text{if } d_{ij} < d_{\text{th}} \\
@@ -219,13 +210,13 @@
 \section{数据融合与推断流程}
 \label{sec:spin_model}
 
-针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的设计思路与数据融合流程。该模型的关键不在于单一网络架构的创新，而在于如何将多源异构数据通过物理合理的方式融合到统一的推断框架中。具体而言，SPIN需要融合四类信息：（1）地面观测数据——提供稀疏但精确的\cqt{锚点}浓度值；（2）气象与排放数据——为每个空间位置（包括无观测区域）提供本地物理环境背景；（3）图结构与物理传播机制——将扩散与平流的大气传输规律编码为节点间的信息传递路径，实现从有观测区域向无观测区域的物理合理外推；（4）卫星遥感AOD数据——提供覆盖面广但存在非随机缺失的空间结构约束。这四类数据在精度、覆盖率和可靠性上各有优劣，SPIN的核心设计思想是让它们在推断流程中各司其职、互为补充。
+针对第\ref{sec:infer_intro}节提出的两个核心问题，本节详细阐述SPIN（Spatiotemporal Physics-Guided Inference Network）模型的设计思路与数据融合流程。该模型的关键不在于单一网络架构的创新，而在于如何将多源异构数据通过物理合理的方式融合到统一的推断框架中。具体而言，SPIN需要融合四类信息：（1）地面观测数据——提供稀疏但精确的\cqt{锚点}浓度值；（2）气象与排放数据——为每个空间位置（包括无观测区域）提供本地物理环境背景；（3）图结构与物理传播机制——将扩散与平流的大气传输规律编码为节点间的信息传递路径，实现从有观测区域向无观测区域的物理合理外推；（4）卫星遥感AOD数据的应用——提供覆盖面广但存在非随机缺失的空间结构约束。这四类数据在精度、覆盖率和可靠性上各有优劣，SPIN的核心设计思想是让它们在推断流程中各司其职、互为补充。
 
 该模型遵循第\ref{subsec:paradigm}节提出的\cqt{物理启发的数据驱动建模}范式，与第\ref{chap:prediction}章的PCDCNet形成互补关系：PCDCNet通过LID--STD--TAD三模块解耦时间维度的化学反应、空间传输和累积过程，用于预测已知站点的未来状态；而SPIN通过扩散--平流双核解耦空间维度的各向同性与各向异性传输过程，用于推断未知位置的当前状态。
 
 基于第\ref{subsec:spin_graph}节构建的站点图$\mathcal{G}^{\text{s}}$与网格图$\mathcal{G}^{\text{g}}$，SPIN的推断流程由四阶段流水线组成。两个子任务$\mathcal{F}^{\text{s}}_{\Theta^{\text{s}}}$与$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$采用完全相同的四阶段架构，但各自独立训练，仅在输入节点集合、训练数据与损失函数上有所区别。
 
-如图~\ref{fig:model_architecture}所示，四个阶段依次为：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，在基础图上构建扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$，通过物理启发的双流传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）；阶段四，施加多层级损失约束，其中网格推断$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$额外引入AOD梯度约束（第\ref{subsec:stage4_constraints}节）。
+如图~\ref{fig:model_architecture}所示，四个阶段依次为：阶段一，通过动态节点掩码模拟数据缺失场景，赋予模型归纳式泛化能力（第\ref{subsec:stage1_masking}节）；阶段二，利用时间卷积网络编码本地物理特征，为所有节点提供初始浓度估计（第\ref{subsec:stage2_encoding}节）；阶段三，在基础图上构建扩散核$\tilde{A}^{\mathcal{D}}$与平流核$\tilde{A}^{\mathcal{A}}$，通过物理启发的双流传播机制实现空间信息交互（第\ref{subsec:stage3_propagation}节）；阶段四，施加多层级损失约束，其中网格推断$\mathcal{F}^{\text{g}}_{\Theta^{\text{g}}}$额外引入AOD梯度约束（第\ref{subsec:stage4_constraints}节）。下面分别详细介绍各阶段的设计。
 
 \begin{figure}[htbp]
     \centering
@@ -256,38 +247,19 @@
 
 本阶段为站点推断和网格推断提供统一的特征编码，为所有节点（包括阶段一中被掩码的目标节点，无论是站点还是网格像素）提供基于本地物理条件的初始浓度估计。
 
-% 时序特征编码器
-在大气系统中，某一点的污染物浓度不仅受周边传输影响，更取决于本地的排放强度和气象条件（如湿度影响吸湿性增长，边界层高度影响垂直稀释）\citep{tai2010correlations}。为了捕捉这些本地过程的时间依赖性，我们采用时间卷积网络（Temporal Convolutional Network, TCN）作为特征提取器。
-
-令$\mathbf{x}_i^{in} = [\mathbf{M}_i, \mathbf{E}_i] \in \mathbb{R}^{T' \times F_{in}}$表示节点$i$在过去$T'$个时间步内的输入特征序列，其中包含了气象变量$\mathbf{M}$和排放变量$\mathbf{E}$。TCN将该序列映射为高维潜在表示$\mathbf{h}_i^{(0)}$：
+在大气系统中，某一点的污染物浓度不仅受周边传输影响，更取决于本地的排放强度和气象条件（如湿度影响吸湿性增长，边界层高度影响垂直稀释）\citep{tai2010correlations}。为了捕捉这些本地过程的时间依赖性，我们采用第\ref{subsec:stgnn}节介绍的时间卷积网络（TCN，公式\eqref{eq:tcn}）作为特征提取器。令$\mathbf{x}_i^{in} = [\mathbf{M}_i, \mathbf{E}_i] \in \mathbb{R}^{T' \times F_{in}}$表示节点$i$在过去$T'$个时间步内的输入特征序列，其中包含气象变量$\mathbf{M}$和排放变量$\mathbf{E}$。TCN通过膨胀卷积以指数级扩大的感受野捕捉长周期的累积效应，将该序列映射为高维时序表征$\mathbf{h}_i^{\text{temp}}$：
 \begin{equation}
-    \mathbf{h}_i^{(0)} = \text{TCN}(\mathbf{x}_i^{in})
+    \mathbf{h}_i^{\text{temp}} = \text{TCN}(\mathbf{x}_i^{in}) \in \mathbb{R}^{d_h}
 \label{eq:tcn_encoding}
 \end{equation}
+\noindent 本研究采用4层膨胀卷积（膨胀因子$[1, 2, 4, 8]$），感受野覆盖16小时，足以捕捉日变化特征。
 
-相较于循环神经网络（RNNs，如LSTM/GRU），TCN在本任务中具有显著优势：通过膨胀卷积（Dilated Convolution），TCN能够以指数级扩大的感受野捕捉长周期的累积效应（例如过去24小时的排放累积）；同时支持并行处理整个时间序列，极大提升了大规模网格推断时的计算效率\citep{bai2018empirical}。
-
-TCN由多层膨胀卷积组成。第$l$层的输出为：
-\begin{equation}
-\mathbf{h}^{(l)} = \text{ReLU}\left(\text{Conv1D}(\mathbf{h}^{(l-1)}, \mathbf{W}^{(l)}, \text{dilation}=2^l) + \mathbf{b}^{(l)}\right)
-\label{eq:tcn_layer}
-\end{equation}
-\noindent 式中膨胀因子$2^l$使得$L$层TCN的感受野达到$2^L$个时间步。本研究采用4层膨胀卷积（膨胀因子$[1, 2, 4, 8]$），感受野覆盖16小时，足以捕捉日变化特征。
-
-TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本地物理条件的\cqt{初始猜测（Initial Guess）}。这一设计是实现归纳式推断的关键：目标节点虽然缺乏历史污染观测，但其气象和排放数据是完整可用的。
-
-对于观测节点$v \in \mathcal{V}_{\text{obs}}$，将观测值$X_v$与时序表征拼接：
-\begin{equation}
-\mathbf{h}_v^{(0)} = [\mathbf{h}_v^{\text{temp}}, X_v] \in \mathbb{R}^{d_h+1}
-\label{eq:obs_init}
-\end{equation}
-\noindent 对于目标节点$v \in \mathcal{V}_{\text{target}}$，仅使用时序表征作为初始化：
-\begin{equation}
-\mathbf{h}_v^{(0)} = [\mathbf{h}_v^{\text{temp}}, 0] \in \mathbb{R}^{d_h+1}
-\label{eq:target_init}
-\end{equation}
-
-这种差异化的初始化策略体现了归纳式学习的核心思想：观测节点携带真实的污染信息，而目标节点仅携带环境背景信息，后者需要通过图传播从前者\cqt{借用}污染信息。
+$\mathbf{h}_i^{\text{temp}}$为每个节点提供了一个基于本地物理条件的\cqt{初始猜测}。这一设计是实现归纳式推断的关键：目标节点虽然缺乏历史污染观测，但其气象和排放数据是完整可用的。在此基础上，根据节点是否拥有观测数据，通过拼接操作构造进入图传播阶段的初始节点表示$\mathbf{h}_v^{(0)}$：对于观测节点$v \in \mathcal{V}_{\text{obs}}$，将真实观测值$X_v$拼接到时序表征之后；对于目标节点$v \in \mathcal{V}_{\text{target}}$，则以零值填充观测维度：
+\begin{align}
+\text{观测节点：} \quad \mathbf{h}_v^{(0)} &= [\mathbf{h}_v^{\text{temp}},\; X_v] \in \mathbb{R}^{d_h+1} \label{eq:obs_init} \\
+\text{目标节点：} \quad \mathbf{h}_v^{(0)} &= [\mathbf{h}_v^{\text{temp}},\; 0] \in \mathbb{R}^{d_h+1} \label{eq:target_init}
+\end{align}
+\noindent 式中$[\cdot,\;\cdot]$表示向量拼接操作，$d_h$为TCN输出的隐藏维度。$\mathbf{h}_v^{(0)}$即为阶段三图传播的输入——上标$(0)$表示尚未经过图传播层。这种差异化的初始化策略体现了归纳式学习的核心思想：观测节点携带真实的污染信息，而目标节点仅携带环境背景信息，后者需要通过图传播从前者\cqt{借用}污染信息。
 
 
 \subsection{阶段三：物理启发的双图空间传播}
@@ -406,13 +378,13 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 
 \subsubsection{推断损失（\LossInfer）}
 
-这是模型的主要优化目标。计算经过图网络传播后的最终预测值$\hat{\mathbf{X}}$与被掩码目标节点的真实观测值之间的L1误差：
+这是模型的主要优化目标。计算经过图网络传播后的最终预测值$\hat{\mathbf{X}}$与被掩码目标节点的真实观测值$\mathbf{X}$之间的$\ell_1$误差（即平均绝对误差，MAE）：
 \begin{equation}
     \mathcal{L}_{\mathrm{infer}} = \frac{1}{|\mathcal{V}_{\text{target}}|} \sum_{v \in \mathcal{V}_{\text{target}}} |\hat{X}_v - X_v|
 \label{eq:infer_loss}
 \end{equation}
 
-该损失函数直接驱动模型学习如何综合利用本地环境特征和邻居传播信息来填补数据盲区。采用$L_1$损失（MAE）而非$L_2$损失（MSE），以降低对异常值的敏感性——这在大气污染数据中尤为重要，因为极端污染事件虽然是重要的预测目标，但不应过度主导训练过程。
+\noindent 式中$\hat{X}_v$为节点$v$经阶段三图传播后的最终浓度预测值，$X_v$为该节点的真实观测浓度。该损失函数直接驱动模型学习如何综合利用本地环境特征和邻居传播信息来填补数据盲区。采用$\ell_1$损失（MAE）而非$\ell_2$损失（MSE），以降低对异常值的敏感性——这在大气污染数据中尤为重要，因为极端污染事件虽然是重要的预测目标，但不应过度主导训练过程。
 
 
 \subsubsection{初始化损失（\LossInit）}
@@ -422,7 +394,7 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
     \mathcal{L}_{\mathrm{init}} = \frac{1}{|\mathcal{V}_{\text{obs}}|} \sum_{v \in \mathcal{V}_{\text{obs}}} |\hat{X}_v^{\text{init}} - X_v|
 \label{eq:init_loss}
 \end{equation}
-\noindent 式中$\hat{X}_v^{\text{init}} = \text{MLP}(\mathbf{h}_v^{(0)})$为节点$v$在阶段二（第\ref{subsec:stage2_encoding}节）中由TCN编码得到的潜在表示$\mathbf{h}_v^{(0)}$经一个独立的MLP映射后产生的标量浓度估计值，代表了\textbf{仅基于本地气象与排放信息、尚未经过任何图传播}的初始浓度判断。换言之，$\hat{X}_v^{\text{init}}$是阶段二的直接输出，而$\hat{X}_v$（公式\ref{eq:decoder_stage4}）是经阶段三图传播后的最终输出，两者分别由$\mathcal{L}_{\mathrm{init}}$和$\mathcal{L}_{\mathrm{infer}}$约束。
+\noindent 式中$X_v$为观测节点$v$的真实\PM 浓度（与公式\eqref{eq:infer_loss}中相同），$\hat{X}_v^{\text{init}} = \text{MLP}(\mathbf{h}_v^{(0)})$为节点$v$在阶段二（第\ref{subsec:stage2_encoding}节）中由TCN编码得到的潜在表示$\mathbf{h}_v^{(0)}$经一个独立的MLP映射后产生的标量浓度估计值，代表了\textbf{仅基于本地气象与排放信息、尚未经过任何图传播}的初始浓度判断。换言之，$\hat{X}_v^{\text{init}}$是阶段二的直接输出，而$\hat{X}_v$（公式\ref{eq:decoder_stage4}）是经阶段三图传播后的最终输出，两者分别由$\mathcal{L}_{\mathrm{init}}$和$\mathcal{L}_{\mathrm{infer}}$约束。
 
 该损失的设计动机在于：在推断阶段，目标节点$\mathcal{V}_{\text{target}}$没有历史观测数据，其初始表示$\mathbf{h}_v^{(0)}$完全来自本地气象与排放特征（公式\ref{eq:target_init}）。如果TCN的编码缺乏物理意义，目标节点的初始估计将毫无信息量，后续的图传播将难以有效修正。因此，$\mathcal{L}_{\mathrm{init}}$通过在观测节点上施加监督，迫使TCN在没有任何邻居信息的情况下，仅凭本地条件就能给出一个尽可能接近真实值的基准估计。这样，目标节点即使缺乏观测数据，其基于相同TCN编码的初始估计也具有物理合理性，为后续的图传播提供了稳健的起始状态。
 
@@ -439,15 +411,15 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 \label{eq:gradient_definition}
 \end{equation}
 
-为了处理缺失值，利用节点级有效性掩码$\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（第\ref{sec:infer_data}节），其中$\omega_i^{\text{AOD}} = 1$表示节点$i$处有有效AOD观测，$\omega_i^{\text{AOD}} = 0$表示该节点因云遮挡而缺失。在此基础上定义边级掩码$\Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}$，当且仅当边$(i,j)$两端节点均有有效AOD数据时$\Omega_{ij}^{\text{AOD}} = 1$：
-\begin{equation}
-    \mathcal{L}_{\mathrm{AOD}} = \sum_{t=1}^{T'} \sum_{(i,j) \in \mathcal{E}} \left| \nabla_{ij}(\hat{\mathbf{X}}_t) - \nabla_{ij}(\mathbf{X}^{\text{AOD}}_t) \right| \cdot \Omega_{ij}^{\text{AOD}}
-\label{eq:aod_loss}
-\end{equation}
-\noindent 式中边级掩码由节点级掩码的乘积导出：
+为了处理缺失值，利用节点级有效性掩码$\boldsymbol{\omega}^{\text{AOD}} \in \{0,1\}^{N}$（第\ref{sec:infer_data}节），其中$\omega_i^{\text{AOD}} = 1$表示节点$i$处有有效AOD观测，$\omega_i^{\text{AOD}} = 0$表示该节点因云遮挡而缺失。在此基础上定义边级掩码：
 \begin{equation}
 \Omega_{ij}^{\text{AOD}} = \omega_i^{\text{AOD}} \cdot \omega_j^{\text{AOD}}
 \label{eq:aod_mask}
+\end{equation}
+\noindent 当且仅当边$(i,j)$两端节点均有有效AOD数据时$\Omega_{ij}^{\text{AOD}} = 1$。则AOD空间梯度损失项为：
+\begin{equation}
+    \mathcal{L}_{\mathrm{AOD}} = \sum_{t=1}^{T'} \sum_{(i,j) \in \mathcal{E}} \left| \nabla_{ij}(\hat{\mathbf{X}}_t) - \nabla_{ij}(\mathbf{X}^{\text{AOD}}_t) \right| \cdot \Omega_{ij}^{\text{AOD}}
+\label{eq:aod_loss}
 \end{equation}
 
 \begin{figure}[htbp]
@@ -684,8 +656,8 @@ TCN的输出$\mathbf{h}_i^{(0)}$实际上为每个节点提供了一个基于本
 
 （1）\textbf{构建了物理嵌入的双流图网络架构。}通过显式设计扩散核与平流核，模型成功解耦了浓度梯度驱动的各向同性扩散（公式\eqref{eq:diffusion_normalized}）与风场驱动的各向异性平流输送（公式\eqref{eq:advection_adjacency}）两类物理过程，分别对应公式（\ref{eq:advection_diffusion}）中的扩散项与平流项。平流核根据实时风场动态调整边权重，显式编码\cqt{上游影响下游}的定向传输规律；扩散核模拟浓度梯度驱动的均一化过程，在数据稀疏区域起到\cqt{保守滤波}作用。这种设计与第\ref{chap:prediction}章PM$_{2.5}$-GNN和PCDCNet的物理启发思想一脉相承。
 
-（2）\textbf{实现了归纳式时空推断能力。}通过动态掩码训练策略（公式\eqref{eq:inductive_sampling}），模型摆脱了对固定图结构的依赖，具备了对任意空间位置进行\cqt{虚拟传感}的能力。站点推断实验证明，该模型在未观测站点上的推断精度显著优于现有最优方法（MAE降低25.2\%），特别是在冬季复杂气象条件下表现出极强的鲁棒性。
+（2）\textbf{实现了归纳式时空推断能力。}通过动态掩码训练策略（公式\eqref{eq:inductive_sampling}），模型摆脱了对固定图结构的依赖，具备了对任意空间位置进行\cqt{虚拟传感}的能力。站点推断实验证明，该模型在未观测站点上的推断精度显著优于现有最优方法（较最优基线IGNNK的MAE降低25.2\%），特别是在冬季复杂气象条件下表现出极强的鲁棒性。
 
 （3）\textbf{提出了全天候制图的AOD融合范式。}创新性地提出\cqt{掩码AOD梯度损失}（公式\eqref{eq:aod_loss}），实现了从\cqt{依赖卫星输入}到\cqt{利用卫星约束}的范式转换。网格推断实验表明，这一机制不仅有效利用了晴空下的卫星空间信息，更在卫星数据缺失（云/夜）时，保证了系统能够平滑回退到物理驱动模式，从而生成了时空连续、物理一致的高分辨率污染地图。
 
-从方法论角度，本章将第\ref{subsec:paradigm}节提出的\cqt{物理启发数据驱动建模}范式从时间维度（第\ref{chap:prediction}章的预测）扩展到空间维度（推断），通过在图神经网络中显式嵌入扩散--平流双核物理机制并采用归纳式学习策略，使模型从\cqt{监测什么推断什么}的直推式范式跨越到\cqt{学习物理规律、推断任意位置}的归纳式范式。SPIN有效地充当了\cqt{虚拟传感器}的角色：在站点推断中为未受监控的郊区和农村地区提供可靠的逐小时浓度估计（MAE降低25.2\%），在网格推断中生成$0.25^{\circ}$分辨率的全天候污染场，可用于识别监测盲区中的污染热点与评估环境暴露公平性。本章构建的高分辨率污染场也为后续第\ref{chap:simulation}章开展精细化的情景模拟奠定了空间数据基础。
+从方法论角度，本章将第\ref{subsec:paradigm}节提出的\cqt{物理启发数据驱动建模}范式从时间维度（第\ref{chap:prediction}章的预测）扩展到空间维度（推断），通过在图神经网络中显式嵌入扩散--平流双核物理机制并采用归纳式学习策略，使模型从\cqt{监测什么推断什么}的直推式范式跨越到\cqt{学习物理规律、推断任意位置}的归纳式范式。SPIN有效地充当了\cqt{虚拟传感器}的角色：在站点推断中为未受监控的郊区和农村地区提供可靠的逐小时浓度估计（较最优基线IGNNK的MAE降低25.2\%），在网格推断中生成$0.25^{\circ}$分辨率的全天候污染场，可用于识别监测盲区中的污染热点与评估环境暴露公平性。本章构建的高分辨率污染场也为后续第\ref{chap:simulation}章开展精细化的情景模拟奠定了空间数据基础。
