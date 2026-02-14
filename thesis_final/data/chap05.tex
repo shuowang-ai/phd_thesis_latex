@@ -181,30 +181,30 @@ IGNN模型遵循第\ref{chap:methodology}章图\ref{fig:unified_framework}所示
   \label{fig:ignn_arch}
 \end{figure}
 
-谱图卷积：IGNN的空间建模采用第\ref{subsec:gnn_paradigms}节介绍的谱方法。与第\ref{chap:prediction}章和第\ref{chap:inference}章中使用的消息传递（MPNN）范式不同，本章选用切比雪夫谱卷积（公式\eqref{eq:chebynet}），其优势在于通过多项式阶数$K_c$精确控制空间感受野的跳数，使模型能够系统地聚合$K_c$阶邻域内的气象与排放信息。模型通过拉普拉斯矩阵将输入$(M, E)$变换到傅里叶空间\citep{kipf2017semi}：
+谱图卷积：IGNN的空间建模采用第\ref{subsec:gnn_paradigms}节介绍的谱方法。与第\ref{chap:prediction}章和第\ref{chap:inference}章中使用的消息传递（MPNN）范式不同，本章选用切比雪夫谱卷积（公式\eqref{eq:chebynet}），其优势在于通过多项式阶数$K_c$精确控制空间感受野的跳数，使模型能够系统地聚合$K_c$阶邻域内的气象与排放信息。模型通过拉普拉斯矩阵将输入$(\mathbf{M}, \mathbf{E})$变换到傅里叶空间\citep{kipf2017semi}：
 
 \begin{equation}
-\mathcal{G}_{\theta} * \mathcal{G}(M, E) = \mathbf{U}\mathcal{G}_{\theta}(\boldsymbol{\Lambda})\mathbf{U}^{T}(M, E)
+g_{\theta} * (\mathbf{M}, \mathbf{E}) = \mathbf{U} g_{\theta}(\boldsymbol{\Lambda})\mathbf{U}^{T}(\mathbf{M}, \mathbf{E})
 \label{eq:ignn_spectral_conv}
 \end{equation}
 
-\noindent 式中$L = I_{N} - D^{-1/2}AD^{-1/2} = \mathbf{U}\boldsymbol{\Lambda} \mathbf{U}^{T}$为归一化图拉普拉斯矩阵。为降低计算复杂度，采用切比雪夫多项式近似\citep{kipf2017semi}：
+\noindent 式中$\mathbf{L} = \mathbf{I}_{N} - \mathbf{D}^{-1/2}\mathbf{A}\mathbf{D}^{-1/2} = \mathbf{U}\boldsymbol{\Lambda} \mathbf{U}^{T}$为归一化图拉普拉斯矩阵。为降低计算复杂度，采用切比雪夫多项式近似\citep{kipf2017semi}：
 
 \begin{equation}
-\mathcal{G}_{\theta}(L) = \sum_{k=0}^{K_c-1}\theta_{k}T_{k}(\tilde{L})
+g_{\theta}(\mathbf{L}) = \sum_{k=0}^{K_c-1}\theta_{k}T_{k}(\tilde{\mathbf{L}})
 \label{eq:chebyshev}
 \end{equation}
 
-\noindent 式中$\tilde{L} = \frac{2}{\lambda_{\max}}L - I_{N}$，$K_c$为切比雪夫多项式的阶数。通过这种方式，第$k$阶邻域的气象和排放信息被有效聚合。
+\noindent 式中$\tilde{\mathbf{L}} = \frac{2}{\lambda_{\max}}\mathbf{L} - \mathbf{I}_{N}$，$K_c$为切比雪夫多项式的阶数。通过这种方式，第$k$阶邻域的气象和排放信息被有效聚合。
 
 时间卷积：采用膨胀卷积从气象和排放时间序列中提取时间特征。完整的前向传播过程可表述为：
 
 \begin{equation}
-\mathcal{F} = \text{ReLU}\left(\varphi * \left(\text{ReLU}\left(\mathcal{G}_{\theta}(L)(M, E)\right)\right)\right)
+\mathbf{H}^{\text{out}} = \text{ReLU}\left(\varphi * \left(\text{ReLU}\left(g_{\theta}(\mathbf{L})(\mathbf{M}, \mathbf{E})\right)\right)\right)
 \label{eq:temporal_conv}
 \end{equation}
 
-\noindent 式中$\varphi$为卷积参数，$*$为卷积操作。
+\noindent 式中$\mathbf{H}^{\text{out}}$为时空模块的输出隐表示，$\varphi$为时间卷积参数，$*$为卷积操作。
 
 
 \subsection{训练与推理范式}
@@ -244,7 +244,7 @@ IGNN模型采用两阶段范式实现从历史学习到未来模拟的知识迁�
 \subsection{模型训练与验证}
 \label{subsec:ignn_validation}
 
-IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时间顺序划分为训练集（2014-2018年）、验证集（2019年）和测试集（2020年）。模型基于PyTorch实现。主要超参数设置：时间窗口$T'=24$（72小时），切比雪夫多项式阶数$K=3$，隐藏维度$d=32$，学习率$10^{-4}$，批大小32，优化器使用Adam。训练在NVIDIA Tesla K80 GPU上进行，共训练90轮，总耗时约3小时。训练后的模型文件大小仅119 KB，便于部署与快速推理。
+IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时间顺序划分为训练集（2014-2018年）、验证集（2019年）和测试集（2020年）。模型基于PyTorch实现。主要超参数设置：时间窗口$T'=24$（72小时），切比雪夫多项式阶数$K_c=3$，隐藏维度$d_h=32$，学习率$10^{-4}$，批大小32，优化器使用Adam。训练在NVIDIA Tesla K80 GPU上进行，共训练90轮，总耗时约3小时。训练后的模型文件大小仅119 KB，便于部署与快速推理。
 
 将IGNN与以下方法进行了对比：
 \begin{itemize}
@@ -329,7 +329,7 @@ IGNN模型使用2014-2020年的历史数据进行训练与验证，数据按时�
 
 
 % ------------------------------------------------------------
-% 5.4 未来情景模拟结果与分析
+% 5.5 未来情景模拟结果与分析
 % ------------------------------------------------------------
 \section{模拟结果与分析}
 \label{sec:sim_results}
