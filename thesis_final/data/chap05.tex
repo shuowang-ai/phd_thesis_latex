@@ -56,7 +56,7 @@
 \hat{\mathbf{X}}^{\text{future}}_{t} = \mathcal{F}_{\Theta^*}\left(\mathbf{M}^{\text{future}}_{t-T'+1:t}, \mathbf{E}^{\text{future}}_{t-T'+1:t}, \mathcal{G}\right)
 \label{eq:forward_simulation}
 \end{equation}
-\noindent 式中，$\mathbf{M}^{\text{future}}_t \in \mathbb{R}^{N \times D_M}$表示第$t$时刻的未来气象变量（CMIP6，包括温度、风速、辐射等），$\mathbf{E}^{\text{future}}_t \in \mathbb{R}^{N \times D_E}$表示第$t$时刻的未来排放数据（DPEC，包括\NOx、VOC、SO$_2$、\PM 一次排放等），$\hat{\mathbf{X}}^{\text{future}}_t \in \mathbb{R}^{N \times 2}$表示模拟的\PM 和\ozone 浓度，$\Theta^*$为通过历史数据预训练得到的固定模型参数。
+\noindent 式中，$\mathbf{M}^{\text{future}}_t \in \mathbb{R}^{N \times D_M}$表示第$t$时刻的未来气象变量（CMIP6，包括温度、风速、辐射等），$\mathbf{E}^{\text{future}}_t \in \mathbb{R}^{N \times D_E}$表示第$t$时刻的未来排放数据（DPEC，包括\NOx{}、VOC、SO$_2${}、\PM{}一次排放等），$\hat{\mathbf{X}}^{\text{future}}_t \in \mathbb{R}^{N \times 2}$表示模拟的\PM 和\ozone 浓度，$\Theta^*$为通过历史数据预训练得到的固定模型参数。
 
 与第\ref{chap:prediction}章的自回归预测范式不同，\textbf{本章的模型输入不包含污染物浓度观测，仅依赖气象和排放驱动}。具体而言，模型将一个长度为$T'$的时间窗口（从$t-T'+1$到$t$时刻）内的气象场$\mathbf{M}^{\text{future}}$和排放数据$\mathbf{E}^{\text{future}}$，映射为该窗口末端$t$时刻的污染物浓度$\hat{\mathbf{X}}^{\text{future}}_t$\penalty10000{}。由于每个时刻的模拟仅依赖当前窗口内的气象和排放输入，而不依赖前一时刻的模拟结果，因此避免了长期积分中的误差累积问题，同时使模型能够直接响应任意假设的排放情景，支撑\cqt{如果减排50\%结果如何}这类假设情景分析。
 
