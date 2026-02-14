@@ -371,7 +371,7 @@ $\mathbf{h}_i^{\text{temp}}$为每个节点提供了一个基于本地物理条�
 为了在数据驱动的基础上引入物理约束，特别是解决卫星AOD数据\cqt{虽有空间结构但存在缺失与偏差}的难题，设计了一个包含三部分的复合损失函数：
 \begin{equation}
     \mathcal{L} = \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}
-\label{eq:total_loss_chap3}
+\label{eq:total_loss_chap4}
 \end{equation}
 \noindent 式中$\lambda_1$和$\lambda_2$为平衡系数。三项损失各司其职：$\mathcal{L}_{\mathrm{infer}}$为主损失，约束经图传播后目标节点的最终推断精度；$\mathcal{L}_{\mathrm{init}}$为辅助损失，约束TCN编码器在图传播之前即能给出合理的本地初始估计；$\mathcal{L}_{\mathrm{AOD}}$为空间结构约束，仅在网格推断中启用，利用卫星AOD的空间梯度引导预测场的形态。下面分别介绍各项的技术设计。
 
@@ -475,7 +475,7 @@ $\mathbf{h}_i^{\text{temp}}$为每个节点提供了一个基于本地物理条�
         \STATE $\mathcal{L}_{\mathrm{infer}} \leftarrow \frac{1}{|\mathcal{V}_{\text{target}}^{(b)}|}\sum_{v \in \mathcal{V}_{\text{target}}^{(b)}} |\hat{X}_v - X_v|$ \COMMENT{公式\ref{eq:infer_loss}}
         \STATE $\mathcal{L}_{\mathrm{init}} \leftarrow \frac{1}{|\mathcal{V}_{\text{obs}}^{(b)}|}\sum_{v \in \mathcal{V}_{\text{obs}}^{(b)}} |\hat{X}_v^{\text{init}} - X_v|$ \COMMENT{公式\ref{eq:init_loss}}
         \STATE $\mathcal{L}_{\mathrm{AOD}} \leftarrow \sum_{(i,j) \in \mathcal{E}} |\nabla_{ij}(\hat{\mathbf{X}}) - \nabla_{ij}(\mathbf{X}^{\text{AOD}})| \cdot \Omega_{ij}^{\text{AOD}}$ \COMMENT{公式\ref{eq:aod_loss}}
-        \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}$ \COMMENT{公式\ref{eq:total_loss_chap3}}
+        \STATE $\mathcal{L} \leftarrow \mathcal{L}_{\mathrm{infer}} + \lambda_1 \mathcal{L}_{\mathrm{init}} + \lambda_2 \mathcal{L}_{\mathrm{AOD}}$ \COMMENT{公式\ref{eq:total_loss_chap4}}
     \ENDFOR
 
     \STATE $\Theta \leftarrow \Theta - \eta \nabla_{\Theta} \mathcal{L}$

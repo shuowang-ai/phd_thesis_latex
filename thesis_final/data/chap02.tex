@@ -20,7 +20,7 @@
 \subsection{图的基本概念}
 \label{subsec:graph_concept}
 
-图（Graph）是描述实体及其关系的数学结构，形式化定义为$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{A})$，其中$\mathcal{V} = \{v_1, v_2, \ldots, v_N\}$为节点集合，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$为边集合，$\mathbf{A} \in \mathbb{R}^{N \times N}$为邻接矩阵。每个节点$v_i$附带特征向量$\mathbf{x}_i \in \mathbb{R}^{F}$，边$e_{ij}$附带边特征$\mathbf{e}_{ij}$。在大气污染问题中，节点通常对应监测站点或城市，节点特征包含污染物浓度与气象变量，边特征可编码节点间的空间距离或风场信息。具体的图构建方法将在各应用章节（第\ref{chap:prediction}--\ref{chap:simulation}章）中根据任务特点详细阐述。
+图（Graph）是描述实体及其关系的数学结构，形式化定义为$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，其中$\mathcal{V} = \{v_1, v_2, \ldots, v_N\}$为节点集合，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$为边集合。图的连接关系可用邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$表示，其中$A_{ij} > 0$当且仅当$(v_i, v_j) \in \mathcal{E}$。每个节点$v_i$附带特征向量$\mathbf{x}_i \in \mathbb{R}^{F}$，边$e_{ij}$附带边特征$\mathbf{e}_{ij}$。在大气污染问题中，节点通常对应监测站点或城市，节点特征包含污染物浓度与气象变量，边特征可编码节点间的空间距离或风场信息。具体的图构建方法将在各应用章节（第\ref{chap:prediction}--\ref{chap:simulation}章）中根据任务特点详细阐述。
 
 \subsection{图神经网络的两大范式}
 \label{subsec:gnn_paradigms}
@@ -286,4 +286,4 @@
 \section{本章小结}
 \label{sec:method_summary}
 
-本章系统阐述了物理启发的时空图神经网络建模范式，为后续三个应用章节奠定理论基础。首先介绍了图神经网络的基础理论（谱方法与消息传递范式）及其在地球科学中的前沿应用；然后阐述了对流-扩散方程的物理含义与质量守恒约束，并从图结构、网络架构、损失函数和输入特征四个层面说明了物理知识融入GNN的具体途径；最后提出了\cqt{融合物理启发的图神经网络建模}研究范式，构建了预测、推断、模拟三类任务的统一框架（图\ref{fig:unified_framework}）。本章所建立的方法论框架为后续章节的具体模型设计提供了统一的理论视角。
+本章系统阐述了物理启发的时空图神经网络建模范式，为后续三个应用章节奠定理论基础。首先介绍了图神经网络的基础理论（谱方法与消息传递范式）及其在地球科学中的前沿应用；然后阐述了对流-扩散方程的物理含义与质量守恒约束，并从图结构、网络架构、损失函数三个层面说明了物理知识融入GNN的具体途径；最后提出了\cqt{融合物理启发的图神经网络建模}研究范式，构建了预测、推断、模拟三类任务的统一框架（图\ref{fig:unified_framework}）。本章所建立的方法论框架为后续章节的具体模型设计提供了统一的理论视角。

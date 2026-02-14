@@ -23,6 +23,8 @@
 \item[\(K\)] 大气扩散系数，用于对流-扩散方程的扩散项。
 \item[\(t=0\)] 起报时刻，\(t \leq 0\) 为历史时刻，\(t>0\) 为未来预测时刻。
 \item[\(T', T\)] 历史输入窗口与未来预测窗口长度。
+\item[\(d_{ij}\)] 节点$i$与$j$之间的测地距离（球面大圆距离），用于图邻接矩阵的构建。
+\item[\(D_X, D_M, D_E\)] 污染物、气象变量与排放变量的特征维度。
 
 % 3. 模型与物理算子
 \item[\(\mathcal{F}_\Theta\)] 参数为 \(\Theta\) 的深度学习模型，学习真实空气质量生成过程 \(f(\mathbf{M}, \mathbf{E})\) 的映射。
@@ -30,12 +32,15 @@
 \item[\(C\)] 污染物浓度场的点值形式，用于对流-扩散方程表述。
 \item[\(S, D\)] 对流-扩散方程中的排放源项与沉降汇项。
 \item[\(\mathbf{u}\)] 风速矢量场，用于计算平流传输。
-\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。
+\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。$\mathbf{h}_i \in \mathbb{R}^{d_h}$，其中$d_h$为隐层维度。
+\item[\(R\)] 对流-扩散方程中的化学反应项。
 \item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集。
 \item[\(\nabla\)] 空间梯度算子，用于扩散/平流约束。
 \item[\(\mathcal{L}\)] 总损失函数，由监督损失与物理约束损失组成。
 \item[\(\mathcal{L}_{\mathrm{Pred}}, \mathcal{L}_{\mathrm{DIC}}\)] 预测损失与领域一致性约束损失（第\ref{chap:prediction}章）。
 \item[\(\mathcal{L}_{\mathrm{infer}}, \mathcal{L}_{\mathrm{init}}, \mathcal{L}_{\mathrm{AOD}}\)] 推断损失、初始场约束损失与AOD梯度约束损失（第\ref{chap:inference}章）。
+\item[\(\lambda, \lambda_1, \lambda_2\)] 损失函数中的平衡系数，控制数据拟合项与物理约束项之间的权重。
+\item[\(r_{\text{mask}}\)] 动态节点掩码比例（第\ref{chap:inference}章），控制训练时随机遮蔽的站点比例。
 \item[\(\ell_1, \ell_2\)] $\ell_1$损失（平均绝对误差MAE）与$\ell_2$损失（均方误差MSE）。本文采用$\ell_1$损失作为主要优化目标，以降低对异常值的敏感性。
 
 % 4. 缩略语

@@ -128,11 +128,12 @@
 \label{eq:heaviside}
 \end{equation}
 
-\noindent $d_{ij}$为节点$i$与$j$之间的地理距离，采用L2范数计算：
+\noindent $d_{ij}$为节点$i$与$j$之间的测地距离（球面大圆距离），基于节点的经纬度坐标$\rho_i$和$\rho_j$计算：
 \begin{equation}
-    d_{ij} = \|\rho_i - \rho_j\|_2
+    d_{ij} = R_{\oplus} \arccos\left(\sin\phi_i \sin\phi_j + \cos\phi_i \cos\phi_j \cos(\lambda_j - \lambda_i)\right)
 \label{eq:distance}
 \end{equation}
+\noindent 式中$R_{\oplus}$为地球半径，$(\phi_i, \lambda_i)$和$(\phi_j, \lambda_j)$分别为节点$i$和$j$的纬度与经度。
 
 \noindent $m_{ij}$为两节点连线路径上的相对山脉高度，定义为路径上最高点与两端点中较高者的海拔差：
 \begin{equation}
@@ -666,8 +667,9 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 & PM$_{2.5}$-GNN & \cmark & \cmark & \xmark & \cmark & \cmark & \xmark \\
 & AirPhyNet & \cmark & \cmark & \xmark & \xmark & \cmark & \cmark \\
 \midrule
-\multirow{2}{*}{本文方法} & CMAQ (参考) & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
-& \textbf{PCDCNet} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+数值模式（参考） & CMAQ & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\midrule
+本文方法 & \textbf{PCDCNet} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
 \bottomrule
 \end{tabular}
 \end{table}
