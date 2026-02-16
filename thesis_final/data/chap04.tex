@@ -43,7 +43,7 @@
     \centering
     \includegraphics[width=\textwidth]{figures/chap04_inference_problem.pdf}
     \caption{大气污染空间推断问题示意图}
-    \caption*{左侧与上方为四类输入数据（标注为Input）：观测站点历史\PM 时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$（上方中部）、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$（左上）、排放场$\mathbf{E}^{F}_{t-T'+1:t}$（左中）和卫星遥感AOD数据$\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$（左下，其中斜线阴影区域表示因云层遮挡等原因导致的AOD缺失区域）。需要注意的是，AOD数据的输入箭头标注为\cqt{Input (Loss)}，表示AOD并非作为模型的直接输入特征，而是通过损失函数$\mathcal{L}_{\mathrm{AOD}}$以空间结构约束的形式参与训练（详见第\ref{subsubsec:aod_data}节）。中央地图展示图$\mathcal{G}$上的空间传播结构：黑色实心圆点为观测站点，蓝色圆点为待推断的目标节点；图中大面积的蓝色色块为缺乏地面监测数据的未知网格单元（Unknown Grid Cell），直观展示了地面监测网络覆盖的有限性——这正是空间推断任务需要填补的区域。以中央蓝色节点为例，实线表示1跳连接，虚线表示2跳连接，周围更浅的蓝色区域表示该节点的2跳感受野。右侧为两个子任务的输出（标注为Output）——站点推断$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$（蓝色曲线，右上）和网格推断$\hat{\mathbf{X}}^{F}_t$（红色热力图，右下）。两个子任务采用相同的SPIN架构$\mathcal{F}_{\Theta}$但各自独立训练。}
+    \caption*{左侧与上方为四类输入数据（标注为Input）：观测站点历史\PM 时序$\mathbf{X}^{\text{obs}}_{t-T'+1:t}$（上方中部）、全域气象场$\mathbf{M}^{F}_{t-T'+1:t}$（左上）、排放场$\mathbf{E}^{F}_{t-T'+1:t}$（左中）和卫星遥感AOD数据$\mathbf{X}^{\text{AOD}}_{t-T'+1:t}$（左下，其中斜线区域表示因云层遮挡等原因导致的AOD缺失区域）。需要注意的是，AOD数据的输入箭头标注为\cqt{Input (Loss)}，表示AOD并非作为模型的直接输入特征，而是通过损失函数$\mathcal{L}_{\mathrm{AOD}}$以空间结构约束的形式参与训练（详见第\ref{subsubsec:aod_data}节）。中央地图展示图$\mathcal{G}$上的空间传播结构：黑色实心圆点为观测站点，蓝色圆点为待推断的目标节点；图中大面积的蓝色色块为缺乏地面监测数据的未知网格单元（Unknown Grid Cell），直观展示了地面监测网络覆盖的有限性——这正是空间推断任务需要填补的区域。以中央蓝色节点为例，实线表示1跳连接，虚线表示2跳连接，周围更浅的蓝色区域表示该节点的2跳感受野。右侧为两个子任务的输出（标注为Output）——站点推断$\hat{\mathbf{X}}^{\text{target}}_{t-T'+1:t}$（蓝色曲线，右上）和网格推断$\hat{\mathbf{X}}^{F}_t$（红色热力图，右下）。两个子任务采用相同的SPIN架构$\mathcal{F}_{\Theta}$但各自独立训练。}
     \label{fig:inference_problem}
 \end{figure}
 
@@ -426,7 +426,7 @@ $\mathbf{h}_i^{\text{temp}}$为每个节点提供了一个基于本地物理条�
     \centering
     \includegraphics[width=0.75\textwidth]{figures/chap04_aod_mask_loss.pdf}
     \caption{网格图上的掩码AOD梯度约束示意图}
-    \caption*{左图为模型预测浓度场在网格图上沿边$(i,j)$的空间梯度$\nabla_{ij}(\hat{\mathbf{X}}) = \hat{X}_j - \hat{X}_i$；右图为对应的卫星AOD场梯度$\nabla_{ij}(\mathbf{X}^{\text{AOD}})$，其中斜线阴影区域（$\boldsymbol{\omega}^{\text{AOD}} = 0$）表示AOD因云层遮挡而缺失的网格节点。损失函数$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）仅在两端点均有有效AOD观测（$\Omega^{\text{AOD}}_{ij}=1$）的边上计算，从而避免对缺失区域的错误约束。}
+    \caption*{左图为模型预测浓度场在网格图上沿边$(i,j)$的空间梯度$\nabla_{ij}(\hat{\mathbf{X}}) = \hat{X}_j - \hat{X}_i$；右图为对应的卫星AOD场梯度$\nabla_{ij}(\mathbf{X}^{\text{AOD}})$，其中斜线区域表示AOD数据可用（$\boldsymbol{\omega}^{\text{AOD}} = 1$）的网格节点。损失函数$\mathcal{L}_{\mathrm{AOD}}$（公式\ref{eq:aod_loss}）仅在两端点均有有效AOD观测（$\Omega^{\text{AOD}}_{ij}=1$）的边上计算，从而避免对缺失区域的错误约束。}
     \label{fig:aod_mask_loss}
 \end{figure}
 
