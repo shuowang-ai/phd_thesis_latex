@@ -97,7 +97,7 @@
 \begin{table}[htbp]
     \centering
     \caption{排放清单数据（$\mathbf{E}$）中包含的变量}
-    \caption*{排放向量$\mathbf{E}_i^t \in \mathbb{R}^{5}$包含5种主要污染物的排放强度，用于表征节点$i$在时刻$t$的人为排放特征。}
+    \caption*{排放向量$\mathbf{E}_i^t \in \mathbb{R}^{6}$包含6种主要污染物的排放强度，用于表征节点$i$在时刻$t$的人为排放特征。}
     \label{tab:emission_variables}
     \begin{tabular}{@{}lllp{5cm}@{}}
         \toprule
@@ -107,7 +107,8 @@
         挥发性有机物 & $E_{\text{VOC}}$ & ton/h & \ozone 的关键前驱物，与\NOx 协同生成\ozone \\
         二氧化硫 & $E_{\text{SO}_2}$ & ton/h & 氧化生成硫酸盐，贡献于二次\PM \\
         氨 & $E_{\text{NH}_3}$ & ton/h & 与酸性气体中和生成铵盐气溶胶 \\
-        一次\PM & $E_{\text{PM}_{2.5}}$ & ton/h & 直接排放的颗粒物 \\
+        一次\PM & $E_{\text{PM}_{2.5}}$ & ton/h & 直接排放的细颗粒物 \\
+        一次PM$_{10}$ & $E_{\text{PM}_{10}}$ & ton/h & 直接排放的可吸入颗粒物 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -172,7 +173,7 @@ KnowAir-DS-V1（2015-2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-
   \label{fig:knowair_v1_study_area}
 \end{figure}
 
-KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和5种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016-2019）、验证集（2020-2021）、测试集（2022-2023）。
+KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016-2019）、验证集（2020-2021）、测试集（2022-2023）。
 
 两版本虽空间尺度不同，但均基于第\ref{chap:methodology}章的物理启发时空图神经网络范式，核心组件（平流系数、消息传递、物理约束）具有跨尺度迁移性。
 
