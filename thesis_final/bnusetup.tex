@@ -195,42 +195,42 @@
 % =========================================================
 % 核心命令定义（直接嵌入以确保 Overleaf 兼容性）
 % =========================================================
-% 污染物
-\def\PM{\ensuremath{\mathrm{PM}_{2.5}}\xspace}
-\def\PMten{\ensuremath{\mathrm{PM}_{10}}\xspace}
-\def\ozone{\ensuremath{\mathrm{O}_{3}}\xspace}
-\def\NOx{\ensuremath{\mathrm{NO}_{x}}\xspace}
-\def\NOtwo{\ensuremath{\mathrm{NO}_{2}}\xspace}
-\def\VOCs{\ensuremath{\mathrm{VOCs}}\xspace}
-\def\CO{\ensuremath{\mathrm{CO}}\xspace}
-\def\SOtwo{\ensuremath{\mathrm{SO}_{2}}\xspace}
-\def\AOD{\ensuremath{\mathrm{AOD}}\xspace}
+% 污染物（不使用\xspace，xeCJK自动处理CJK-Latin间距；英文语境需手动加{}）
+\def\PM{\ensuremath{\mathrm{PM}_{2.5}}}
+\def\PMten{\ensuremath{\mathrm{PM}_{10}}}
+\def\ozone{\ensuremath{\mathrm{O}_{3}}}
+\def\NOx{\ensuremath{\mathrm{NO}_{x}}}
+\def\NOtwo{\ensuremath{\mathrm{NO}_{2}}}
+\def\VOCs{\ensuremath{\mathrm{VOCs}}}
+\def\CO{\ensuremath{\mathrm{CO}}}
+\def\SOtwo{\ensuremath{\mathrm{SO}_{2}}}
+\def\AOD{\ensuremath{\mathrm{AOD}}}
 
 % 模型名称
-\def\ModelPred{\ensuremath{\mathrm{PM}_{2.5}}-GNN\xspace}
-\def\ModelSurr{PCDCNet\xspace}
-\def\ModelInfer{SPIN\xspace}
-\def\ModelSim{IGNN\xspace}
-\def\SystemName{KnowAir\xspace}
+\def\ModelPred{\ensuremath{\mathrm{PM}_{2.5}}-GNN}
+\def\ModelSurr{PCDCNet}
+\def\ModelInfer{SPIN}
+\def\ModelSim{IGNN}
+\def\SystemName{KnowAir}
 
 % 损失函数
-\def\LossAOD{\ensuremath{\mathcal{L}_{\mathrm{AOD}}}\xspace}
-\def\LossInfer{\ensuremath{\mathcal{L}_{\mathrm{infer}}}\xspace}
-\def\LossInit{\ensuremath{\mathcal{L}_{\mathrm{init}}}\xspace}
-\def\LossDIC{\ensuremath{\mathcal{L}_{\mathrm{DIC}}}\xspace}
+\def\LossAOD{\ensuremath{\mathcal{L}_{\mathrm{AOD}}}}
+\def\LossInfer{\ensuremath{\mathcal{L}_{\mathrm{infer}}}}
+\def\LossInit{\ensuremath{\mathcal{L}_{\mathrm{init}}}}
+\def\LossDIC{\ensuremath{\mathcal{L}_{\mathrm{DIC}}}}
 
 % 评价指标
-\def\RMSE{\ensuremath{\mathrm{RMSE}}\xspace}
-\def\MAE{\ensuremath{\mathrm{MAE}}\xspace}
-\def\Rsquare{\ensuremath{R^{2}}\xspace}
+\def\RMSE{\ensuremath{\mathrm{RMSE}}}
+\def\MAE{\ensuremath{\mathrm{MAE}}}
+\def\Rsquare{\ensuremath{R^{2}}}
 
 % 数据源
-\def\MEIC{MEIC\xspace}
-\def\ERAFive{ERA5\xspace}
-\def\CMAQ{CMAQ\xspace}
-\def\GNN{GNN\xspace}
-\def\GRU{GRU\xspace}
-\def\LSTM{LSTM\xspace}
+\def\MEIC{MEIC}
+\def\ERAFive{ERA5}
+\def\CMAQ{CMAQ}
+\def\GNN{GNN}
+\def\GRU{GRU}
+\def\LSTM{LSTM}
 
 % hyperref 宏包在最后调用
 \usepackage{hyperref}
