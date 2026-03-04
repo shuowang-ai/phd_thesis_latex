@@ -1,8 +1,9 @@
 # vim: set ft=perl:
 
 $pdf_mode = 5;
+$force_mode = 1;
 
-$xelatex = "xelatex -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode -no-pdf -synctex=1 %O %S";
+$xelatex = "xelatex -shell-escape -file-line-error -interaction=nonstopmode -no-pdf -synctex=1 %O %S";
 $lualatex = "lualatex -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode -synctex=1 %O %S";
 $xdvipdfmx = "xdvipdfmx -q -E -o %D %O %S";
 
