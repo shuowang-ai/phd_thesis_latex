@@ -1,0 +1,64 @@
+% !TeX encoding = UTF-8
+% !TeX program = xelatex
+% !TeX spellcheck = en_US
+
+% 打印版：与提交版内容一致，仅切换为 print 模式（插入空白页以便双面打印）
+
+\documentclass[degree=doctor,fontset=fandol]{bnuthesis}
+
+% 论文基本配置
+\input{bnusetup}
+
+% 覆盖输出格式为打印版
+\bnusetup{output = print}
+
+\input{data/commands}
+
+\begin{document}
+
+% 封面
+\maketitle
+
+% 使用授权的说明
+\copyrightpage[file=scan-copyright.pdf]
+
+
+\frontmatter
+\input{data/abstract}
+
+% 目录
+\tableofcontents
+
+% 插图和附表清单
+\listoffigures*
+\listoftables*
+\listofalgorithms*
+
+% 符号对照表
+\input{data/denotation}
+
+
+% 正文部分
+\mainmatter
+\input{data/chap01}
+\input{data/chap02}
+\input{data/chap03}
+\input{data/chap04}
+\input{data/chap05}
+\input{data/chap06}
+\input{data/chap07}
+
+
+% 其他部分
+\backmatter
+
+% 参考文献
+\bibliography{ref/refs}
+
+% 个人简历、在学期间完成的相关学术成果
+\input{data/resume}
+
+% 致谢
+\input{data/acknowledgements}
+
+\end{document}
