@@ -2,6 +2,7 @@
 
 $pdf_mode = 5;
 $force_mode = 1;
+$jobname = "王硕.基于物理启发图神经网络的大气污染复杂系统建模研究";
 
 $xelatex = "xelatex -shell-escape -file-line-error -interaction=nonstopmode -no-pdf -synctex=1 %O %S";
 $lualatex = "lualatex -shell-escape -file-line-error -halt-on-error -interaction=nonstopmode -synctex=1 %O %S";
