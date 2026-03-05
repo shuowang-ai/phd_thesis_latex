@@ -76,7 +76,7 @@
 
 长江三角洲地区（YRD）：涵盖上海、江苏、浙江等省市，共约175个站点，面积约270,000 km$^2$。该区域\ozone 污染问题突出，是检验多污染物协同预测能力的典型区域。
 
-监测变量包括\PM 和\ozone 等六种常规污染物，时间分辨率为1小时（2016-2023年）。数据经质量控制处理：异常值（\PM{} $>$1000 $\mu$g/m$^3$）标记为缺失，短期缺失（$<$6小时）线性插值，长期缺失采用历史同期均值填补。
+监测变量包括\PM 和\ozone 等六种常规污染物，时间分辨率为1小时（2016-2023年）。数据经质量控制处理：异常值（\PM{} $>$1000 \ug{}）标记为缺失，短期缺失（$<$6小时）线性插值，长期缺失采用历史同期均值填补。
 
 \subsection[气象数据（\texorpdfstring{$\mathbf{M}$}{M}）]{气象数据（$\mathbf{M}$）}
 \label{subsec:meteo_data}
@@ -634,7 +634,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
     \item FAR（虚警率）：$\text{FAR} = \frac{\text{false alarms}}{\text{hits} + \text{false alarms}}$，反映误报情况。
 \end{itemize}
 
-其中，CSI、POD、FAR的计算以75 $\mu$g/m$^3$为阈值（中国《环境空气质量标准》良好等级分界点\citep{evaluation}），将预测和观测二值化为\cqt{污染/非污染}后统计。
+其中，CSI、POD、FAR的计算以75 \ug{}为阈值（中国《环境空气质量标准》良好等级分界点\citep{evaluation}），将预测和观测二值化为\cqt{污染/非污染}后统计。
 
 （3）基线方法。将模型与以下方法进行对比：
 
@@ -684,7 +684,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 \begin{table*}[htbp]
     \centering
     \caption{PM$_{2.5}$-GNN与基线模型在KnowAir-DS-V1数据集上的性能对比}
-    \caption*{报告的指标为72小时预测的平均值，包括RMSE、MAE（单位：$\mu$g/m$^3$）和预警指标CSI、POD、FAR（单位：\%）。每个指标报告10次实验的均值$\pm$标准差，最优结果已加粗显示。}
+    \caption*{报告的指标为72小时预测的平均值，包括RMSE、MAE（单位：\ug{}）和预警指标CSI、POD、FAR（单位：\%）。每个指标报告10次实验的均值$\pm$标准差，最优结果已加粗显示。}
     \label{tab:pm25gnn_overall_performance}
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{@{}clcccccc@{}}
@@ -692,22 +692,22 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
         \textbf{数据集} & \textbf{指标} & \textbf{MLP} & \textbf{LSTM} & \textbf{GRU} & \textbf{GC-LSTM} & \textbf{nodesFC-GRU} & \textbf{\ModelPred} \\
         \midrule
         \multirow{5}{*}{全年} 
-        & RMSE ($\mu$g/m$^3$) & $22.98\pm0.98$ & $21.07\pm0.38$ & $21.13\pm0.37$ & $20.90\pm0.40$ & $20.28\pm0.29$ & \textbf{20.16}$\pm$\textbf{0.48} \\
-        & MAE ($\mu$g/m$^3$) & $18.37\pm0.94$ & $16.68\pm0.39$ & $16.77\pm0.37$ & $16.53\pm0.41$ & $15.98\pm0.30$ & \textbf{15.91}$\pm$\textbf{0.49} \\
+        & RMSE (\ug{}) & $22.98\pm0.98$ & $21.07\pm0.38$ & $21.13\pm0.37$ & $20.90\pm0.40$ & $20.28\pm0.29$ & \textbf{20.16}$\pm$\textbf{0.48} \\
+        & MAE (\ug{}) & $18.37\pm0.94$ & $16.68\pm0.39$ & $16.77\pm0.37$ & $16.53\pm0.41$ & $15.98\pm0.30$ & \textbf{15.91}$\pm$\textbf{0.49} \\
         & CSI (\%) & $40.77\pm2.69$ & $44.87\pm1.09$ & $44.71\pm0.99$ & $45.64\pm1.10$ & $47.61\pm0.92$ & \textbf{47.91}$\pm$\textbf{1.65} \\
         & POD (\%) & $51.43\pm5.68$ & $56.43\pm2.43$ & $56.17\pm2.45$ & $57.98\pm2.51$ & $59.79\pm2.11$ & \textbf{60.33}$\pm$\textbf{3.42} \\
         & FAR (\%) & $32.80\pm4.29$ & $31.21\pm1.68$ & $31.16\pm1.80$ & $31.65\pm1.73$ & $29.87\pm1.43$ & \textbf{29.83}$\pm$\textbf{2.36} \\
         \midrule
         \multirow{5}{*}{采暖季} 
-        & RMSE ($\mu$g/m$^3$) & $35.55\pm2.76$ & $33.53\pm1.04$ & $33.09\pm1.00$ & $33.20\pm1.23$ & $33.07\pm1.03$ & \textbf{32.11}$\pm$\textbf{1.47} \\
-        & MAE ($\mu$g/m$^3$) & $28.67\pm2.52$ & $26.90\pm1.04$ & $26.54\pm0.97$ & $26.57\pm1.22$ & $26.40\pm0.97$ & \textbf{25.68}$\pm$\textbf{1.42} \\
+        & RMSE (\ug{}) & $35.55\pm2.76$ & $33.53\pm1.04$ & $33.09\pm1.00$ & $33.20\pm1.23$ & $33.07\pm1.03$ & \textbf{32.11}$\pm$\textbf{1.47} \\
+        & MAE (\ug{}) & $28.67\pm2.52$ & $26.90\pm1.04$ & $26.54\pm0.97$ & $26.57\pm1.22$ & $26.40\pm0.97$ & \textbf{25.68}$\pm$\textbf{1.42} \\
         & CSI (\%) & $45.52\pm5.49$ & $49.75\pm2.09$ & $49.83\pm1.79$ & $50.13\pm2.50$ & $48.79\pm1.38$ & \textbf{51.35}$\pm$\textbf{2.53} \\
         & POD (\%) & $60.85\pm9.17$ & $64.94\pm3.30$ & $64.58\pm3.03$ & $64.54\pm3.49$ & $61.29\pm2.07$ & \textbf{66.24}$\pm$\textbf{4.56} \\
         & FAR (\%) & $34.56\pm6.21$ & $31.88\pm2.28$ & $31.31\pm2.44$ & $30.73\pm2.80$ & \textbf{29.37}$\pm$\textbf{2.60} & $30.11\pm3.67$ \\
         \midrule
         \multirow{5}{*}{滚动预测} 
-        & RMSE ($\mu$g/m$^3$) & $50.70\pm4.57$ & $46.19\pm2.04$ & $46.06\pm2.03$ & $45.71\pm2.38$ & $47.97\pm1.67$ & \textbf{44.36}$\pm$\textbf{2.85} \\
-        & MAE ($\mu$g/m$^3$) & $41.89\pm4.22$ & $37.97\pm1.94$ & $37.94\pm1.92$ & $37.46\pm2.29$ & $39.03\pm1.65$ & \textbf{36.32}$\pm$\textbf{2.81} \\
+        & RMSE (\ug{}) & $50.70\pm4.57$ & $46.19\pm2.04$ & $46.06\pm2.03$ & $45.71\pm2.38$ & $47.97\pm1.67$ & \textbf{44.36}$\pm$\textbf{2.85} \\
+        & MAE (\ug{}) & $41.89\pm4.22$ & $37.97\pm1.94$ & $37.94\pm1.92$ & $37.46\pm2.29$ & $39.03\pm1.65$ & \textbf{36.32}$\pm$\textbf{2.81} \\
         & CSI (\%) & $52.44\pm3.81$ & $58.85\pm2.36$ & $59.16\pm1.87$ & $58.98\pm2.47$ & $58.84\pm1.60$ & \textbf{60.57}$\pm$\textbf{2.78} \\
         & POD (\%) & $74.16\pm7.25$ & $81.03\pm3.14$ & $83.32\pm1.95$ & $81.92\pm2.91$ & $79.40\pm1.71$ & \textbf{83.94}$\pm$\textbf{3.34} \\
         & FAR (\%) & $35.25\pm5.32$ & $31.71\pm2.38$ & $32.86\pm2.37$ & $32.18\pm2.36$ & \textbf{30.51}$\pm$\textbf{2.28} & $31.37\pm3.63$ \\
@@ -766,7 +766,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 \begin{table*}[htbp]
 \centering
 \caption{PCDCNet与基线模型在72小时预报任务中的性能对比}
-\caption*{BTHSA：京津冀及周边地区（Beijing-Tianjin-Hebei and Surrounding Areas）；YRD：长江三角洲地区（Yangtze River Delta）。报告的指标为所有时间步的平均RMSE和MAE（单位：$\mu$g/m$^3$）。对比方法涵盖机器学习基线、通用时序模型和空气质量专用模型。最优结果已加粗，次优结果已加下划线。}
+\caption*{BTHSA：京津冀及周边地区（Beijing-Tianjin-Hebei and Surrounding Areas）；YRD：长江三角洲地区（Yangtze River Delta）。报告的指标为所有时间步的平均RMSE和MAE（单位：\ug{}）。对比方法涵盖机器学习基线、通用时序模型和空气质量专用模型。最优结果已加粗，次优结果已加下划线。}
 \label{tab:performance_vertical}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lcccccccc@{}}
@@ -809,7 +809,7 @@ TimeXer & 31.51 & 30.07 & \underline{20.60} & 22.87 & \underline{17.89} & 30.47 
   \centering
   \includegraphics[width=\linewidth]{figures/chap03_pcdcnet_leadtime.png}
   \caption{不同预测时效下各模型的MAE变化曲线}
-  \caption*{横轴为预测时效（Forecast Lead Time，单位：小时），表示从当前时刻起向未来预测的时间跨度，范围为6--72小时；纵轴为平均绝对误差（MAE，单位：$\mu$g/m$^3$），数值越低表示预测精度越高。左图为BTHSA（京津冀及周边）区域的\PM 预测，右图为YRD（长三角）区域的\ozone 预测。随着预测时效的增加，所有模型的MAE均呈上升趋势，反映了长时序预测固有的误差累积效应。PCDCNet在所有时效上均保持最优性能，且误差增长速率最为平缓，表明DIC约束有效抑制了自回归预测中的误差累积。}
+  \caption*{横轴为预测时效（Forecast Lead Time，单位：小时），表示从当前时刻起向未来预测的时间跨度，范围为6--72小时；纵轴为平均绝对误差（MAE，单位：\ug{}），数值越低表示预测精度越高。左图为BTHSA（京津冀及周边）区域的\PM 预测，右图为YRD（长三角）区域的\ozone 预测。随着预测时效的增加，所有模型的MAE均呈上升趋势，反映了长时序预测固有的误差累积效应。PCDCNet在所有时效上均保持最优性能，且误差增长速率最为平缓，表明DIC约束有效抑制了自回归预测中的误差累积。}
   \label{fig:leadtime}
 \end{figure}
 
