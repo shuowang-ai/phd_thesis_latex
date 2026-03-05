@@ -71,7 +71,7 @@
 
 从计算实现角度，两种范式具有不同的适用场景。谱方法基于邻接矩阵或拉普拉斯矩阵的稠密/稀疏矩阵运算，通过矩阵乘法一次性完成所有节点的信息聚合，计算效率高，适用于节点规模较小的图（如本文的城市级网络，$N \approx 10^2$）。消息传递方法则采用边索引（edge index）表示图结构，以$[2, |\mathcal{E}|]$的张量形式存储所有边的源节点--目标节点对，逐条边计算消息并聚合。这种实现方式对稀疏图的适应性更强：当图规模增大时（如$N \approx 10^5 \sim 10^6$），稠密邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$可能无法装入显存，而边索引表示的空间复杂度仅为$O(|\mathcal{E}|)$，对于稀疏图（$|\mathcal{E}| \ll N^2$）具有显著优势。
 
-本文根据不同任务的特点灵活选择两种范式：第\ref{chap:prediction}章\ModelPred采用消息传递范式，利用其对边特征的灵活建模能力将风场编码为有向边权重；第\ref{chap:prediction}章PCDCNet采用基于拉普拉斯矩阵的一阶谱卷积，第\ref{chap:simulation}章IGNN采用ChebNet的多阶滤波特性捕捉多尺度空间依赖；第\ref{chap:inference}章SPIN则结合两种范式，分别建模扩散过程（谱卷积）和平流过程（有向消息传递）。
+本文根据不同任务的特点灵活选择两种范式：第\ref{chap:prediction}章\ModelPred{}采用消息传递范式，利用其对边特征的灵活建模能力将风场编码为有向边权重；第\ref{chap:prediction}章PCDCNet采用基于拉普拉斯矩阵的一阶谱卷积，第\ref{chap:simulation}章IGNN采用ChebNet的多阶滤波特性捕捉多尺度空间依赖；第\ref{chap:inference}章SPIN则结合两种范式，分别建模扩散过程（谱卷积）和平流过程（有向消息传递）。
 
 \subsection{时空图神经网络}
 \label{subsec:stgnn}
@@ -246,7 +246,7 @@
 
 基于该统一框架，本文针对三类任务设计了具体模型：
 
-预测任务（第\ref{chap:prediction}章）：给定历史观测、未来气象和排放数据，预测未来污染物浓度。本文提出\ModelPred与PCDCNet模型，通过DIC损失显式约束时空连续性。
+预测任务（第\ref{chap:prediction}章）：给定历史观测、未来气象和排放数据，预测未来污染物浓度。本文提出\ModelPred{}与PCDCNet模型，通过DIC损失显式约束时空连续性。
 
 推断任务（第\ref{chap:inference}章）：给定稀疏监测站点观测和辅助信息（AOD、气象），推断全域连续浓度场。本文提出SPIN模型，通过基于物理启发的扩散核与平流核设计增强空间插值能力。
 
