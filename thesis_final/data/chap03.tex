@@ -251,7 +251,7 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\linewidth]{figures/chap03_pm25gnn_arch.png}
-  \caption{PM$_{2.5}$-GNN模型架构示意图}
+  \caption{\ModelPred{}模型架构示意图}
   \caption*{模型由三个核心组件构成：（1）知识增强的消息传递模块，利用风驱边权重计算邻居节点的污染传输通量；（2）时空GRU单元，融合空间聚合信息与历史隐状态；（3）输出层，预测下一时刻的\PM 浓度。橙色箭头表示输入流（import），蓝色箭头表示输出流（export）。}
   \label{fig:pm25gnn_model}
 \end{figure}
@@ -295,7 +295,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 算法\ref{alg:pm25_gnn}给出了\ModelPred{}的完整训练与推理流程。
 
 \begin{algorithm}[htbp]
-\caption{PM$_{2.5}$-GNN 模型训练与推理流程}
+\caption{\ModelPred{}模型训练与推理流程}
 \caption*{\textbf{\ModelPred}：算法包含初始化、自回归预测循环、MSE损失计算和参数更新四个阶段。预测循环中依次进行节点特征构建、净通量聚合、GRU状态更新和浓度预测。}
 \label{alg:pm25_gnn}
 \begin{algorithmic}[1]
@@ -683,7 +683,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 
 \begin{table*}[htbp]
     \centering
-    \caption{PM$_{2.5}$-GNN与基线模型在KnowAir-DS-V1数据集上的性能对比}
+    \caption{\ModelPred{}与基线模型在KnowAir-DS-V1数据集上的性能对比}
     \caption*{报告的指标为72小时预测的平均值，包括RMSE、MAE（单位：\ug{}）和预警指标CSI、POD、FAR（单位：\%）。每个指标报告10次实验的均值$\pm$标准差，最优结果已加粗显示。}
     \label{tab:pm25gnn_overall_performance}
     \resizebox{\textwidth}{!}{%
@@ -729,7 +729,7 @@ KnowAir-DS-V2（2016-2023）：用于评估PCDCNet的多污染物预测能力。
 
 \begin{table}[htbp]
     \centering
-    \caption{PM$_{2.5}$-GNN消融实验结果}
+    \caption{\ModelPred{}消融实验结果}
     \caption*{\cqt{无blh特征}表示从节点属性中移除边界层高度；\cqt{无export项}表示在消息聚合中仅使用输入流，不减去输出流。结果表明两项设计均对模型性能有显著贡献。}
     \label{tab:pm25gnn_ablation_study}
     \begin{tabular}{@{}clccc@{}}
