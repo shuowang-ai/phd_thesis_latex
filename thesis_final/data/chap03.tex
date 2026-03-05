@@ -186,7 +186,7 @@ KnowAir-DS-V2（2016-2023）\footnote{\url{https://zenodo.org/records/15614907}}
 
 细颗粒物（\PM）具有显著的跨区域传输特性。研究表明，在季风气候条件下，污染物可在72小时内传输数百公里\citep{pongkiatkul2007assessment,wang2015long,hao2019transport}。\PM 的演化过程呈现典型的双重动力学特性：一方面，污染物沿风向从上游城市传输至下游城市；另一方面，在局地发生扩散累积。这种\cqt{传输--扩散}的双重动力学特性，要求预测模型必须具备捕捉长距离、有向时空依赖的能力。
 
-现有的时空图神经网络（如GC-LSTM\citep{qi2019hybrid}）通常基于地理距离构建无向图，假设节点间的影响是相互对称的。然而，大气中的平流输送（Advection）具有强烈的方向性：上游城市对下游城市的影响显著，反之则不然。针对这一问题，我们提出了\ModelPred\citep{wang2020pm2}模型，通过物理启发的图网络设计显式编码风场信息，实现对\PM 传输过程的精确建模。
+现有的时空图神经网络（如GC-LSTM\citep{qi2019hybrid}）通常基于地理距离构建无向图，假设节点间的影响是相互对称的。然而，大气中的平流输送（Advection）具有强烈的方向性：上游城市对下游城市的影响显著，反之则不然。针对这一问题，我们提出了\ModelPred\citep{wang2020pm2}模型\footnote{模型代码与数据集已开源：\url{https://github.com/shuowang-ai/PM2.5-GNN}}，通过物理启发的图网络设计显式编码风场信息，实现对\PM 传输过程的精确建模。
 
 
 \subsection{图网络设计}
