@@ -18,8 +18,9 @@
 \item[\(\mathcal{G}^{\text{s}}, \mathcal{G}^{\text{g}}\)] 站点图与网格图（第\ref{chap:inference}章）。$\mathcal{G}^{\text{s}}$以$N^{\text{s}}$个监测站点为节点，$\mathcal{G}^{\text{g}}$以$N^{\text{g}}$个$0.25^{\circ}$网格像素为节点，两者采用相同的模型架构与图核构建方法，但各自独立训练，所得邻接矩阵维度不同。
 \item[\(N^{\text{s}}, N^{\text{g}}\)] 站点图与网格图的节点数（第\ref{chap:inference}章）。$N^{\text{s}} = |\mathcal{V}^{\text{s}}|$为监测站点数，$N^{\text{g}} = |\mathcal{V}^{\text{g}}|$为网格像素数。
 \item[\(\mathbf{A}, \tilde{\mathbf{A}}\)] 图邻接矩阵与归一化后的邻接矩阵。
-\item[\(A^{\text{s}}, A^{\text{g}}\)] 站点图与网格图的基础邻接矩阵（第\ref{chap:inference}章），基于节点间测地距离$d_{ij}$按高斯核构建，$A^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，$A^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。
-\item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵与归一化拉普拉斯矩阵。非归一化形式$\mathbf{L} = \mathbf{D} - \mathbf{A}$；对称归一化形式$\mathbf{L} = \mathbf{I}_N - \mathbf{D}^{-1/2}\mathbf{A}\mathbf{D}^{-1/2}$（第\ref{chap:inference}、\ref{chap:simulation}章）。$\tilde{\mathbf{L}}$为切比雪夫多项式近似所用的缩放拉普拉斯矩阵$\tilde{\mathbf{L}} = \frac{2}{\lambda_{\max}}\mathbf{L} - \mathbf{I}_N$。
+\item[\(\mathbf{A}^{\text{s}}, \mathbf{A}^{\text{g}}\)] 站点图与网格图的基础邻接矩阵（第\ref{chap:inference}章），基于节点间测地距离$d_{ij}$按高斯核构建，$\mathbf{A}^{\text{s}} \in \mathbb{R}^{N^{\text{s}} \times N^{\text{s}}}$，$\mathbf{A}^{\text{g}} \in \mathbb{R}^{N^{\text{g}} \times N^{\text{g}}}$。
+\item[\(\tilde{\mathbf{A}}^{\mathcal{D}}, \tilde{\mathbf{A}}^{\mathcal{A}}\)] 归一化扩散邻接矩阵与归一化平流邻接矩阵（第\ref{chap:inference}章）。$\tilde{\mathbf{A}}^{\mathcal{D}} = \mathbf{D}^{-1/2}\mathbf{A}\mathbf{D}^{-1/2}$建模各向同性扩散传播，$\tilde{\mathbf{A}}^{\mathcal{A}} = \mathbf{D}_{\text{in}}^{-1}\mathbf{A}^{\mathcal{A}}$建模风场驱动的各向异性平流传输。
+\item[\(\mathbf{L}, \tilde{\mathbf{L}}\)] 图拉普拉斯矩阵与缩放拉普拉斯矩阵。非归一化形式$\mathbf{L} = \mathbf{D} - \mathbf{A}$；在第\ref{chap:inference}、\ref{chap:simulation}章中采用对称归一化形式$\mathbf{L} = \mathbf{I}_N - \mathbf{D}^{-1/2}\mathbf{A}\mathbf{D}^{-1/2}$。$\tilde{\mathbf{L}}$为切比雪夫多项式近似所用的缩放拉普拉斯矩阵$\tilde{\mathbf{L}} = \frac{2}{\lambda_{\max}}\mathbf{L} - \mathbf{I}_N$，其中$\lambda_{\max}$为$\mathbf{L}$的最大特征值。
 \item[\(K\)] 大气扩散系数，用于对流--扩散方程的扩散项。
 \item[\(t=0\)] 起报时刻，\(t \leq 0\) 为历史时刻，\(t>0\) 为未来预测时刻。
 \item[\(T', T\)] 历史输入窗口与未来预测窗口长度。
@@ -32,7 +33,8 @@
 \item[\(C\)] 污染物浓度场的点值形式，用于对流--扩散方程表述。
 \item[\(S, D\)] 对流--扩散方程中的排放源项与沉降汇项。
 \item[\(\mathbf{u}\)] 风速矢量场，用于计算平流传输。
-\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。$\mathbf{h}_i \in \mathbb{R}^{d_h}$，其中$d_h$为隐层维度。
+\item[\(\mathbf{H}^{(l)}, \mathbf{h}_i\)] 第$l$层隐表示，$\mathbf{h}_i$为节点$i$的隐向量。$\mathbf{h}_i \in \mathbb{R}^{d_h}$。
+\item[\(d_h\)] 隐层维度，即各隐藏层特征向量的维数。
 \item[\(R\)] 对流--扩散方程中的化学反应项。
 \item[\(\mathcal{V}_{\text{obs}}, \mathcal{V}_{\text{target}}\)] 观测节点集与目标推断节点集。
 \item[\(\nabla\)] 空间梯度算子，用于扩散/平流约束。

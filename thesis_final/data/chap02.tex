@@ -43,7 +43,7 @@
 \mathbf{y} = \sum_{k=0}^{K_c-1} \theta_k T_k(\tilde{\mathbf{L}}) \mathbf{x}
 \label{eq:chebynet}
 \end{equation}
-\noindent 式中，$\theta_k$为可学习的多项式系数，$T_k(\cdot)$为$k$阶切比雪夫多项式，$\tilde{\mathbf{L}} = 2\mathbf{L}/\lambda_{\max} - \mathbf{I}$为归一化拉普拉斯矩阵，$K_c$控制滤波器的阶数（即感受野大小）。
+\noindent 式中，$\theta_k$为可学习的多项式系数，$T_k(\cdot)$为$k$阶切比雪夫多项式，$\tilde{\mathbf{L}} = 2\mathbf{L}/\lambda_{\max} - \mathbf{I}$为缩放拉普拉斯矩阵（$\lambda_{\max}$为$\mathbf{L}$的最大特征值），$K_c$控制滤波器的阶数（即感受野大小）。
 
 图卷积网络（Graph Convolutional Network, GCN）\citep{kipf2017semi}进一步将ChebNet简化为一阶形式（取$K_c=2$），并引入归一化技巧以稳定训练：
 \begin{equation}
@@ -83,7 +83,7 @@
 \mathbf{Y}_t = \sum_{s=0}^{K_t-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
 \end{equation}
-\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为卷积核权重，$d$为膨胀因子。膨胀因子$d$通常按指数递增设置，即$d \in \{1, 2, 4, \ldots, 2^{L-1}\}$，使得$L$层TCN以线性参数量获得$\mathcal{O}(2^L)$的感受野。
+\noindent 式中，$\mathbf{Y}_t$为时刻$t$的输出，$\mathbf{X}_{t-d \cdot s}$为时刻$t-d \cdot s$的输入，$\mathbf{W}_s$为卷积核权重，$\star$为卷积操作，$K_t$为卷积核大小，$d$为膨胀因子。膨胀因子$d$通常按指数递增设置，即$d \in \{1, 2, 4, \ldots, 2^{L-1}\}$，使得$L$层TCN以线性参数量获得$\mathcal{O}(2^L)$的感受野。
 
 综上，完整的STGNN通过空间模块（公式\eqref{eq:gcn}或\eqref{eq:message_passing}）与时间模块（公式\eqref{eq:tcn}）的交替堆叠，实现时空联合建模。这与大气污染系统的物理特性高度吻合——空间上相邻节点通过传输相互影响，时间上当前状态依赖历史演化。
 
@@ -153,7 +153,7 @@
 \frac{\partial C}{\partial t} = \underbrace{-\mathbf{u} \cdot \nabla C}_{\text{平流项}} + \underbrace{\nabla \cdot (K \nabla C)}_{\text{扩散项}} + \underbrace{R}_{\text{化学反应}} + \underbrace{S}_{\text{排放源}} - \underbrace{D}_{\text{沉降汇}}
 \label{eq:advection_diffusion}
 \end{equation}
-\noindent 式中，$C$为污染物浓度，$\mathbf{u}$为风速矢量，$K$为扩散系数，$R$、$S$、$D$分别为化学反应项、排放源项和沉降汇项。该方程的各项在本文的GNN设计中均有对应实现（见表\ref{tab:pde_gnn_mapping}）：
+\noindent 式中，$C$为污染物浓度，$\mathbf{u}$为风速矢量，$K$为扩散系数，$R$、$S$、$D$分别为化学反应项、排放源项和沉降汇项。该方程的各项在本文的GNN设计中均有对应实现（见表~\ref{tab:pde_gnn_mapping}）：
 
 \begin{table}[htbp]
     \centering
@@ -224,7 +224,7 @@
 \subsection{统一建模框架}
 \label{subsec:unified_framework}
 
-基于上述理论基础，本文构建了面向预测、推断与模拟三类核心任务的统一建模框架，如图\ref{fig:unified_framework}所示。该框架将物理启发的时空图神经网络抽象为参数化映射$\mathcal{F}_\Theta$，通过端到端的梯度优化从数据中学习模型参数$\Theta$。尽管三类任务在具体形式上有所差异，但均可在统一的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}架构下表达。
+基于上述理论基础，本文构建了面向预测、推断与模拟三类核心任务的统一建模框架，如图~\ref{fig:unified_framework}所示。该框架将物理启发的时空图神经网络抽象为参数化映射$\mathcal{F}_\Theta$，通过端到端的梯度优化从数据中学习模型参数$\Theta$。尽管三类任务在具体形式上有所差异，但均可在统一的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}架构下表达。
 
 \begin{figure}[htbp]
     \centering
@@ -234,7 +234,7 @@
     \label{fig:unified_framework}
 \end{figure}
 
-如图\ref{fig:unified_framework}所示，该框架包含三个核心模块，每个模块均可融入物理启发的设计：
+如图~\ref{fig:unified_framework}所示，该框架包含三个核心模块，每个模块均可融入物理启发的设计：
 
 编码层（Encoder）——将多源异构输入映射到高维隐空间。输入包括污染物历史浓度$\mathbf{X}$、气象变量$\mathbf{M}$（风速、风向、温度、湿度等）以及排放数据$\mathbf{E}$。编码层负责特征提取、异构数据融合与图结构嵌入。如图中橙色标注所示，物理启发可通过图网络设计实现——例如基于风场信息构建有向图，将大气传输的方向性先验编码到图的拓扑结构中。
 
@@ -242,7 +242,7 @@
 
 解码层（Decoder）——将隐空间表示映射回目标空间，输出预测、推断或模拟结果$\hat{\mathbf{X}}$。物理约束可通过损失函数嵌入——在数据拟合损失之外添加物理惩罚项（如基于质量守恒的DIC约束、基于遥感反演的AOD梯度约束），引导模型学习符合物理规律的时空表示。
 
-图\ref{fig:unified_framework}右侧展示了模型的训练机制：损失函数$\mathcal{L}$综合数据拟合项与物理约束项，通过比较模型输出$\hat{\mathbf{X}}$与观测数据（Ground Truth）计算误差，并通过反向传播算法计算梯度、更新模型参数$\Theta$。这种端到端的梯度优化机制是本文方法区别于数值模式的关键——数值模式通过求解偏微分方程获得数值解，而本文方法通过数据驱动的参数学习自适应拟合观测数据，同时通过物理约束保证结果的物理一致性。
+图~\ref{fig:unified_framework}右侧展示了模型的训练机制：损失函数$\mathcal{L}$综合数据拟合项与物理约束项，通过比较模型输出$\hat{\mathbf{X}}$与观测数据（Ground Truth）计算误差，并通过反向传播算法计算梯度、更新模型参数$\Theta$。这种端到端的梯度优化机制是本文方法区别于数值模式的关键——数值模式通过求解偏微分方程获得数值解，而本文方法通过数据驱动的参数学习自适应拟合观测数据，同时通过物理约束保证结果的物理一致性。
 
 基于该统一框架，本文针对三类任务设计了具体模型：
 
@@ -252,12 +252,12 @@
 
 模拟任务（第\ref{chap:simulation}章）：给定未来气象情景和假设排放情景，模拟对应的浓度响应。本文提出IGNN模型，通过大规模数据驱动隐式学习排放--浓度响应关系。
 
-三类任务共享相同的\cqt{编码$\rightarrow$隐空间$\rightarrow$解码}框架（图\ref{fig:unified_framework}蓝色模块），但物理启发的嵌入方式因任务特点而异（图\ref{fig:unified_framework}橙色标注）。这种灵活的物理启发机制使得统一框架能够适应不同任务的特定需求，同时保持方法论上的一致性。
+三类任务共享相同的\cqt{编码$\rightarrow$隐空间$\rightarrow$解码}框架（图~\ref{fig:unified_framework}蓝色模块），但物理启发的嵌入方式因任务特点而异（图~\ref{fig:unified_framework}橙色标注）。这种灵活的物理启发机制使得统一框架能够适应不同任务的特定需求，同时保持方法论上的一致性。
 
 \subsection{与现有方法的对比}
 \label{subsec:comparison}
 
-表\ref{tab:paradigm_comparison}对比了本文研究范式与现有方法的主要区别。
+表~\ref{tab:paradigm_comparison}对比了本文研究范式与现有方法的主要区别。
 
 \begin{table}[htbp]
     \centering
@@ -286,4 +286,4 @@
 \section{本章小结}
 \label{sec:method_summary}
 
-本章系统阐述了物理启发的时空图神经网络建模范式，为后续三个应用章节奠定理论基础。首先介绍了图神经网络的基础理论（谱方法与消息传递范式）及其在地球科学中的前沿应用；然后阐述了对流--扩散方程的物理含义与质量守恒约束，并从图结构、网络架构、损失函数三个层面说明了物理知识融入GNN的具体途径；最后提出了\cqt{融合物理启发的图神经网络建模}研究范式，构建了预测、推断、模拟三类任务的统一框架（图\ref{fig:unified_framework}）。本章所建立的方法论框架为后续章节的具体模型设计提供了统一的理论视角。
+本章系统阐述了物理启发的时空图神经网络建模范式，为后续三个应用章节奠定理论基础。首先介绍了图神经网络的基础理论（谱方法与消息传递范式）及其在地球科学中的前沿应用；然后阐述了对流--扩散方程的物理含义与质量守恒约束，并从图结构、网络架构、损失函数三个层面说明了物理知识融入GNN的具体途径；最后提出了\cqt{融合物理启发的图神经网络建模}研究范式，构建了预测、推断、模拟三类任务的统一框架（图~\ref{fig:unified_framework}）。本章所建立的方法论框架为后续章节的具体模型设计提供了统一的理论视角。
