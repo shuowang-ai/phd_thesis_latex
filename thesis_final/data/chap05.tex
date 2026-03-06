@@ -26,7 +26,7 @@
 
 （2）历史与未来数据源的融合。历史训练数据基于MEIC排放清单，而未来情景数据来源于DPEC动态评估模型，两者在空间分辨率、行业分类和时间覆盖上存在差异\citep{zheng2018trends,cheng2021pathways}。此外，未来气象条件来自CMIP6耦合模式输出，与历史ERA5再分析数据在统计特性上也存在偏差。如何建立跨数据源的有效融合机制，确保模型在域迁移（Domain Shift）条件下仍能保持稳定性能，是多源数据融合的核心问题。
 
-（3）未来情景外推能力。模拟任务要求模型外推至训练数据覆盖范围之外的未来情景——包括2025--2050年的气候变化路径和多种减排策略组合。模型需在气象条件和排放强度均超出历史分布的条件下保持预测稳定性，这对泛化能力提出了极高要求。如何避免在长期模拟中的误差累积，同时保持对极端情景的物理合理响应，是突破模型泛化瓶颈的核心问题。
+（3）未来情景外推能力。模拟任务要求模型外推至训练数据覆盖范围之外的未来情景——包括2025--2050年的气候变化路径和多种减排策略组合。模型需在气象条件和排放强度均超出历史分布的条件下保持预测稳定性，这对泛化能力提出了极高要求。如何避免长期模拟中的误差累积，同时保持对极端情景的物理合理响应，是突破模型泛化瓶颈的核心问题。
 
 针对上述挑战，现有方法存在以下不足：（1）在计算效率方面，化学传输模式（如CMAQ（Community Multiscale Air Quality，社区多尺度空气质量模型）、WRF-Chem（Weather Research and Forecasting model coupled with Chemistry，气象--化学耦合模型））虽具有完备的物理化学方程组，但单次区域年尺度模拟需要消耗数百至数千核时的超算资源，难以支撑多情景、多路径的探索性模拟需求。（2）在误差控制方面，现有数据驱动方法多采用自回归模式，在长期模拟（如25年尺度）中面临严重的误差累积问题，预测偏差随时间步逐层放大。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，本章的核心挑战不在于如何建模污染物的时空传输过程，而在于如何建立排放源强与浓度场之间的直接响应映射，从而支撑长期情景模拟。
 
@@ -76,7 +76,7 @@
 
 值得说明的是，本章的图网络构建粒度与前述章节存在显著差异。第\ref{chap:prediction}章以中东部184个城市（\ModelPred{}）或京津冀--长三角327个监测站点（PCDCNet）为节点；第\ref{chap:inference}章（SPIN）以152个国控监测站点为节点进行站点级和网格级推断。\textbf{本章则以28个城市作为图节点}，将各城市内多个站点的观测数据\textbf{聚合为城市级均值}，构建城市尺度的时空图网络。采用城市级粒度的原因在于：情景模拟任务的核心驱动变量——排放清单（MEIC/DPEC）——\textbf{本身以城市或区县为统计单元编制}，城市级建模能够与排放数据的空间分辨率自然对齐，确保排放变化信号被模型有效接收和响应。
 
-如图~\ref{fig:bthsa_network}所示，网络的构建与第\ref{chap:inference}章（公式\eqref{eq:diffusion_adjacency}）采用相同的空间邻近性规则，距离阈值为200 km。
+如图~\ref{fig:bthsa_network}所示，网络采用与第\ref{chap:inference}章（公式\eqref{eq:diffusion_adjacency}）相同的空间邻近性规则构建，距离阈值为200 km。
 
 \begin{figure}[htbp]
   \centering
@@ -135,7 +135,7 @@
 
 为驱动IGNN模型进行2025--2050年的未来情景模拟，本研究构建了两类未来驱动数据。
 
-未来气象数据：选取高碳排放情景（SSP5-8.5，Shared Socioeconomic Pathway 5-8.5，即共享社会经济路径5-8.5）作为未来气候变化的背景。具体采用CMIP6\citep{eyring2016overview}高分辨率模式比较项目中的CAS FGOALS-f3-L模型输出\citep{bao2020cas}。该模型是唯一提供3小时高时间分辨率输出的气候模式，空间分辨率为25 km，能够为IGNN模型提供与历史数据一致的气象驱动场。数据通过地球系统网格联盟（ESGF）节点获取\footnote{\url{https://esgf-node.llnl.gov/search/cmip6/}}。
+未来气象数据：选取高碳排放情景（SSP5-8.5，Shared Socioeconomic Pathway 5-8.5，即共享社会经济路径5-8.5）作为未来气候变化的背景。具体采用CMIP6\citep{eyring2016overview}高分辨率模式比较项目中的CAS FGOALS-f3-L模式输出\citep{bao2020cas}。该模式是唯一提供3小时高时间分辨率输出的CMIP6参与模式，空间分辨率为25 km，能够为IGNN模型提供与历史数据一致的气象驱动场。数据通过地球系统网格联盟（ESGF）节点获取\footnote{\url{https://esgf-node.llnl.gov/search/cmip6/}}。
 
 未来排放数据：采用MEIC团队开发的未来排放动态评估模型（DPEC）数据\citep{tong2020dynamic,cheng2021pathways}\footnote{\url{http://meicmodel.org.cn/?page_id=1901&lang=en}}。DPEC的核心优势在于其创新的构建方法：将\cqt{自下而上}的精细化技术分析与\cqt{自上而下}的宏观情景驱动相结合，内部集成了源自MEIC清单的700多种中国本土排放源及其详细的技术演变过程，并与全球综合评估模型GCAM-China无缝对接。
 
