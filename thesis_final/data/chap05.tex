@@ -28,7 +28,7 @@
 
 （3）未来情景外推能力。模拟任务要求模型外推至训练数据覆盖范围之外的未来情景——包括2025--2050年的气候变化路径和多种减排策略组合。模型需在气象条件和排放强度均超出历史分布的条件下保持预测稳定性，这对泛化能力提出了极高要求。如何避免在长期模拟中的误差累积，同时保持对极端情景的物理合理响应，是突破模型泛化瓶颈的核心问题。
 
-针对上述挑战，现有方法存在以下不足：（1）在计算效率方面，化学传输模式（如CMAQ（Community Multiscale Air Quality，社区多尺度空气质量模型）、WRF-Chem（Weather Research and Forecasting model coupled with Chemistry，气象-化学耦合模型））虽具有完备的物理化学方程组，但单次区域年尺度模拟需要消耗数百至数千核时的超算资源，难以支撑多情景、多路径的探索性模拟需求。（2）在误差控制方面，现有数据驱动方法多采用自回归模式，在长期模拟（如25年尺度）中面临严重的误差累积问题，预测偏差随时间步逐层放大。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，本章的核心挑战不在于如何建模污染物的时空传输过程，而在于如何建立排放源强与浓度场之间的直接响应映射，从而支撑长期情景模拟。
+针对上述挑战，现有方法存在以下不足：（1）在计算效率方面，化学传输模式（如CMAQ（Community Multiscale Air Quality，社区多尺度空气质量模型）、WRF-Chem（Weather Research and Forecasting model coupled with Chemistry，气象--化学耦合模型））虽具有完备的物理化学方程组，但单次区域年尺度模拟需要消耗数百至数千核时的超算资源，难以支撑多情景、多路径的探索性模拟需求。（2）在误差控制方面，现有数据驱动方法多采用自回归模式，在长期模拟（如25年尺度）中面临严重的误差累积问题，预测偏差随时间步逐层放大。与第\ref{chap:prediction}章和第\ref{chap:inference}章不同，本章的核心挑战不在于如何建模污染物的时空传输过程，而在于如何建立排放源强与浓度场之间的直接响应映射，从而支撑长期情景模拟。
 
 为此，本章提出IGNN模型，将排放清单作为可控变量显式纳入深度学习框架，通过\cqt{一对一映射}策略消除自回归误差累积，构建计算高效且精度可靠的代理模型。
 
@@ -288,7 +288,7 @@ IGNN模型使用2014--2020年的历史数据进行训练与验证，数据按时
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/chap05_ignn_scatter.pdf}
-  \caption{IGNN模拟值与观测值散点图}
+  \caption{北京IGNN模拟值与观测值散点图}
   \caption*{（a）\PM（$R^2=0.42$，MAE$=29.2$ \ug{}）和（b）\ozone（$R^2=0.78$，MAE$=18.5$ \ug{}）的浓度对比。颜色表示数据点密度，红色实线为线性回归拟合线，黑色虚线为1:1参考线。}
   \label{fig:ignn_scatter}
 \end{figure}
@@ -354,7 +354,7 @@ IGNN模型使用2014--2020年的历史数据进行训练与验证，数据按时
 \begin{table}[htbp]
     \centering
     \caption{2025--2050年\cqt{2+26}城市模拟污染物浓度变化的线性拟合参数}
-    \caption*{斜率单位为\ug{} year$^{-1}$，AAC（年均变化）单位为\ug{} year$^{-1}$，截距单位为\ug{}。斜率在$p < 0.05$水平显著的已加粗。六种策略按减排力度从弱到强排列。}
+    \caption*{斜率由线性回归计算得到，AAC（年均变化）定义为首末年份模拟浓度之差除以间隔年数\citep{zhang2026ignn}。截距单位为\ug{}，AAC单位为\ug{} year$^{-1}$。斜率在$p < 0.05$水平显著的已加粗。六种策略按减排力度从弱到强排列。}
     \label{tab:future_trends_bthsa}
     \begin{tabular}{@{}lcccccc@{}}
         \toprule
