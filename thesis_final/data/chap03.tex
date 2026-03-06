@@ -550,11 +550,11 @@ PCDCNet采用Adam优化器\citep{kingma2015adam}，初始学习率$1 \times 10^{
 \caption*{\textbf{PCDCNet}：算法包含历史编码和预测两个阶段。每个时间步依次执行：嵌入层融合多源数据、LID模块处理局地化学反应、STD模块处理空间传输、TAD模块处理时间累积、残差预测生成浓度。训练时同时优化预测损失和DIC约束损失。}
 \label{alg:algorithm}
 \begin{algorithmic}[1]
-    \REQUIRE 训练数据集 $\mathcal{D} = \{D_n\}_{n=1}^N$，初始化参数 $\Theta$，学习率 $\eta$，DIC权重 $\lambda$
+    \REQUIRE 训练数据集 $\mathcal{D} = \{D_k\}_{k=1}^{|\mathcal{D}|}$，初始化参数 $\Theta$，学习率 $\eta$，DIC权重 $\lambda$
     \ENSURE 优化后的参数 $\Theta$（训练），预测序列 $\{\hat{\mathbf{X}}_t\}_{t=1}^T$（推理）
 
     \FOR{每个样本 $D_k = (\mathbf{X}, \mathbf{M}, \mathbf{E}) \in \mathcal{D}$}
-        \STATE 初始化 $\mathbf{H}_{-T'+1}^T \leftarrow \mathbf{0}$
+        \STATE 初始化 $\mathbf{H}_{-T'+1}^T \leftarrow \mathbf{0}$ \COMMENT{TAD模块GRU隐状态，上标$T$代表Temporal}
         \FOR{$t \leftarrow -T'+2$ to $T$}
             \IF{$t < 1$}
                 \STATE $\mathbf{H}_t \leftarrow \text{Linear}([\mathbf{X}_{t-1}, \mathbf{M}_t, \mathbf{E}_t])$ \COMMENT{历史编码阶段：使用真实观测}
