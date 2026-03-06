@@ -143,19 +143,7 @@
 \end{equation}
 \noindent 其中$h(\cdot)$为地形高程函数，$\lambda\rho_i + (1-\lambda)\rho_j$表示两城市连线上的插值点。该定义的物理含义是：只有当路径上存在显著高于两端城市的山脉时，$m_{ij}$才会取较大正值，从而阻断连边。
 
-本文设置$d_\theta = 300$km，$m_\theta = 1200$m（约为边界层平均高度）。图~\ref{fig:multi-image}展示了基于公式\eqref{eq:adjacency}构建的两个研究区域的城市网络结构。
-
-\begin{figure}[htbp]
-  \centering
-  \subcaptionbox{京津冀及周边地区（BTHSA）城市网络\label{fig:graph-bthsa}}
-    {\includegraphics[width=0.48\linewidth]{figures/chap03_graph_bthsa.png}}
-  \hfill
-  \subcaptionbox{长江三角洲地区（YRD）城市网络\label{fig:graph-yrd}}
-    {\includegraphics[width=0.48\linewidth]{figures/chap03_graph_yrd.png}}
-  \caption{研究区域的城市网络图结构}
-  \caption*{节点代表城市/站点，边代表潜在污染传输通道。边的建立基于公式\eqref{eq:adjacency}，综合考虑地理距离（$<$300km）和地形阻隔（山脉海拔差$<$1200m）。}
-  \label{fig:multi-image}
-\end{figure}
+本文设置$d_\theta = 300$km，$m_\theta = 1200$m（约为边界层平均高度）。
 
 
 \subsection{KnowAir-DS数据集}
@@ -163,19 +151,31 @@
 
 基于上述多源数据，我们构建并公开发布了\textbf{KnowAir-DS}系列数据集\citep{wang2020pm2}：
 
-KnowAir-DS-V1（2015--2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于\ModelPred{}评估。图~\ref{fig:knowair_v1_study_area}展示了KnowAir-DS-V1的研究区域及基于公式\eqref{eq:adjacency}构建的城市网络图结构。
+KnowAir-DS-V1（2015--2018）\footnote{\url{https://github.com/shuowang-ai/PM2.5-GNN}}：覆盖184个城市，包含\PM 和8种气象变量，时间分辨率3小时，用于\ModelPred{}评估。图~\ref{fig:knowair_v1_study_area}展示了KnowAir-DS-V1的研究区域及基于公式\eqref{eq:adjacency}构建的城市网络图结构（距离阈值$d_\theta = 300$km）。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{figures/chap03_knowair_study_area.jpg}
   \caption{KnowAir-DS-V1数据集研究区域与城市网络}
-  \caption*{左图为研究区域地理范围，覆盖中国中东部184个城市；右图为基于公式\eqref{eq:adjacency}构建的城市网络图$\mathcal{G}$，节点代表城市，边代表满足距离阈值（$d < 300$km）和地形约束的潜在污染传输通道。}
+  \caption*{左图为研究区域地理范围，覆盖中国中东部184个城市；右图为基于公式\eqref{eq:adjacency}构建的城市网络图$\mathcal{G}$，节点代表城市，边代表满足距离阈值（$d < 300$km）和地形约束的潜在污染传输通道。时间分辨率为3小时。}
   \label{fig:knowair_v1_study_area}
 \end{figure}
 
-KnowAir-DS-V2（2016--2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016--2019）、验证集（2020--2021）、测试集（2022--2023）。
+KnowAir-DS-V2（2016--2023）\footnote{\url{https://zenodo.org/records/15614907}}：覆盖BTHSA和YRD共327个监测站点，包含2种污染物、8种气象变量和6种排放变量，时间分辨率1小时，总计70,128小时记录，用于PCDCNet评估。数据划分：训练集（2016--2019）、验证集（2020--2021）、测试集（2022--2023）。图~\ref{fig:multi-image}展示了基于地理距离（$<$200km）构建的两个研究区域的站点网络结构。
 
-两版本虽空间尺度不同，但均基于第\ref{chap:methodology}章的物理启发时空图神经网络范式，核心组件（平流系数、消息传递、物理约束）具有跨尺度迁移性。
+两版本在时空分辨率上形成互补：V1以城市为节点、3小时分辨率覆盖全国尺度，V2以监测站点为节点、1小时分辨率聚焦区域尺度，从而在不同时空粒度下验证了第\ref{chap:methodology}章物理启发时空图神经网络范式的通用性与可迁移性。
+
+\begin{figure}[htbp]
+  \centering
+  \subcaptionbox{京津冀及周边地区（BTHSA）站点网络\label{fig:graph-bthsa}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap03_graph_bthsa.png}}
+  \hfill
+  \subcaptionbox{长江三角洲地区（YRD）站点网络\label{fig:graph-yrd}}
+    {\includegraphics[width=0.48\linewidth]{figures/chap03_graph_yrd.png}}
+  \caption{KnowAir-DS-V2数据集研究区域与站点网络}
+  \caption*{节点代表监测站点，边代表潜在污染传输通道。边的建立基于地理距离（$<$200km）。时间分辨率为1小时。}
+  \label{fig:multi-image}
+\end{figure}
 
 
 % ------------------------------------------------------------
