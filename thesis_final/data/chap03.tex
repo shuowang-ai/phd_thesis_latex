@@ -143,7 +143,7 @@
 \end{equation}
 \noindent 其中$h(\cdot)$为地形高程函数，$\lambda\rho_i + (1-\lambda)\rho_j$表示两城市连线上的插值点。该定义的物理含义是：只有当路径上存在显著高于两端城市的山脉时，$m_{ij}$才会取较大正值，从而阻断连边。
 
-本文设置$d_\theta = 300$km，$m_\theta = 1200$m（约为边界层平均高度）。
+距离阈值$d_\theta$的设置需根据节点的空间尺度确定。KnowAir-DS-V1以城市为节点，城市间距离较大，设置$d_\theta = 300$km；KnowAir-DS-V2以监测站点为节点，站点间距离较小，设置$d_\theta = 200$km。山脉高度阈值统一设置$m_\theta = 1200$m（约为边界层平均高度）。
 
 
 \subsection{KnowAir-DS数据集}
@@ -343,7 +343,7 @@ h_i^t &= (1 - z_i^t) \odot h_i^{t-1} + z_i^t \odot \tilde{h}_i^t
 \section{PCDCNet：物理化学动力学约束模型}
 \label{sec:pcdcnet}
 
-为解决\ModelPred{}的上述局限，我们又提出了\textbf{PCDCNet（Physical-Chemical Dynamics and Constraints Network）}\citep{wang2025pcdcnet}。该模型定位为数值模式（如CMAQ）的\textbf{深度学习代理模型（Surrogate Model）}，在继承\ModelPred{}风场驱动图网络设计的基础上，进行了以下关键升级：
+为解决\ModelPred{}的上述局限，我们又提出了\textbf{PCDCNet（Physical-Chemical Dynamics and Constraints Network）}\citep{wang2025pcdcnet}。该模型定位为数值模式（如CMAQ）的\textbf{深度学习代理模型（Surrogate Model）}，在继承第\ref{chap:methodology}章所建立的物理启发时空图神经网络建模思想的基础上，进行了以下关键升级：
 
 \begin{itemize}
     \item 多污染物联合预测：同时预报\PM 与\ozone 浓度，并建模其协同效应；
@@ -795,7 +795,7 @@ TimeXer & 31.51 & 30.07 & \underline{20.60} & 22.87 & \underline{17.89} & 30.47 
 
 （1）PCDCNet在所有指标上均取得最优性能。在BTHSA区域，\PM 的RMSE从次优方法iTransformer的31.17降至24.13，降幅达\textbf{22.6\%}；\ozone 的RMSE从次优方法XGBoost的27.53降至22.45，降幅达\textbf{18.5\%}。在YRD区域，\PM 的RMSE降低\textbf{13.1\%}，\ozone 的RMSE降低\textbf{16.9\%}。
 
-（2）\ModelPred{}在\ozone 预测上表现不佳。\ModelPred{}的\ozone{} RMSE（BTHSA: 31.85, YRD: 31.46）显著高于PCDCNet，验证了我们在第\ref{subsec:pm25gnn_limitation}节分析的局限性——缺乏化学机制约束和排放输入导致其难以捕捉\ozone 的光化学生成过程。
+（2）\ModelPred{}在\ozone 预测上表现不佳。需要说明的是，\ModelPred{}最初仅针对\PM 单一污染物设计（第\ref{sec:pm25gnn}节的实验也仅评估\PM 预测），在本节的对比实验中，我们将其输出层扩展为多变量输出，以便在统一的多污染物预测任务下进行公平对比。扩展后的\ModelPred{}在\ozone{} RMSE（BTHSA: 31.85, YRD: 31.46）上显著落后于PCDCNet，验证了我们在第\ref{subsec:pm25gnn_limitation}节分析的局限性——缺乏化学机制约束和排放输入导致其难以捕捉\ozone 的光化学生成过程。
 
 （3）通用时序模型在\ozone 预测上优于专用空气质量模型。iTransformer和TimeXer在\ozone 预测上的表现优于GC-LSTM和\ModelPred，但仍显著落后于PCDCNet。这表明：（a）\ozone 预测需要捕捉复杂的非线性依赖，Transformer架构在此有一定优势；（b）仅依靠通用时序建模能力仍不充分，需要融合排放和物理约束。
 
