@@ -38,7 +38,7 @@
 \end{equation}
 \noindent 式中，$\mathbf{y}$为输出信号，$\mathbf{x}$为输入图信号，$\mathbf{L} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top$为拉普拉斯矩阵的特征分解（$\mathbf{U}$为特征向量矩阵，$\boldsymbol{\Lambda}$为特征值对角矩阵），$g_\theta(\cdot)$为可学习的频谱滤波器。
 
-然而，公式\eqref{eq:spectral_conv}中的全特征分解计算复杂度为$O(N^3)$，难以应用于大规模图。为此，ChebNet\citep{defferrard2016convolutional}采用切比雪夫多项式近似滤波器$g_\theta(\boldsymbol{\Lambda})$，将复杂度降至$O(|\mathcal{E}|)$（$|\mathcal{E}|$为边数）：
+然而，公式\eqref{eq:spectral_conv}要求对拉普拉斯矩阵执行完整的特征分解，其计算复杂度高达$O(N^3)$，在大规模图上难以实际运用。ChebNet\citep{defferrard2016convolutional}利用切比雪夫多项式对滤波器$g_\theta(\boldsymbol{\Lambda})$进行$K_c$阶截断逼近，将计算复杂度降低至$O(|\mathcal{E}|)$（$|\mathcal{E}|$为边数）：
 \begin{equation}
 \mathbf{y} = \sum_{k=0}^{K_c-1} \theta_k T_k(\tilde{\mathbf{L}}) \mathbf{x}
 \label{eq:chebynet}
@@ -76,7 +76,7 @@
 \subsection{时空图神经网络}
 \label{subsec:stgnn}
 
-时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）在空间维度的图卷积基础上，进一步引入时间维度的建模能力，是处理时空序列预测问题的有效工具\citep{yu2018spatio,li2018diffusion}。
+时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）将空间维度的图卷积与时间维度的序列建模相结合，已成为时空数据预测任务中的主流框架\citep{yu2018spatio,li2018diffusion}。
 
 典型的STGNN架构包含交替堆叠的空间模块与时间模块。空间模块采用上述GCN（公式\eqref{eq:gcn}）或MPNN（公式\eqref{eq:message_passing}）捕捉节点间的空间依赖；时间模块沿时间轴捕捉序列依赖，常用膨胀卷积（Dilated Convolution）：
 \begin{equation}
@@ -103,7 +103,7 @@
 
 \subsection{气象预报领域}
 
-在气象预报领域，Google DeepMind的GraphCast\citep{lam2023learning}首次实现数据驱动模型在中期天气预报精度上超越欧洲中期天气预报中心（European Centre for Medium-Range Weather Forecasts, ECMWF）业务系统；NVIDIA的FourCastNet\citep{pathak2022fourcastnet}基于傅里叶神经算子在频谱域建模全球动力学。GraphCast的核心创新在于多尺度图结构——采用\cqt{编码器--处理器--解码器}架构，在细网格（ERA5再分析数据格点，约100万节点）与粗网格（准均匀球面网格，约4万节点）间建立跨尺度连接，实现计算效率（10天全球预报仅需1分钟）与长程依赖建模的平衡。这类基于规则网格构建的稠密图结构，节点按经纬度均匀分布，适用于全域场的连续建模。本文第\ref{chap:inference}章的网格推断任务采用了类似的稠密网格图结构，在规则格点上进行空间插值与推断。
+在气象预报领域，Google DeepMind的GraphCast\citep{lam2023learning}首次以数据驱动模型在中期天气预报任务上超越了ECMWF（European Centre for Medium-Range Weather Forecasts，欧洲中期天气预报中心）的高分辨率业务预报；NVIDIA的FourCastNet\citep{pathak2022fourcastnet}基于傅里叶神经算子在频谱域建模全球动力学。GraphCast的核心创新在于多尺度图结构——采用\cqt{编码器--处理器--解码器}架构，在细网格（ERA5再分析数据格点，约100万节点）与粗网格（准均匀球面网格，约4万节点）间建立跨尺度连接，实现计算效率（10天全球预报仅需1分钟）与长程依赖建模的平衡。这类基于规则网格构建的稠密图结构，节点按经纬度均匀分布，适用于全域场的连续建模。本文第\ref{chap:inference}章的网格推断任务采用了类似的稠密网格图结构，在规则格点上进行空间插值与推断。
 
 \subsection{大气污染预测领域}
 
