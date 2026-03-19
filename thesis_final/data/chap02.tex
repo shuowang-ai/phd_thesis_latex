@@ -15,12 +15,12 @@
 \label{sec:gnn_basics}
 
 % 从系统科学角度引入
-从系统科学的角度来看，图神经网络（Graph Neural Network, GNN）可被视为一种学习系统动力学的通用框架\citep{battaglia2018relational}。复杂系统由相互作用的实体构成，其宏观行为涌现于微观个体间的局部交互。GNN的核心思想是：首先根据问题特点构建图结构（将实体建模为节点、交互关系建模为边），然后在图上运行神经网络，通过迭代执行消息传递与聚合操作学习实体间的交互规律。神经网络提供的可学习参数（如卷积核权重、注意力系数等）使模型能够从数据中自动拟合复杂的非线性映射关系，从而逼近系统的演化动力学。这种\cqt{从局部交互到全局涌现}的建模思想与大气污染系统的物理本质高度契合——污染物浓度的时空演化正是由无数局部的排放、传输、反应与沉降过程共同决定的。
+在系统科学的视域下，GNN（Graph Neural Network，图神经网络）为复杂系统动力学建模提供了一套通用的参数化学习方案\citep{battaglia2018relational}。现实中的复杂系统往往由大量彼此耦合的个体组成，系统整体的宏观规律根植于个体层面的局部相互作用。GNN的建模逻辑可概括为：依据研究对象的结构特征将个体抽象为图节点、将耦合关系抽象为图边，进而在所构建的图拓扑上执行参数化的邻域信息聚合，逐层提取交互模式。网络中的可训练参数（包括卷积核权重、注意力系数等）赋予模型对高度非线性映射的逼近能力，使其能够从有限观测样本中捕获系统的动态演化特征。这种\cqt{从局部交互到全局涌现}的建模思想与大气污染系统的物理本质高度契合——污染物浓度的时空演化正是由无数局部的排放、传输、反应与沉降过程共同决定的。
 
 \subsection{图的基本概念}
 \label{subsec:graph_concept}
 
-图（Graph）是描述实体及其关系的数学结构，形式化定义为$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，其中$\mathcal{V} = \{v_1, v_2, \ldots, v_N\}$为节点集合，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$为边集合。图的连接关系可用邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$表示，其中$A_{ij} > 0$当且仅当$(v_i, v_j) \in \mathcal{E}$。每个节点$v_i$附带特征向量$\mathbf{x}_i \in \mathbb{R}^{F}$，边$e_{ij}$附带边特征$\mathbf{e}_{ij}$。在大气污染问题中，节点通常对应监测站点或城市，节点特征包含污染物浓度与气象变量，边特征可编码节点间的空间距离或风场信息。具体的图构建方法将在各应用章节（第\ref{chap:prediction}--\ref{chap:simulation}章）中根据任务特点详细阐述。
+图（Graph）是描述实体及其关系的数学结构，形式化定义为$\mathcal{G} = (\mathcal{V}, \mathcal{E})$，其中$\mathcal{V} = \{v_1, v_2, \ldots, v_N\}$表示由$N$个节点构成的集合，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$表示连接节点的边集。图的拓扑信息通过邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$进行数值表达，当且仅当$(v_i, v_j) \in \mathcal{E}$时$A_{ij} > 0$。此外，每个节点$v_i$关联一个$F$维特征向量$\mathbf{x}_i \in \mathbb{R}^{F}$，每条边$e_{ij}$亦可携带边属性$\mathbf{e}_{ij}$。就大气污染研究而言，监测站点或城市自然地构成图节点，其关联的污染物浓度序列与气象观测量形成节点特征，而站点之间的地理距离、主导风向等信息则可编码为边特征。具体的图构建方法将在各应用章节（第\ref{chap:prediction}--\ref{chap:simulation}章）中根据任务特点详细阐述。
 
 \subsection{图神经网络的两大范式}
 \label{subsec:gnn_paradigms}
@@ -29,16 +29,16 @@
 
 \subsubsection{谱方法：图卷积网络}
 
-谱方法从图信号处理的角度出发，在图的频谱域定义卷积操作\citep{bruna2014spectral}。其核心思想是利用图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$（式中$\mathbf{D}$为度矩阵，$\mathbf{A}$为邻接矩阵）的特征分解进行滤波。下面通过公式\eqref{eq:spectral_conv}--\eqref{eq:gcn}展示谱方法从理论形式到实用形式的演化过程。
+谱方法借鉴经典信号处理理论，将卷积操作推广至图的频谱域\citep{bruna2014spectral}。该方法的基本思路是：对图拉普拉斯矩阵$\mathbf{L} = \mathbf{D} - \mathbf{A}$（式中$\mathbf{D}$为度矩阵，$\mathbf{A}$为邻接矩阵）实施特征分解，并在所得谱空间中设计可学习的滤波器。下面通过公式\eqref{eq:spectral_conv}--\eqref{eq:gcn}展示谱方法从理论形式到实用形式的演化过程。
 
 对于图信号$\mathbf{x} \in \mathbb{R}^N$，谱卷积的理论形式定义为：
 \begin{equation}
 \mathbf{y} = \mathbf{U} g_\theta(\boldsymbol{\Lambda}) \mathbf{U}^\top \mathbf{x}
 \label{eq:spectral_conv}
 \end{equation}
-\noindent 式中，$\mathbf{y}$为输出信号，$\mathbf{x}$为输入图信号，$\mathbf{L} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top$为拉普拉斯矩阵的特征分解（$\mathbf{U}$为特征向量矩阵，$\boldsymbol{\Lambda}$为特征值对角矩阵），$g_\theta(\cdot)$为可学习的频谱滤波器。
+\noindent 式中，$\mathbf{y}$为输出信号，$\mathbf{x}$为输入图信号，$\mathbf{U}$与$\boldsymbol{\Lambda}$分别为拉普拉斯矩阵$\mathbf{L}$特征分解后所得的特征向量矩阵与特征值对角矩阵（即$\mathbf{L} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top$），$g_\theta(\cdot)$为参数可训练的频域滤波函数。
 
-然而，公式\eqref{eq:spectral_conv}要求对拉普拉斯矩阵执行完整的特征分解，其计算复杂度高达$O(N^3)$，在大规模图上难以实际运用。ChebNet\citep{defferrard2016convolutional}利用切比雪夫多项式对滤波器$g_\theta(\boldsymbol{\Lambda})$进行$K_c$阶截断逼近，将计算复杂度降低至$O(|\mathcal{E}|)$（$|\mathcal{E}|$为边数）：
+但上述理论形式（公式\eqref{eq:spectral_conv}）需要对$\mathbf{L}$进行完整的特征分解，带来$O(N^3)$的计算开销，这在节点规模较大的图上不具有可行性。为此，ChebNet\citep{defferrard2016convolutional}提出用$K_c$阶切比雪夫多项式截断近似滤波器$g_\theta(\boldsymbol{\Lambda})$，从而将复杂度压缩至与边数成线性关系的$O(|\mathcal{E}|)$：
 \begin{equation}
 \mathbf{y} = \sum_{k=0}^{K_c-1} \theta_k T_k(\tilde{\mathbf{L}}) \mathbf{x}
 \label{eq:chebynet}
@@ -50,26 +50,26 @@
 \mathbf{H}^{(l+1)} = \sigma\left(\tilde{\mathbf{D}}^{-\frac{1}{2}} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-\frac{1}{2}} \mathbf{H}^{(l)} \mathbf{W}^{(l)}\right)
 \label{eq:gcn}
 \end{equation}
-\noindent 式中，$\mathbf{H}^{(l)}$为第$l$层的节点特征矩阵，$\mathbf{H}^{(l+1)}$为第$l+1$层的输出，$\tilde{\mathbf{A}} = \mathbf{A} + \mathbf{I}$为添加自环的邻接矩阵，$\tilde{\mathbf{D}}$为对应的度矩阵，$\mathbf{W}^{(l)}$为可学习参数矩阵，$\sigma(\cdot)$为非线性激活函数（如ReLU）。经过$L$层图卷积后，最终的节点表示$\mathbf{H}^{(L)}$可通过读出层（如线性映射$\mathbf{Y} = \mathbf{H}^{(L)}\mathbf{W}_{\text{out}}$）生成预测输出。
+\noindent 式中，$\mathbf{H}^{(l)}$为第$l$层的节点特征矩阵，$\mathbf{H}^{(l+1)}$为第$l+1$层的输出，$\tilde{\mathbf{A}} = \mathbf{A} + \mathbf{I}$为添加自环的邻接矩阵，$\tilde{\mathbf{D}}$为对应的度矩阵，$\mathbf{W}^{(l)}$为可学习参数矩阵，$\sigma(\cdot)$为非线性激活函数（如ReLU）。当逐层传播至第$L$层时，所得节点表示$\mathbf{H}^{(L)}$经由读出层（例如线性投影$\mathbf{Y} = \mathbf{H}^{(L)}\mathbf{W}_{\text{out}}$）转换为最终的预测输出。
 
-谱方法的优势在于具有坚实的数学基础，卷积操作在频谱域具有明确的物理意义（低频对应平滑信号，高频对应突变信号）；其局限性在于基于邻接矩阵或拉普拉斯矩阵进行运算，难以直接输入边属性（Edge Attributes），但近年来边条件卷积等扩展方法已逐步克服这一限制。
+谱方法以图谱理论为数学根基，其滤波操作在频域具有清晰的可解释性——低频分量刻画图信号的全局平滑趋势，高频分量则反映局部的剧烈变化。不过，由于计算过程依赖邻接矩阵或拉普拉斯矩阵的矩阵运算，谱方法在处理边属性（Edge Attributes）时并不直观，尽管近年来边条件卷积等扩展技术已在一定程度上弥补了这一不足。
 
 \subsubsection{消息传递神经网络}
 
-与谱方法从频谱域定义卷积不同，消息传递神经网络（MPNN）\citep{gilmer2017neural}从空间域出发，通过邻居间的显式信息交互更新节点表示：
+有别于谱方法在频域施加滤波的思路，消息传递神经网络（MPNN）\citep{gilmer2017neural}直接在图的空间域上工作，借助相邻节点之间的显式信息交换来迭代更新节点表示：
 \begin{equation}
 \mathbf{h}_i^{(l+1)} = \phi\left(\mathbf{h}_i^{(l)}, \bigoplus_{j \in \mathcal{N}(i)} \psi\left(\mathbf{h}_i^{(l)}, \mathbf{h}_j^{(l)}, \mathbf{e}_{ji}\right)\right)
 \label{eq:message_passing}
 \end{equation}
-\noindent 式中，$\mathbf{h}_i^{(l)}$为节点$i$在第$l$层的隐藏表示，$\mathcal{N}(i)$为节点$i$的邻居集合，$\psi(\cdot)$为消息函数，$\bigoplus$为聚合操作（如求和、均值），$\phi(\cdot)$为更新函数。该范式的物理直觉是：节点从邻居收集\cqt{消息}并聚合，再结合自身状态生成新的表示。这与大气污染物的传输机制一致——站点的污染水平受本地排放与周边传输的共同作用。
+\noindent 式中，$\mathbf{h}_i^{(l)}$为节点$i$在第$l$层的隐藏表示，$\mathcal{N}(i)$为节点$i$的邻居集合，$\psi(\cdot)$为消息函数，$\bigoplus$为聚合操作（如求和、均值），$\phi(\cdot)$为更新函数。上述过程可从物理角度直观理解：每个节点汇集来自其邻域的信息片段，经聚合后与自身已有状态融合，生成更新后的特征表示。这一机制在本质上与大气污染的传播规律相吻合——任意站点的污染水平取决于本地排放强度以及周围区域经由大气输送带来的贡献。
 
 消息传递方法的优势在于灵活性强，可自然处理有向图、动态图和边特征；局限性在于缺乏全局视野，多跳依赖需堆叠多层网络。
 
 \subsubsection{两种范式的统一视角}
 
-从数学角度，谱方法与消息传递方法可以统一为图滤波框架：两者本质上都是对邻居信息的加权聚合，区别在于权重的定义方式——谱方法通过频谱滤波器隐式定义，消息传递方法通过显式的消息函数定义。
+从数学角度审视，谱方法与消息传递方法可纳入同一图滤波框架予以理解：二者均在本质上执行邻域信息的加权汇聚操作，差异主要体现在聚合权重的来源——前者由频谱域的滤波器参数隐式决定，后者则经由空间域中显式定义的消息函数生成。
 
-从计算实现角度，两种范式具有不同的适用场景。谱方法基于邻接矩阵或拉普拉斯矩阵的稠密/稀疏矩阵运算，通过矩阵乘法一次性完成所有节点的信息聚合，计算效率高，适用于节点规模较小的图（如本文的城市级网络，$N \approx 10^2$）。消息传递方法则采用边索引（edge index）表示图结构，以$[2, |\mathcal{E}|]$的张量形式存储所有边的源节点--目标节点对，逐条边计算消息并聚合。这种实现方式对稀疏图的适应性更强：当图规模增大时（如$N \approx 10^5 \sim 10^6$），稠密邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$可能无法装入显存，而边索引表示的空间复杂度仅为$O(|\mathcal{E}|)$，对于稀疏图（$|\mathcal{E}| \ll N^2$）具有显著优势。
+在工程实现层面，两种范式分别适用于不同的应用场景。谱方法基于邻接矩阵或拉普拉斯矩阵的稠密/稀疏矩阵运算，通过矩阵乘法一次性完成所有节点的信息聚合，计算效率高，适用于节点规模较小的图（如本文的城市级网络，$N \approx 10^2$）。消息传递方法则采用边索引（edge index）表示图结构，以$[2, |\mathcal{E}|]$的张量形式存储所有边的源节点--目标节点对，逐条边计算消息并聚合。这种实现方式对稀疏图的适应性更强：当图规模增大时（如$N \approx 10^5 \sim 10^6$），稠密邻接矩阵$\mathbf{A} \in \mathbb{R}^{N \times N}$可能无法装入显存，而边索引表示的空间复杂度仅为$O(|\mathcal{E}|)$，对于稀疏图（$|\mathcal{E}| \ll N^2$）具有显著优势。
 
 本文根据不同任务的特点灵活选择两种范式：第\ref{chap:prediction}章\ModelPred{}采用消息传递范式，利用其对边特征的灵活建模能力将风场编码为有向边权重；第\ref{chap:prediction}章PCDCNet采用基于拉普拉斯矩阵的一阶谱卷积，第\ref{chap:simulation}章IGNN采用ChebNet的多阶滤波特性捕捉多尺度空间依赖；第\ref{chap:inference}章SPIN则结合两种范式，分别建模扩散过程（谱卷积）和平流过程（有向消息传递）。
 
@@ -78,7 +78,7 @@
 
 时空图神经网络（Spatiotemporal Graph Neural Network, STGNN）将空间维度的图卷积与时间维度的序列建模相结合，已成为时空数据预测任务中的主流框架\citep{yu2018spatio,li2018diffusion}。
 
-典型的STGNN架构包含交替堆叠的空间模块与时间模块。空间模块采用上述GCN（公式\eqref{eq:gcn}）或MPNN（公式\eqref{eq:message_passing}）捕捉节点间的空间依赖；时间模块沿时间轴捕捉序列依赖，常用膨胀卷积（Dilated Convolution）：
+在结构设计上，STGNN通常将空间模块与时间模块按层交替排列。其中，空间模块沿用前述GCN（公式\eqref{eq:gcn}）或MPNN（公式\eqref{eq:message_passing}）以提取节点间的空间关联信息；时间模块则负责沿时间维度建模序列演化，膨胀卷积（Dilated Convolution）是其中一种常见选择：
 \begin{equation}
 \mathbf{Y}_t = \sum_{s=0}^{K_t-1} \mathbf{W}_s \star \mathbf{X}_{t-d \cdot s}
 \label{eq:tcn}
@@ -99,7 +99,7 @@
 \section{图神经网络在地球科学中的应用}
 \label{sec:gnn_earth_science}
 
-近年来，图神经网络在地球科学领域取得了突破性进展，涵盖气象预报与大气污染预测两大方向。本节综述该领域的代表性工作，提炼这类方法的共性特点，为本文的模型设计提供方法论基础。
+图神经网络在地球科学中的应用近年来发展迅速，已在气象预报和大气污染预测两个方向上产生了一系列具有代表性的成果。本节对上述方向的关键工作进行梳理，归纳其方法论层面的共性规律，为本文后续的模型设计提供参考。
 
 \subsection{气象预报领域}
 
@@ -107,7 +107,7 @@
 
 \subsection{大气污染预测领域}
 
-在大气污染预测领域，时空图神经网络（STGNN）已成为主流技术架构\citep{zhou2020graph,wu2020comprehensive}。与气象预报的规则网格不同，空气质量监测站点在空间上呈稀疏且不规则分布——站点数量有限（通常为数百至数千个）、站点位置受城市规划与地形约束，形成天然的稀疏图结构。如第\ref{chap:introduction}章所述，这类模型通过图结构（监测站点网络）引入归纳偏置，使用图卷积刻画站点间的空间关联，配合时序卷积或长短期记忆网络（Long Short-Term Memory, LSTM）建模浓度的时间演变。代表性工作包括：STGCN\citep{yu2018spatio}建立了时空图建模的基础框架；DCRNN\citep{li2018diffusion}将信息传播建模为有向图上的扩散过程，与大气污染物的扩散传输机制天然对应；Graph WaveNet\citep{wu2019graph}引入自适应邻接矩阵学习机制，无需预定义图结构即可端到端学习节点间的隐式依赖。本文除第\ref{chap:inference}章的网格推断任务外，第\ref{chap:prediction}章（预测）和第\ref{chap:simulation}章（模拟）均采用这种基于监测站点或城市的稀疏图结构。
+大气污染预测方面，时空图神经网络（STGNN）已逐渐确立为该领域的核心建模工具\citep{zhou2020graph,wu2020comprehensive}。不同于气象预报所依赖的规则格点数据，空气质量监测站点的空间分布具有稀疏性和不规则性——站点数量有限（通常为数百至数千个）、站点位置受城市规划与地形约束，形成天然的稀疏图结构。如第\ref{chap:introduction}章所述，这类模型通过图结构（监测站点网络）引入归纳偏置，使用图卷积刻画站点间的空间关联，配合时序卷积或长短期记忆网络（Long Short-Term Memory, LSTM）建模浓度的时间演变。代表性工作包括：STGCN\citep{yu2018spatio}建立了时空图建模的基础框架；DCRNN\citep{li2018diffusion}把节点间的信息流动刻画为有向图上的扩散过程，这一建模思路与大气中污染物沿风场扩散传输的物理图景具有内在的一致性；Graph WaveNet\citep{wu2019graph}引入自适应邻接矩阵学习机制，无需预定义图结构即可端到端学习节点间的隐式依赖。本文除第\ref{chap:inference}章的网格推断任务外，第\ref{chap:prediction}章（预测）和第\ref{chap:simulation}章（模拟）均采用这种基于监测站点或城市的稀疏图结构。
 
 在物理启发融合方向，AirPhyNet\citep{hettigeairphynet}将质量守恒原理嵌入网络结构，在稀疏数据和突变场景下展现出更强的鲁棒性；Air-DualODE\citep{tianair}采用双分支架构，物理分支求解边界感知的扩散--平流方程，数据驱动分支学习额外的依赖关系，实现物理可解释性与数据拟合能力的平衡。
 
@@ -139,9 +139,9 @@
 \section{大气污染的物理基础}
 \label{sec:atmospheric_dynamics}
 
-纯数据驱动的图神经网络虽然具备强大的表示学习能力，但在地球科学领域面临两个核心挑战：一是数据稀疏性导致的过拟合风险，二是预测结果可能违背物理规律（如质量守恒）。将领域知识融入深度学习模型——即物理启发的机器学习（Physics-Informed Machine Learning）——是应对这些挑战的有效途径\citep{karniadakis2021physics,reichstein2019deep}。
+纯数据驱动的图神经网络虽然具备强大的表示学习能力，但在地球科学领域面临两个核心挑战：一是数据稀疏性导致的过拟合风险，二是预测结果可能违背物理规律（如质量守恒）。物理启发机器学习（Physics-Informed Machine Learning）\citep{karniadakis2021physics,reichstein2019deep}为应对上述挑战开辟了新的技术路径——其核心策略是将领域先验知识以归纳偏置的形式注入深度学习的建模流程，从而在数据有限或分布偏移的条件下提升模型的可靠性。
 
-本节的核心问题是：大气污染建模的物理基础是什么？如何将这些物理知识转化为神经网络的归纳偏置（Inductive Bias，即学习算法从有限数据泛化时所依赖的先验假设\citep{battaglia2018relational}）？
+本节围绕两个核心问题展开：其一，大气污染建模所依托的物理基础是什么？其二，如何将这些物理知识编码为神经网络的归纳偏置（Inductive Bias，即学习算法在有限样本条件下泛化所依赖的先验假设\citep{battaglia2018relational}）？
 
 在大气污染物理领域，存在两个核心的约束方程：\textbf{对流--扩散方程}（公式\eqref{eq:advection_diffusion}）描述污染物浓度场的时空演化规律，\textbf{质量守恒方程}（公式\eqref{eq:mass_conservation}）作为其积分形式，约束封闭系统内污染物总量的收支平衡。化学传输模式（如CMAQ、WRF-Chem）通过数值方法直接求解这些方程来模拟污染物演化。本文的策略有所不同：不直接求解方程，而是将这两个核心约束\textbf{隐式地融入图神经网络的架构与训练过程}中——对流--扩散的动力学通过隐空间的消息传递机制体现，质量守恒约束则在解码到物理空间后，以损失函数的形式与数据拟合项并列作用。
 
@@ -153,7 +153,7 @@
 \frac{\partial C}{\partial t} = \underbrace{-\mathbf{u} \cdot \nabla C}_{\text{平流项}} + \underbrace{\nabla \cdot (K \nabla C)}_{\text{扩散项}} + \underbrace{R}_{\text{化学反应}} + \underbrace{S}_{\text{排放源}} - \underbrace{D}_{\text{沉降汇}}
 \label{eq:advection_diffusion}
 \end{equation}
-\noindent 式中，$C$为污染物浓度，$\mathbf{u}$为风速矢量，$K$为扩散系数，$R$、$S$、$D$分别为化学反应项、排放源项和沉降汇项。该方程的各项在本文的GNN设计中均有对应实现（见表~\ref{tab:pde_gnn_mapping}）：
+\noindent 式中，$C$表示污染物浓度标量场，$\mathbf{u}$为三维风速矢量，$K$为湍流扩散系数；$R$对应大气光化学反应引起的浓度变化，$S$为人为及自然源的排放贡献，$D$则表征干湿沉降导致的移除通量。上述各物理项在本文所设计的GNN架构中均有相应的结构映射（见表~\ref{tab:pde_gnn_mapping}）：
 
 \begin{table}[htbp]
     \centering
@@ -176,7 +176,7 @@
 \subsection{质量守恒约束}
 \label{subsec:physics_constraints}
 
-对流--扩散方程\eqref{eq:advection_diffusion}的积分形式即为质量守恒定律。在封闭系统内，污染物总量的变化应等于源汇之差：
+将对流--扩散方程\eqref{eq:advection_diffusion}在空间控制体上积分，可自然地导出质量守恒的积分表述。其物理含义为：封闭区域内污染物总量的时间变化率等于内部源汇的净贡献减去边界通量：
 \begin{equation}
 \frac{\partial}{\partial t} \int_{\Omega} C \, d\Omega = \int_{\Omega} (S - D + R) \, d\Omega - \oint_{\partial\Omega} \mathbf{F} \cdot \mathbf{n} \, dS
 \label{eq:mass_conservation}
@@ -185,9 +185,9 @@
 
 公式\eqref{eq:advection_diffusion}（对流--扩散方程）与公式\eqref{eq:mass_conservation}（质量守恒方程）构成大气污染物理的两个核心约束，本文将其隐式地融入图神经网络的不同层次。
 
-对流--扩散动力学$\rightarrow$隐空间消息传递。公式\eqref{eq:advection_diffusion}描述的平流与扩散过程，通过GNN在隐空间（Latent Space）中的消息传递机制体现：编码器（Encoder）将观测数据从物理空间映射到隐空间表示，图卷积的消息传递模拟污染物在节点间的传输——平流项对应有向图上的定向传递，扩散项对应无向图上的各向同性扩散。
+对流--扩散动力学$\rightarrow$隐空间消息传递。公式\eqref{eq:advection_diffusion}所刻画的平流与扩散过程，在本文的模型中通过隐空间（Latent Space）内的图消息传递加以体现。具体而言，编码器（Encoder）首先将物理空间的观测数据投射为隐空间表征，随后图卷积层在隐空间中执行邻域聚合——其中有向图上沿风场方向的定向传递类比平流输送，无向图上的对称聚合则类比湍流扩散的各向同性混合。
 
-质量守恒$\rightarrow$物理空间损失约束。公式\eqref{eq:mass_conservation}的守恒约束在物理空间中施加。解码器（Decoder）将隐空间表示映射回浓度预测后，质量守恒以损失函数形式与数据拟合损失并列作用，引导模型学习符合物理规律的时空表示；该设计使守恒约束直接作用于可观测的物理量，而非抽象的隐层表示。
+质量守恒$\rightarrow$物理空间损失约束。公式\eqref{eq:mass_conservation}所表达的守恒律则在物理空间层面予以实施。当解码器（Decoder）将隐空间表征还原为浓度预测值之后，质量守恒条件被构造为附加的损失项，与数据拟合损失共同参与梯度优化。这一设计确保守恒约束直接施加于具有明确物理意义的可观测量，而非作用于缺乏直观解释的隐层特征。
 
 下一节将具体阐述物理知识融入GNN的三种实现途径。
 
@@ -200,12 +200,12 @@
 
 （2）网络架构设计。对流--扩散方程的物理过程被解耦为独立的网络模块——第\ref{chap:prediction}章PCDCNet的LID--STD--TAD三模块分别对应局地化学反应及排放沉降项（LID）、空间平流与扩散项（STD）、时间演化项（TAD）。
 
-（3）损失函数设计。通过物理约束项软约束模型输出满足物理规律：
+（3）损失函数设计。在优化目标中引入物理惩罚项，以软约束方式促使模型预测遵从已知的物理定律：
 \begin{equation}
 \mathcal{L} = \mathcal{L}_{\text{data}} + \lambda \mathcal{L}_{\text{physics}}
 \label{eq:physics_loss}
 \end{equation}
-\noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），衡量模型预测与观测数据之间的偏差；$\mathcal{L}_{\text{physics}}$为物理约束项，将领域物理知识以软约束的形式嵌入优化目标；$\lambda$为平衡系数，控制数据拟合与物理一致性之间的权衡。物理约束项$\mathcal{L}_{\text{physics}}$的具体形式因任务而异：第\ref{chap:prediction}章设计了领域知识约束（DIC）损失，基于公式\eqref{eq:mass_conservation}的质量守恒原理，约束相邻时间步之间空间传输贡献的时间连续性与空间一致性；第\ref{chap:inference}章则利用卫星遥感反演的AOD（气溶胶光学厚度）数据构建梯度约束，引导模型学习与遥感观测一致的空间分布模式。
+\noindent 式中，$\mathcal{L}_{\text{data}}$为数据拟合项（如均方误差），衡量模型预测与观测数据之间的偏差；$\mathcal{L}_{\text{physics}}$为物理约束项，将领域物理知识以软约束的形式嵌入优化目标；$\lambda$为正则化权重，用于调节数据拟合精度与物理一致性之间的相对重要性。物理约束项$\mathcal{L}_{\text{physics}}$的具体形式因任务而异：第\ref{chap:prediction}章设计了领域知识约束（DIC）损失，基于公式\eqref{eq:mass_conservation}的质量守恒原理，约束相邻时间步之间空间传输贡献的时间连续性与空间一致性；第\ref{chap:inference}章则利用卫星遥感反演的AOD（气溶胶光学厚度）数据构建梯度约束，引导模型学习与遥感观测一致的空间分布模式。
 
 
 % ------------------------------------------------------------
@@ -224,7 +224,7 @@
 \subsection{统一建模框架}
 \label{subsec:unified_framework}
 
-基于上述理论基础，本文构建了面向预测、推断与模拟三类核心任务的统一建模框架，如图~\ref{fig:unified_framework}所示。该框架将物理启发的时空图神经网络抽象为参数化映射$\mathcal{F}_\Theta$，通过端到端的梯度优化从数据中学习模型参数$\Theta$。尽管三类任务在具体形式上有所差异，但均可在统一的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}架构下表达。
+基于上述理论基础，本文构建了面向预测、推断与模拟三类核心任务的统一建模框架，如图~\ref{fig:unified_framework}所示。该框架的核心是将融入物理先验的时空图神经网络形式化为参数化算子$\mathcal{F}_\Theta$，依托端到端梯度反向传播机制实现参数$\Theta$的数据驱动学习。尽管三类任务在具体形式上有所差异，但均可在统一的\cqt{编码$\rightarrow$隐空间动力学$\rightarrow$解码}架构下表达。
 
 \begin{figure}[htbp]
     \centering
@@ -242,7 +242,7 @@
 
 解码层（Decoder）——将隐空间表示映射回目标空间，输出预测、推断或模拟结果$\hat{\mathbf{X}}$。物理约束可通过损失函数嵌入——在数据拟合损失之外添加物理惩罚项（如基于质量守恒的DIC约束、基于遥感反演的AOD梯度约束），引导模型学习符合物理规律的时空表示。
 
-图~\ref{fig:unified_framework}右侧展示了模型的训练机制：损失函数$\mathcal{L}$综合数据拟合项与物理约束项，通过比较模型输出$\hat{\mathbf{X}}$与观测数据（Ground Truth）计算误差，并通过反向传播算法计算梯度、更新模型参数$\Theta$。这种端到端的梯度优化机制是本文方法区别于数值模式的关键——数值模式通过求解偏微分方程获得数值解，而本文方法通过数据驱动的参数学习自适应拟合观测数据，同时通过物理约束保证结果的物理一致性。
+图~\ref{fig:unified_framework}右侧展示了模型的训练流程：损失函数$\mathcal{L}$同时包含数据拟合项与物理约束项，基于模型输出$\hat{\mathbf{X}}$与观测真值（Ground Truth）之间的偏差计算总误差，随后经反向传播求取参数梯度并完成$\Theta$的迭代更新。这种端到端的梯度优化机制是本文方法区别于数值模式的关键——数值模式通过求解偏微分方程获得数值解，而本文方法通过数据驱动的参数学习自适应拟合观测数据，同时通过物理约束保证结果的物理一致性。
 
 基于该统一框架，本文针对三类任务设计了具体模型：
 
@@ -262,7 +262,7 @@
 \begin{table}[htbp]
     \centering
     \caption{本文研究范式与现有方法的对比}
-    \caption*{本文提出的融合物理启发的图神经网络建模范式兼具数值模式的物理基础和数据驱动方法的计算效率，在泛化能力和可解释性之间实现平衡。}
+    \caption*{本文所构建的物理启发图神经网络范式继承了数值模式对物理规律的尊重，同时保持了数据驱动方法的高效推断速度，力求在模型泛化性与结果可解释性两方面取得较好的折中。}
     \label{tab:paradigm_comparison}
     \begin{tabular}{@{}lp{2.8cm}p{2.8cm}p{3cm}@{}}
         \toprule
@@ -277,7 +277,7 @@
     \end{tabular}
 \end{table}
 
-数值模式（如CMAQ、WRF-Chem）基于第一性原理求解偏微分方程，具有完备的物理机理，但计算代价高昂；纯数据驱动方法（如标准LSTM）计算高效，但缺乏物理启发，泛化能力有限。本文提出的融合物理启发的图神经网络建模范式取两者之长——保持深度学习的计算效率，同时通过多层次物理启发增强模型的物理一致性与泛化能力。
+以CMAQ、WRF-Chem为代表的数值模式严格基于第一性原理求解控制方程，物理机理完备但计算开销巨大；以标准LSTM为代表的纯数据驱动方法虽然推断速度快，却未利用任何领域先验，在训练分布之外的场景中泛化性能往往不足。本文的物理启发图神经网络范式旨在融合上述两条路线的优势——在不牺牲深度学习高效推断特性的前提下，通过图结构、网络架构与损失函数三个层面的物理先验注入，系统地提升模型输出的物理合理性及面向新场景的迁移能力。
 
 
 % ------------------------------------------------------------
