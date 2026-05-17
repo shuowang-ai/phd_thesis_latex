@@ -103,13 +103,13 @@
 
 \subsection{气象预报领域}
 
-在气象预报领域，Google DeepMind的GraphCast\citep{lam2023learning}首次以数据驱动模型在中期天气预报任务上超越了ECMWF（European Centre for Medium-Range Weather Forecasts，欧洲中期天气预报中心）的高分辨率业务预报；NVIDIA的FourCastNet\citep{pathak2022fourcastnet}基于傅里叶神经算子在频谱域建模全球动力学。GraphCast的关键创新在于多尺度图结构——采用\cqt{编码器--处理器--解码器}架构，在细网格（ERA5再分析数据格点，约100万节点）与粗网格（准均匀球面网格，约4万节点）间建立跨尺度连接，实现计算效率（10天全球预报仅需1分钟）与长程依赖建模的平衡。这类基于规则网格构建的稠密图结构，节点按经纬度均匀分布，适用于全域场的连续建模。本文第\ref{chap:inference}章的网格推断任务采用了类似的稠密网格图结构，在规则格点上进行空间插值与推断。
+在气象预报领域，Google DeepMind的GraphCast\citep{lam2023learning}首次以数据驱动模型在中期天气预报任务上超越了ECMWF（European Centre for Medium-Range Weather Forecasts，欧洲中期天气预报中心）的高分辨率业务预报；NVIDIA的FourCastNet\citep{pathak2022fourcastnet}基于傅里叶神经算子（Fourier Neural Operator, FNO）在频谱域建模全球动力学。GraphCast的关键创新在于多尺度图结构——采用\cqt{编码器--处理器--解码器}架构，在细网格（ERA5再分析数据格点，约100万节点）与粗网格（准均匀球面网格，约4万节点）间建立跨尺度连接，实现计算效率（10天全球预报仅需1分钟）与长程依赖建模的平衡。这类基于规则网格构建的稠密图结构，节点按经纬度均匀分布，适用于全域场的连续建模。本文第\ref{chap:inference}章的网格推断任务采用了类似的稠密网格图结构，在规则格点上进行空间插值与推断。
 
 \subsection{大气污染预测领域}
 
 大气污染预测方面，时空图神经网络（STGNN）已逐渐确立为该领域的主要建模工具\citep{zhou2020graph,wu2020comprehensive}。不同于气象预报所依赖的规则格点数据，空气质量监测站点的空间分布具有稀疏性和不规则性——站点数量有限（通常为数百至数千个）、站点位置受城市规划与地形约束，形成天然的稀疏图结构。如第\ref{chap:introduction}章所述，这类模型通过图结构（监测站点网络）引入归纳偏置，使用图卷积刻画站点间的空间关联，配合时序卷积或长短期记忆网络（Long Short-Term Memory, LSTM）建模浓度的时间演变。代表性工作包括：STGCN\citep{yu2018spatio}建立了时空图建模的基础框架；DCRNN\citep{li2018diffusion}把节点间的信息流动刻画为有向图上的扩散过程，这一建模思路与大气中污染物沿风场扩散传输的物理图景具有内在的一致性；Graph WaveNet\citep{wu2019graph}引入自适应邻接矩阵学习机制，无需预定义图结构即可端到端学习节点间的隐式依赖。本文除第\ref{chap:inference}章的网格推断任务外，第\ref{chap:prediction}章（预测）和第\ref{chap:simulation}章（模拟）均采用这种基于监测站点或城市的稀疏图结构。
 
-在物理启发融合方向，AirPhyNet\citep{hettigeairphynet}将质量守恒原理嵌入网络结构，在稀疏数据和突变场景下展现出更强的鲁棒性；Air-DualODE\citep{tianair}采用双分支架构，物理分支求解边界感知的扩散--平流方程，数据驱动分支学习额外的依赖关系，实现物理可解释性与数据拟合能力的平衡。
+在物理启发融合方向，AirPhyNet\citep{hettigeairphynet}将对流--扩散微分方程（含扩散与平流两个核心机制）嵌入GNN结构、以Neural ODE求解，在稀疏数据和突变场景下展现出更强的鲁棒性；Air-DualODE\citep{tianair}采用双分支架构，物理分支求解边界感知的扩散--平流方程，数据驱动分支学习额外的依赖关系，实现物理可解释性与数据拟合能力的平衡。
 
 \subsection{方法共性与统一框架}
 
